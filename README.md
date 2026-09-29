@@ -1,27 +1,23 @@
 # Plasma Title & Buttons
 
-> 🌐 **Language**: [Read in English (README.en.md)](README.en.md)
+> 🌐 **Idioma / Language**: [Read in English (README.en.md)](README.en.md)
 
-Um applet (plasmoid) elegante e altamente configurável para painéis do **KDE Plasma 6**, integrando a barra de título da janela ativa e botões de controle de janela (Minimizar, Maximizar/Restaurar e Fechar) diretamente na sua barra de tarefas ou painel superior.
+Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE Plasma 6**, integrando o título da janela ativa e botões de controle de janela (Minimizar, Maximizar/Restaurar e Fechar) diretamente na sua barra de tarefas ou painel superior.
 
-Projetado especialmente para fluxos de trabalho estilo Unity ou macOS, permitindo economia máxima de espaço vertical ao remover a barra de título nativa de janelas maximizadas.
+> Projetado especialmente para fluxos de trabalho estilo Unity ou macOS, permitindo economia máxima de espaço vertical ao remover a barra de título nativa de janelas maximizadas.
 
-> [!WARNING]
-> ### ⚠️ Aviso Importante / Isenção de Responsabilidade
-> - **Desenvolvido com auxílio de Inteligência Artificial**: Este projeto foi construído com a assistência de ferramentas de IA generativa. O autor por trás do projeto não possui formação acadêmica ou profissional na área de tecnologia.
-> - **Uso por Conta e Risco**: O software é disponibilizado "como está" (*as-is*), sem garantias de qualquer natureza. Qualquer problema, incompatibilidade ou falha decorrente de seu uso é de inteira responsabilidade do usuário.
-> - **Uso Pessoal e Sem Garantia de Manutenção**: Esta extensão foi concebida primariamente para atender às necessidades de uso pessoal do próprio autor, que não se compromete a prestar suporte, lançar atualizações contínuas ou manter o projeto a longo prazo.
-> - **Contribuições de Profissionais são Bem-vindas**: Sugestões, correções de bugs, dicas de otimização e *pull requests* de pessoas com formação ou experiência na área são extremamente bem-vindos!
+> [!IMPORTANT]
+> Este projeto foi desenvolvido principalmente para uso pessoal, com auxílio de ferramentas de inteligência artificial generativa. Embora seja testado antes das versões publicadas, é fornecido sem garantias e pode não receber manutenção contínua. Relatos de bugs, sugestões e pull requests da comunidade são bem-vindos.
 
 ---
 
 ## 🚀 Principais Recursos
 
 - **Título Inteligente da Janela Ativa**:
-  - Exibe o título da janela atualmente em foco com suporte a ícone customizável.
+  - Exibe o título da janela atualmente em foco com suporte a ícone customizável da aplicação.
   - Quando nenhuma janela estiver em foco, exibe suavemente `Plasma Workspace`.
-  - **Ações no Título**:
-    - **Clique esquerdo**: Alterna entre maximizar e restaurar a janela.
+  - **Ações Rápidas no Título**:
+    - **Clique esquerdo**: Alterna entre maximizar e restaurar a janela em foco.
     - **Roda do mouse (Scroll) ou clique do botão do meio**: Percorre e alterna ciclicamente entre as janelas abertas na mesma tela e na mesma área de trabalho virtual.
 - **Botões de Controle Condicionais**:
   - Os botões de Fechar, Minimizar e Maximizar/Restaurar aparecem **apenas quando a janela ativa estiver maximizada**, liberando espaço nos outros momentos.
@@ -30,66 +26,101 @@ Projetado especialmente para fluxos de trabalho estilo Unity ou macOS, permitind
   - **macOS / Círculos Coloridos**: Botões circulares clássicos (vermelho, amarelo e verde) com ícones que se revelam no hover.
   - **Minimalista**: Visual geométrico limpo e discreto.
 - **Disposição Dinâmica e Alinhamento Sincronizado**:
-  - **Expansão Automática**: Ocupa dinamicamente todo o espaço disponível no painel sem tamanhos fixos.
+  - **Expansão Automática**: Ocupa dinamicamente todo o espaço disponível no painel sem comprimentos fixos arbitrários.
   - **Posicionamento do Título**: Escolha entre **Esquerda**, **Centro** ou **Direita**.
-  - **Centralização Absoluta no Painel**: Caixa de seleção adicional quando o título está no centro que mantém o título matematicamente centralizado na largura total do painel, mesmo com elementos de larguras diferentes à esquerda e à direita (como bandeja de notificações e relógio).
+  - **Centralização Absoluta no Painel**: Opção que mantém o título matematicamente centralizado na largura total do painel, compensando assimetrias causadas por outros elementos (como bandeja do sistema, relógio ou lançadores de aplicativos).
   - **Detecção Inteligente de Bordas do Painel**:
-    - Detecta dinamicamente se o widget está na ponta esquerda ou direita da barra.
-    - Se houver outros elementos em uma ponta, os botões só podem ser posicionados na ponta livre.
-    - Se houver outros elementos em ambos os lados (widget no centro entre outros ícones), a opção de botões de controle é desabilitada com aviso de ajuda contextual (`?`).
-  - **Sincronização com os Botões**: A interface impede automaticamente que o título e os botões fiquem na mesma ponta (quando o título é à esquerda, os botões vão para a direita e vice-versa; no centro, permite escolher a ponta desejada com balanceamento de simetria).
-  - **Controle de Tamanho dos Botões**: Opções de tamanho **Pequeno (Compacto)**, **Normal / Padrão** e **Grande (Espaçoso)**, distinguindo com precisão:
+    - Detecta dinamicamente se o applet está encostado na ponta esquerda ou direita da barra.
+    - Se uma das pontas do painel estiver ocupada por outros elementos, a configuração restringe os botões à extremidade livre.
+    - Se ambas as pontas estiverem ocupadas (widget posicionado no meio de outros elementos), os botões são desativados com aviso de ajuda contextual explicativo (`?`).
+  - **Sincronização com os Botões**: A interface impede automaticamente que o título e os botões ocupem a mesma ponta.
+  - **Controle de Tamanho dos Botões**: Opções de tamanho **Pequeno (Compacto)**, **Normal / Padrão** e **Grande (Espaçoso)**:
     - **Largura / área de clique**: 24 px (pequeno), 32 px (médio) e 44 px (grande);
     - **Tamanho-base dos ícones**: 14 px (pequeno), 18 px (médio) e 22 px (grande);
     - **Altura**: adaptativa conforme a espessura do painel (com suporte otimizado a painéis compactos de 24–26 px).
   - Ativação/desativação independente de cada elemento: Título, Ícone e Botões.
 - **Ocultação de Barra de Título Nativa**:
-  - Integração com o KWin para habilitar/desabilitar `BorderlessMaximizedWindows`, ocultando a barra de título original da aplicação quando ela estiver maximizada.
+  - Integração nativa com o KWin para alternar `BorderlessMaximizedWindows`, ocultando a barra de título original da janela quando ela estiver maximizada.
 
 ---
 
-## 🛠️ Requisitos e Ambiente
+## 🛠️ Requisitos de Sistema
 
-- **Sistema Operacional**: Linux (desenvolvido e otimizado no NixOS).
-- **Ambiente Desktop**: KDE Plasma 6 (>= 6.0, testado no 6.7+).
-- **Frameworks e Bibliotecas**:
+- **Sistema Operacional**: Qualquer distribuição Linux com KDE Plasma 6.
+- **Ambiente Desktop**: KDE Plasma 6.7 ou mais recente (Qt 6 e KF6).
+  > [!NOTE]
+  > Atualmente testado e validado no **KDE Plasma 6.7**. Versões anteriores ou posteriores podem exigir adaptações devido a mudanças nas APIs internas do Plasma Workspace (em especial `PW::LibTaskManager` e a integração com KWin).
+- **Dependências de Build**:
+  - CMake 3.20+
+  - Compilador compatível com C++20 (GCC ou Clang)
+  - Extra CMake Modules (ECM)
+  - Ninja (recomendado) ou Make
   - Qt 6 (Core, Gui, Qml, Quick, Svg)
-  - KDE Frameworks 6 (Extra CMake Modules, KCoreAddons, KI18n, KConfig, KWindowSystem)
+  - KDE Frameworks 6 (KCoreAddons, KI18n, KConfig, KWindowSystem)
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
-  - Ninja e CMake 3.20+
 
 ---
 
-## 🛡️ Compilação Segura em Recursos Limitados (NixOS)
+## 🏗️ Compilação e Instalação
 
-O projeto foi preparado para compilação segura em máquinas com **~7GB de RAM**. Como a compilação C++ com Qt 6 e KF6 em 12 threads pode causar esgotamento de memória e *swapping* no zram, o ambiente está configurado para limitar estritamente o paralelismo a **2 threads**.
+### Opção 1: Compilação Padrão (Qualquer Distribuição Linux)
 
-### 1. Entrar no Ambiente de Desenvolvimento
-```bash
-nix-shell
-```
+Clone o repositório e compile o projeto utilizando CMake e Ninja:
 
-### 2. Compilar e Instalar Localmente
-Dentro do `nix-shell`, você pode usar o atalho:
 ```bash
-build-applet
-```
-Ou executar manualmente:
-```bash
+# 1. Configurar o build para instalação local do usuário (~/.local)
 cmake -B build -S . -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=$HOME/.local
-ninja -C build -j2
+
+# 2. Compilar (use -j2 ou ajuste conforme a quantidade de memória do seu sistema)
+ninja -C build -j$(nproc)
+
+# 3. Instalar
 ninja -C build install
 ```
 
-### 3. Testar com o Plasmoidviewer
-Para testar a interface do applet sem precisar reiniciar a sessão do Plasma:
+> [!TIP]
+> **Dica de Memória RAM**: A compilação de código C++ moderno com cabeçalhos pesados do Qt 6 e KDE Frameworks pode consumir bastante memória. Em sistemas com 8 GB de RAM ou menos, recomenda-se limitar o número de compilações paralelas usando `ninja -C build -j2`.
+
+### Opção 2: Ambiente Reproduzível com Nix / NixOS (`shell.nix`)
+
+Para usuários do **Nix** ou **NixOS**, o repositório inclui um arquivo [`shell.nix`](shell.nix) pronto que disponibiliza todas as dependências, ferramentas de compilação e variáveis de ambiente necessárias:
+
 ```bash
+# 1. Entrar no shell do Nix
+nix-shell
+
+# 2. Compilar e instalar no prefixo local do usuário (~/.local)
+build-applet
+
+# 3. (Opcional) Executar o applet em janela de teste isolada
 run-test
-# ou manualmente:
-plasmoidviewer -a org.kde.plasma.windowtitleandbuttons
 ```
+
+### Aplicando as Alterações na Sessão do Plasma
+
+Após a instalação, reinicie a barra de tarefas do Plasma para carregar a nova versão:
+
+```bash
+systemctl --user restart plasma-plasmashell.service
+```
+
+---
+
+## ⚙️ Configurações Disponíveis
+
+Clicando com o botão direito no widget e selecionando **Configurar Título e Botões de Janela...**, é possível ajustar:
+
+1. **Exibir Ícone da Janela**: Alterna a visibilidade do ícone do aplicativo.
+2. **Exibir Título da Janela**: Alterna a visibilidade do nome da janela em foco.
+3. **Exibir Botões de Controle**: Alterna a exibição dos botões de fechar, minimizar e maximizar.
+4. **Posição do Título**: Escolha entre **Esquerda**, **Centro** ou **Direita**.
+5. **Centralizar em relação ao painel inteiro**: Caixa de seleção disponível quando o título está ao centro para mantê-lo matematicamente centralizado no comprimento total do painel.
+6. **Posição dos Botões**: Escolha entre **Esquerda** ou **Direita** (sincronizado automaticamente e restrito às pontas livres do painel).
+7. **Estilo dos Botões**: Tema do Sistema, macOS (Círculos coloridos) ou Minimalista.
+8. **Tamanho dos Botões**: Pequeno, Médio (Padrão) ou Grande.
+9. **Remover borda da janela maximizada**: Alterna a opção `BorderlessMaximizedWindows` do KWin.
 
 ---
 
@@ -97,44 +128,46 @@ plasmoidviewer -a org.kde.plasma.windowtitleandbuttons
 
 ```text
 .
-├── shell.nix                     # Ambiente reproduzível NixOS com limites de memória
-├── CMakeLists.txt                # Configuração global de build do projeto
-├── README.md                     # Documentação para usuários e desenvolvedores
-├── AGENTS.md                     # Diretrizes e regras de contexto para agentes de IA
+├── shell.nix                     # Ambiente de desenvolvimento reprozudível Nix/NixOS
+├── CMakeLists.txt                # Configuração principal do sistema de build CMake
+├── README.md                     # Documentação em Português
+├── README.en.md                  # Documentação em Inglês
+├── AGENTS.md                     # Diretrizes técnicas para agentes e automações
 ├── src/                          # Backend C++ (integração KWin e LibTaskManager)
-│   ├── CMakeLists.txt            # Módulo QML nativo gerado via qt_add_qml_module
+│   ├── CMakeLists.txt            # Módulo QML nativo (qt_add_qml_module)
 │   ├── windowcontroller.h        # Declaração do controlador de janelas
-│   └── windowcontroller.cpp      # Lógica de ciclo, foco e decorações
-└── package/                      # Pacote do Plasmoid Plasma 6
-    ├── metadata.json             # Metadados e identificador do widget
+│   └── windowcontroller.cpp      # Lógica de foco, ciclo de janelas e KWin
+└── package/                      # Pacote Plasmoid para Plasma 6
+    ├── metadata.json             # Metadados e manifesto do widget
     └── contents/
         ├── config/
-        │   ├── main.xml          # Definições do KConfigXT
-        │   └── config.qml        # Configuração das páginas de opções
+        │   ├── main.xml          # Esquema de opções persistidas via KConfigXT
+        │   └── config.qml        # Registro das páginas de configuração
         └── ui/
-            ├── main.qml          # Visão principal do applet
-            ├── WindowTitle.qml   # Componente do título e captura de eventos
-            ├── WindowButtons.qml # Componente dos botões de janela
-            └── configGeneral.qml # Painel de configurações do usuário
+            ├── main.qml          # Componente raiz do plasmoid e gerenciamento de layout
+            ├── WindowTitle.qml   # Componente de renderização e eventos do título
+            ├── WindowButtons.qml # Componente de renderização dos botões de controle
+            └── configGeneral.qml # Interface gráfica de configurações do usuário
 ```
 
 ---
 
-## ⚙️ Configurações Disponíveis no Plasma
+## 🤝 Contribuições
 
-Clicando com o botão direito no widget e selecionando **Configurar Título e Botões de Janela...**, o usuário pode ajustar:
-1. **Exibir Ícone da Janela**: Ativar/desativar ícone da aplicação.
-2. **Exibir Título da Janela**: Ativar/desativar texto do título.
-3. **Exibir Botões de Controle**: Ativar/desativar os botões de fechar, minimizar e maximizar.
-4. **Posição do Título**: Escolher entre Esquerda, Centro ou Direita.
-5. **Centralizar em relação ao painel inteiro**: Caixa de seleção disponível quando o título está ao centro para mantê-lo matematicamente centralizado no painel completo (absoluto).
-6. **Posição dos Botões**: Escolher entre Esquerda ou Direita (sincronizado automaticamente e restrito às pontas livres do painel).
-7. **Estilo dos Botões**: Tema do Sistema, macOS ou Minimalista.
-8. **Tamanho dos Botões**: Pequeno, Médio / Padrão ou Grande — distinguindo largura de clique (24, 32 e 44 px), tamanho-base dos ícones (14, 18 e 22 px) e altura adaptativa à espessura do painel.
-9. **Remover borda da janela maximizada**: Alterna `BorderlessMaximizedWindows` no KWin.
+Contribuições da comunidade, sugestões de melhorias de arquitetura, correções de bugs e traduções são muito bem-vindas! Sinta-se à vontade para abrir uma *Issue* ou enviar um *Pull Request*.
+
+---
+
+## 💡 Inspirações e Agradecimentos
+
+Este projeto foi desenvolvido de forma independente, mas foi inspirado pelo trabalho de [Michail Vourlakos (psifidotos)](https://github.com/psifidotos) nos applets [Window Title](https://github.com/psifidotos/applet-window-title) e [Window Buttons](https://github.com/psifidotos/applet-window-buttons).
+
+Também agradeço a [dhruv8sh](https://github.com/dhruv8sh), pela adaptação do Window Title para o Plasma 6, e a [moodyhunter](https://github.com/moodyhunter), pela adaptação do Window Buttons para o Plasma 6.
+
+Nenhum código desses projetos foi incorporado diretamente a este repositório.
 
 ---
 
 ## 📄 Licença
 
-Distribuído sob a licença **GPLv3** (**GNU General Public License version 3**), compatível com o ecossistema KDE Plasma.
+Este projeto é software livre distribuído sob os termos da **GNU General Public License v3.0** (**GPLv3**). Consulte o cabeçalho dos arquivos para detalhes de copyright.

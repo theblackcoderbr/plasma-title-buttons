@@ -7,7 +7,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
 ## 1. Contexto do Ambiente e Restrições Críticas de Hardware
 
 - **Sistema Operacional**: NixOS (Linux).
-- **Desktop Environment**: KDE Plasma 6 (>= 6.0, Qt 6 e KF6).
+- **Desktop Environment**: KDE Plasma 6 (direcionado e testado no Plasma 6.7+, Qt 6 e KF6).
 - **Restrição de Memória RAM**:
   - A máquina host possui cerca de **6.5 a 7 GB de RAM disponível**, com swap zram de 7 GB.
   - A CPU possui 12 threads virtuais.

@@ -1,17 +1,13 @@
 # Plasma Title & Buttons
 
-> 🌐 **Idioma**: [Ler em Português (README.md)](README.md)
+> 🌐 **Language / Idioma**: [Ler em Português (README.md)](README.md)
 
-An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**, integrating the active window title bar and window control buttons (Minimize, Maximize/Restore, and Close) directly into your taskbar or top panel.
+An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**, integrating the active window title and window control buttons (Minimize, Maximize/Restore, and Close) directly into your taskbar or top panel.
 
-Specially crafted for Unity-like or macOS-style workflows, providing maximum vertical screen estate savings by removing the native title bar on maximized windows.
+> Specially crafted for Unity-like or macOS-style workflows, providing maximum vertical screen estate savings by removing the native title bar on maximized windows.
 
-> [!WARNING]
-> ### ⚠️ Important Notice / Disclaimer
-> - **AI-Assisted Development**: This project was built with the assistance of generative Artificial Intelligence tools. The author does not have a formal educational or professional background in computer science or software engineering.
-> - **Use at Your Own Risk**: This software is provided "as is", without warranty of any kind. Any issues, desktop instability, or incompatibilities arising from its use are entirely the user's responsibility.
-> - **Personal Project & No Long-Term Maintenance Guarantee**: This extension was conceived primarily for the author's own personal workflow. The author makes no commitment to provide ongoing support, regular updates, or long-term maintenance.
-> - **Professional Feedback is Welcome**: Suggestions, bug fixes, architecture reviews, and pull requests from seasoned developers or tech professionals are warmly welcomed!
+> [!IMPORTANT]
+> This project was developed primarily for personal use, with assistance from generative artificial intelligence tools. Although tested prior to published releases, it is provided without warranties and may not receive continuous maintenance. Community bug reports, suggestions, and pull requests are warmly welcomed.
 
 ---
 
@@ -20,11 +16,11 @@ Specially crafted for Unity-like or macOS-style workflows, providing maximum ver
 - **Smart Active Window Title**:
   - Displays the focused window title with customizable application icon support.
   - When no window is focused, gently falls back to `Plasma Workspace`.
-  - **Title Bar Actions**:
+  - **Quick Title Bar Actions**:
     - **Left click**: Toggles maximize/restore on the focused window.
     - **Mouse wheel scroll or Middle click**: Cycles through open windows on the same screen and virtual desktop.
 - **Conditional Window Control Buttons**:
-  - Close, Minimize, and Maximize/Restore buttons appear **only when the active window is maximized**, freeing panel space during unmaximized work.
+  - Close, Minimize, and Maximize/Restore buttons appear **only when the active window is maximized**, saving panel space during unmaximized work.
 - **Selectable Button Styles**:
   - **System Theme (Default)**: Uses native icons from the active Plasma/KWin window decoration theme (Breeze, etc.).
   - **macOS / Traffic Lights**: Classic circular buttons (red, yellow, green) with symbols revealing on hover.
@@ -32,13 +28,13 @@ Specially crafted for Unity-like or macOS-style workflows, providing maximum ver
 - **Dynamic Layout & Synchronized Alignment**:
   - **Automatic Expansion**: Dynamically occupies all available panel space without fixed sizing.
   - **Title Positioning**: Place the title on the **Left**, **Center**, or **Right**.
-  - **Absolute Panel Centering**: Extra checkbox available when the title is centered that mathematically anchors the title to the exact center of the entire panel, even when asymmetric elements (e.g. system tray, app launcher) occupy different amounts of space on each side.
+  - **Absolute Panel Centering**: Keeps the title mathematically centered relative to the entire panel width, compensating for asymmetrical elements (such as system tray, clock, or application launchers).
   - **Smart Panel Edge Detection**:
     - Dynamically detects whether the plasmoid reaches the left or right edge of the panel.
     - If other elements occupy one panel edge, buttons can only be placed on the free edge.
     - If other elements occupy both edges (plasmoid is in the middle of other icons), window control buttons are disabled with an informative Kirigami contextual help button (`?`).
-  - **Synchronized Button Placement**: The configuration interface automatically prevents the title and buttons from clashing on the same edge (when title is on the left, buttons shift to the right and vice versa; centered title allows selecting either edge with symmetry balancing).
-  - **Button Sizing Control**: Select between **Small (Compact)**, **Medium / Default**, and **Large (Spacious)**, accurately distinguishing:
+  - **Synchronized Button Placement**: The configuration interface automatically prevents the title and buttons from clashing on the same edge.
+  - **Button Sizing Control**: Select between **Small (Compact)**, **Medium / Default**, and **Large (Spacious)**:
     - **Width / Click target area**: 24 px (small), 32 px (medium), and 44 px (large);
     - **Base icon size**: 14 px (small), 18 px (medium), and 22 px (large);
     - **Height**: adaptive to panel thickness (with optimized support for compact 24–26 px panels).
@@ -48,48 +44,83 @@ Specially crafted for Unity-like or macOS-style workflows, providing maximum ver
 
 ---
 
-## 🛠️ Requirements & Environment
+## 🛠️ System Requirements
 
-- **Operating System**: Linux (developed and optimized for NixOS).
-- **Desktop Environment**: KDE Plasma 6 (>= 6.0, tested on 6.7+).
-- **Frameworks & Libraries**:
+- **Operating System**: Any Linux distribution running KDE Plasma 6.
+- **Desktop Environment**: KDE Plasma 6.7 or newer (Qt 6 and KF6).
+  > [!NOTE]
+  > Currently tested and validated on **KDE Plasma 6.7**. Earlier or later versions may require adaptations due to changes in Plasma Workspace internal APIs (specifically `PW::LibTaskManager` and KWin integration).
+- **Build Dependencies**:
+  - CMake 3.20+
+  - C++20 compliant compiler (GCC or Clang)
+  - Extra CMake Modules (ECM)
+  - Ninja (recommended) or Make
   - Qt 6 (Core, Gui, Qml, Quick, Svg)
-  - KDE Frameworks 6 (Extra CMake Modules, KCoreAddons, KI18n, KConfig, KWindowSystem)
+  - KDE Frameworks 6 (KCoreAddons, KI18n, KConfig, KWindowSystem)
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
-  - Ninja and CMake 3.20+
 
 ---
 
-## 🛡️ Resource-Constrained Safe Compilation (NixOS)
+## 🏗️ Build & Installation
 
-This project is tailored for machines with **~7GB of RAM**. Because compiling C++ with Qt 6 and KF6 across 12 CPU threads can quickly trigger Out-Of-Memory (OOM) errors and aggressive zram swap thrashing, the build environment is strictly capped at **2 parallel compilation threads**.
+### Option 1: Standard Build (Any Linux Distribution)
 
-### 1. Enter the Nix Development Shell
-```bash
-nix-shell
-```
+Clone the repository and build the project using CMake and Ninja:
 
-### 2. Build and Install Locally
-Inside `nix-shell`, you can run the helper alias:
 ```bash
-build-applet
-```
-Or execute manually:
-```bash
+# 1. Configure the build for local user installation (~/.local)
 cmake -B build -S . -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=$HOME/.local
-ninja -C build -j2
+
+# 2. Build (use -j2 or adjust according to your system RAM)
+ninja -C build -j$(nproc)
+
+# 3. Install
 ninja -C build install
 ```
 
-### 3. Test with Plasmoidviewer
-To preview and test the widget UI without restarting the Plasma shell:
+> [!TIP]
+> **RAM Resource Tip**: Compiling modern C++ with Qt 6 and KDE Frameworks headers can be memory-intensive. On systems with 8 GB of RAM or less, limiting parallel compilation jobs is recommended (e.g., `ninja -C build -j2`).
+
+### Option 2: Reproducible Environment with Nix / NixOS (`shell.nix`)
+
+For **Nix** or **NixOS** users, the repository includes a ready-to-use [`shell.nix`](shell.nix) file providing all required dependencies, build tools, and environment variables:
+
 ```bash
+# 1. Enter the Nix shell
+nix-shell
+
+# 2. Build and install to the local user prefix (~/.local)
+build-applet
+
+# 3. (Optional) Run the applet in an isolated test window
 run-test
-# or manually:
-plasmoidviewer -a org.kde.plasma.windowtitleandbuttons
 ```
+
+### Applying Changes to the Plasma Session
+
+After installation, restart the Plasma shell to load the updated applet:
+
+```bash
+systemctl --user restart plasma-plasmashell.service
+```
+
+---
+
+## ⚙️ Available Settings
+
+Right-clicking the widget and selecting **Configure Window Title and Buttons...** provides the following options:
+
+1. **Show Window Icon**: Toggle application icon visibility.
+2. **Show Window Title**: Toggle title text visibility.
+3. **Show Control Buttons**: Toggle close, minimize, and maximize buttons.
+4. **Title Position**: Choose between **Left**, **Center**, or **Right**.
+5. **Center relative to the entire panel**: Keep the title mathematically centered on the full panel width (absolute centering).
+6. **Button Position**: Choose between **Left** or **Right** (automatically synchronized and restricted to available panel edges).
+7. **Button Style**: System Theme, macOS (Traffic Lights), or Minimalist.
+8. **Button Size**: Small, Medium (Default), or Large.
+9. **Remove border on maximized windows**: Toggles KWin's `BorderlessMaximizedWindows`.
 
 ---
 
@@ -97,45 +128,46 @@ plasmoidviewer -a org.kde.plasma.windowtitleandbuttons
 
 ```text
 .
-├── shell.nix                     # Reproducible NixOS shell with memory safeguards
-├── CMakeLists.txt                # Global CMake build configuration
-├── README.md                     # Portuguese documentation
-├── README.en.md                  # English documentation
-├── AGENTS.md                     # Architecture guidelines and rules for AI agents
+├── shell.nix                     # Reproducible development shell for Nix/NixOS
+├── CMakeLists.txt                # Main CMake build system definition
+├── README.md                     # Documentation in Portuguese
+├── README.en.md                  # Documentation in English
+├── AGENTS.md                     # Technical guidelines for development agents
 ├── src/                          # C++ backend (KWin and LibTaskManager integration)
-│   ├── CMakeLists.txt            # Native QML module generated via qt_add_qml_module
-│   ├── windowcontroller.h        # Window controller header
-│   └── windowcontroller.cpp      # Cycling, focus, and decoration logic
-└── package/                      # Plasma 6 Plasmoid package
-    ├── metadata.json             # Applet metadata and identifiers
+│   ├── CMakeLists.txt            # Native QML module configuration (qt_add_qml_module)
+│   ├── windowcontroller.h        # Window controller class declaration
+│   └── windowcontroller.cpp      # Focus tracking, window cycling, and KWin integration
+└── package/                      # Plasmoid package for Plasma 6
+    ├── metadata.json             # Applet metadata and manifest
     └── contents/
         ├── config/
-        │   ├── main.xml          # KConfigXT settings schema
-        │   └── config.qml        # Settings page loader
+        │   ├── main.xml          # KConfigXT schema definitions
+        │   └── config.qml        # Configuration pages registry
         └── ui/
-            ├── main.qml          # Main applet view
-            ├── WindowTitle.qml   # Title component and event interceptor
-            ├── WindowButtons.qml # Window buttons component
-            └── configGeneral.qml # General user settings page
+            ├── main.qml          # Root plasmoid component and layout management
+            ├── WindowTitle.qml   # Title rendering and interaction component
+            ├── WindowButtons.qml # Window buttons rendering component
+            └── configGeneral.qml # General settings page UI
 ```
 
 ---
 
-## ⚙️ Available Settings in Plasma
+## 🤝 Contributing
 
-Right-clicking the widget and selecting **Configure Window Title and Buttons...** provides the following options:
-1. **Show Window Icon**: Toggle application icon visibility.
-2. **Show Window Title**: Toggle title text visibility.
-3. **Show Control Buttons**: Toggle close, minimize, and maximize buttons.
-4. **Title Position**: Choose between Left, Center, or Right.
-5. **Center relative to the entire panel (absolute)**: Extra checkbox when title is centered to anchor it mathematically to the center of the full panel width.
-6. **Button Position**: Choose between Left or Right (automatically synchronized and restricted to free panel edges).
-7. **Button Style**: System Theme, macOS, or Minimalist.
-8. **Button Size**: Small, Medium / Default, or Large — distinguishing click width (24, 32, and 44 px), base icon size (14, 18, and 22 px), and adaptive panel thickness height.
-9. **Remove border on maximized windows**: Toggles KWin's `BorderlessMaximizedWindows`.
+Community contributions, architectural suggestions, bug reports, and translations are warmly welcomed! Feel free to open an Issue or submit a Pull Request.
+
+---
+
+## 💡 Inspirations & Acknowledgements
+
+This project was developed independently, but was inspired by the work of [Michail Vourlakos (psifidotos)](https://github.com/psifidotos) on the [Window Title](https://github.com/psifidotos/applet-window-title) and [Window Buttons](https://github.com/psifidotos/applet-window-buttons) applets.
+
+Special thanks also to [dhruv8sh](https://github.com/dhruv8sh) for porting Window Title to Plasma 6, and to [moodyhunter](https://github.com/moodyhunter) for porting Window Buttons to Plasma 6.
+
+No code from those projects has been directly incorporated into this repository.
 
 ---
 
 ## 📄 License
 
-Distributed under the **GPLv3** (**GNU General Public License version 3**) license, fully compatible with the KDE Plasma ecosystem.
+This project is free software licensed under the **GNU General Public License v3.0** (**GPLv3**). See source file headers for individual copyright notices.
