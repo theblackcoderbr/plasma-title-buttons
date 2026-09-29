@@ -32,6 +32,11 @@ Specially crafted for Unity-like or macOS-style workflows, providing maximum ver
 - **Dynamic Layout & Synchronized Alignment**:
   - **Automatic Expansion**: Dynamically occupies all available panel space without fixed sizing.
   - **Title Positioning**: Place the title on the **Left**, **Center**, or **Right**.
+  - **Absolute Panel Centering**: Extra checkbox available when the title is centered that mathematically anchors the title to the exact center of the entire panel, even when asymmetric elements (e.g. system tray, app launcher) occupy different amounts of space on each side.
+  - **Smart Panel Edge Detection**:
+    - Dynamically detects whether the plasmoid reaches the left or right edge of the panel.
+    - If other elements occupy one panel edge, buttons can only be placed on the free edge.
+    - If other elements occupy both edges (plasmoid is in the middle of other icons), window control buttons are disabled with an informative Kirigami contextual help button (`?`).
   - **Synchronized Button Placement**: The configuration interface automatically prevents the title and buttons from clashing on the same edge (when title is on the left, buttons shift to the right and vice versa; centered title allows selecting either edge with symmetry balancing).
   - **Button Sizing Control**: Select between **Small (Compact)**, **Medium / Default**, and **Large (Spacious)**, accurately distinguishing:
     - **Width / Click target area**: 24 px (small), 32 px (medium), and 44 px (large);
@@ -123,10 +128,11 @@ Right-clicking the widget and selecting **Configure Window Title and Buttons...*
 2. **Show Window Title**: Toggle title text visibility.
 3. **Show Control Buttons**: Toggle close, minimize, and maximize buttons.
 4. **Title Position**: Choose between Left, Center, or Right.
-5. **Button Position**: Choose between Left or Right (automatically synchronized).
-6. **Button Style**: System Theme, macOS, or Minimalist.
-7. **Button Size**: Small, Medium / Default, or Large — distinguishing click width (24, 32, and 44 px), base icon size (14, 18, and 22 px), and adaptive panel thickness height.
-8. **Remove border on maximized windows**: Toggles KWin's `BorderlessMaximizedWindows`.
+5. **Center relative to the entire panel (absolute)**: Extra checkbox when title is centered to anchor it mathematically to the center of the full panel width.
+6. **Button Position**: Choose between Left or Right (automatically synchronized and restricted to free panel edges).
+7. **Button Style**: System Theme, macOS, or Minimalist.
+8. **Button Size**: Small, Medium / Default, or Large — distinguishing click width (24, 32, and 44 px), base icon size (14, 18, and 22 px), and adaptive panel thickness height.
+9. **Remove border on maximized windows**: Toggles KWin's `BorderlessMaximizedWindows`.
 
 ---
 

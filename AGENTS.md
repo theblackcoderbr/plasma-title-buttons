@@ -62,6 +62,11 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
   5. **Sincronização de Posição**:
      - O título e os botões não podem ocupar a mesma ponta (se título à esquerda, botões à direita; se título à direita, botões à esquerda).
      - Quando o título estiver ao centro, os botões podem ficar à esquerda ou à direita, com contrapesos de largura para garantir centralização matemática perfeita.
+     - **Centralização Absoluta no Painel (`centerInPanel`)**: Opção extra com checkbox quando o título está ao centro. Garante que o título permaneça matematicamente centralizado no comprimento total do painel, calculando a posição global do widget e compensando elementos assimétricos (ex: bandeja do sistema à esquerda).
+     - **Detecção de Extremidades do Painel**:
+       - Detecta se o applet está encostado na ponta esquerda (`isAtLeftEdge`) ou direita (`isAtRightEdge`) do painel.
+       - Se houver outros elementos em uma das extremidades, os botões só podem ser posicionados na extremidade livre.
+       - Se houver outros elementos em **ambas as extremidades** (widget no meio do painel), a opção de botões de controle é desabilitada e desmarcada, exibindo um botão de ajuda contextual Kirigami (`?`) com tooltip explicativo.
   6. **Ações no Título**:
      - Clique esquerdo: minimiza/maximiza a janela focada.
      - Scroll da roda do mouse ou clique do meio (scroll click): aciona `cycleWindow()` navegando pelas janelas abertas.

@@ -21,6 +21,9 @@ Kirigami.ScrollablePage {
     property string cfg_titlePosition: "left"
     property var cfg_titlePositionDefault
 
+    property alias cfg_centerInPanel: centerInPanelCheckBox.checked
+    property var cfg_centerInPanelDefault
+
     property string cfg_buttonsPosition: "right"
     property var cfg_buttonsPositionDefault
 
@@ -33,14 +36,53 @@ Kirigami.ScrollablePage {
     property alias cfg_borderlessMaximized: borderlessCheckBox.checked
     property var cfg_borderlessMaximizedDefault
 
+    // Estado das extremidades do painel detectado dinamicamente pelo widget
+    readonly property bool isAtLeftEdge: (Plasmoid.configuration && Plasmoid.configuration.isAtLeftEdge !== undefined)
+        ? Plasmoid.configuration.isAtLeftEdge : true
+    readonly property bool isAtRightEdge: (Plasmoid.configuration && Plasmoid.configuration.isAtRightEdge !== undefined)
+        ? Plasmoid.configuration.isAtRightEdge : true
+    readonly property bool canShowButtons: isAtLeftEdge || isAtRightEdge
+
+    onIsAtLeftEdgeChanged: enforceButtonEdgeConsistency()
+    onIsAtRightEdgeChanged: enforceButtonEdgeConsistency()
+
+    function enforceButtonEdgeConsistency() {
+        if (!canShowButtons) {
+            root.cfg_showButtons = false;
+        } else if (!isAtLeftEdge && isAtRightEdge) {
+            if (root.cfg_titlePosition === "right") {
+                root.cfg_showButtons = false;
+            } else {
+                root.cfg_buttonsPosition = "right";
+            }
+        } else if (!isAtRightEdge && isAtLeftEdge) {
+            if (root.cfg_titlePosition === "left") {
+                root.cfg_showButtons = false;
+            } else {
+                root.cfg_buttonsPosition = "left";
+            }
+        }
+    }
+
     // Garante que título e botões nunca fiquem simultaneamente no mesmo lado
+    // e respeita a disponibilidade das pontas do painel
     function onTitlePositionSelected(pos) {
         root.cfg_titlePosition = pos;
-        if (pos === "left" && root.cfg_buttonsPosition === "left") {
-            root.cfg_buttonsPosition = "right";
-        } else if (pos === "right" && root.cfg_buttonsPosition === "right") {
-            root.cfg_buttonsPosition = "left";
+        if (pos === "left") {
+            if (root.isAtRightEdge) {
+                root.cfg_buttonsPosition = "right";
+            }
+        } else if (pos === "right") {
+            if (root.isAtLeftEdge) {
+                root.cfg_buttonsPosition = "left";
+            }
+        } else if (pos === "center") {
+            enforceButtonEdgeConsistency();
         }
+    }
+
+    Component.onCompleted: {
+        enforceButtonEdgeConsistency();
     }
 
     Kirigami.FormLayout {
@@ -66,10 +108,20 @@ Kirigami.ScrollablePage {
             text: i18n("Show active window title")
         }
 
-        QQC2.CheckBox {
-            id: showButtonsCheckBox
+        RowLayout {
             Kirigami.FormData.label: i18n("Window Buttons:")
-            text: i18n("Show control buttons (Minimize, Maximize, Close)")
+            spacing: Kirigami.Units.smallSpacing
+
+            QQC2.CheckBox {
+                id: showButtonsCheckBox
+                text: i18n("Show control buttons (Minimize, Maximize, Close)")
+                enabled: root.canShowButtons
+            }
+
+            Kirigami.ContextualHelpButton {
+                visible: !root.canShowButtons
+                toolTipText: i18n("Window control buttons can only be placed at the edges of the panel. Because there are other elements on both sides of this widget, buttons are disabled.")
+            }
         }
 
         // ==========================================
@@ -104,6 +156,21 @@ Kirigami.ScrollablePage {
         }
 
         RowLayout {
+            Kirigami.FormData.label: ""
+            visible: root.cfg_titlePosition === "center"
+            spacing: Kirigami.Units.smallSpacing
+
+            QQC2.CheckBox {
+                id: centerInPanelCheckBox
+                text: i18n("Center relative to the entire panel (absolute)")
+            }
+
+            Kirigami.ContextualHelpButton {
+                toolTipText: i18n("Maintains the window title mathematically centered on the full panel width, even when asymmetric elements (such as the system tray or application launcher) exist on the panel.")
+            }
+        }
+
+        RowLayout {
             Kirigami.FormData.label: i18n("Buttons Position:")
             spacing: Kirigami.Units.largeSpacing
 
@@ -111,7 +178,7 @@ Kirigami.ScrollablePage {
                 id: buttonsLeftRadio
                 text: i18n("Left")
                 checked: root.cfg_buttonsPosition === "left"
-                enabled: root.cfg_titlePosition !== "left"
+                enabled: root.canShowButtons && root.isAtLeftEdge && (root.cfg_titlePosition !== "left")
                 onToggled: if (checked) root.cfg_buttonsPosition = "left"
             }
 
@@ -119,10 +186,20 @@ Kirigami.ScrollablePage {
                 id: buttonsRightRadio
                 text: i18n("Right")
                 checked: root.cfg_buttonsPosition === "right"
-                enabled: root.cfg_titlePosition !== "right"
+                enabled: root.canShowButtons && root.isAtRightEdge && (root.cfg_titlePosition !== "right")
                 onToggled: if (checked) root.cfg_buttonsPosition = "right"
             }
+
+            Kirigami.ContextualHelpButton {
+                visible: !root.canShowButtons || (!root.isAtLeftEdge || !root.isAtRightEdge)
+                toolTipText: !root.canShowButtons
+                    ? i18n("Both panel edges are occupied by other elements. Window buttons cannot be placed.")
+                    : (!root.isAtLeftEdge
+                        ? i18n("The left edge of the panel is occupied by other elements. Window buttons can only be placed on the right edge.")
+                        : i18n("The right edge of the panel is occupied by other elements. Window buttons can only be placed on the left edge."))
+            }
         }
+
 
         // ==========================================
         // 3. ESTILO E TAMANHO DOS BOTÕES

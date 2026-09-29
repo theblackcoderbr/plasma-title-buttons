@@ -32,6 +32,11 @@ Projetado especialmente para fluxos de trabalho estilo Unity ou macOS, permitind
 - **Disposição Dinâmica e Alinhamento Sincronizado**:
   - **Expansão Automática**: Ocupa dinamicamente todo o espaço disponível no painel sem tamanhos fixos.
   - **Posicionamento do Título**: Escolha entre **Esquerda**, **Centro** ou **Direita**.
+  - **Centralização Absoluta no Painel**: Caixa de seleção adicional quando o título está no centro que mantém o título matematicamente centralizado na largura total do painel, mesmo com elementos de larguras diferentes à esquerda e à direita (como bandeja de notificações e relógio).
+  - **Detecção Inteligente de Bordas do Painel**:
+    - Detecta dinamicamente se o widget está na ponta esquerda ou direita da barra.
+    - Se houver outros elementos em uma ponta, os botões só podem ser posicionados na ponta livre.
+    - Se houver outros elementos em ambos os lados (widget no centro entre outros ícones), a opção de botões de controle é desabilitada com aviso de ajuda contextual (`?`).
   - **Sincronização com os Botões**: A interface impede automaticamente que o título e os botões fiquem na mesma ponta (quando o título é à esquerda, os botões vão para a direita e vice-versa; no centro, permite escolher a ponta desejada com balanceamento de simetria).
   - **Controle de Tamanho dos Botões**: Opções de tamanho **Pequeno (Compacto)**, **Normal / Padrão** e **Grande (Espaçoso)**, distinguindo com precisão:
     - **Largura / área de clique**: 24 px (pequeno), 32 px (médio) e 44 px (grande);
@@ -122,10 +127,11 @@ Clicando com o botão direito no widget e selecionando **Configurar Título e Bo
 2. **Exibir Título da Janela**: Ativar/desativar texto do título.
 3. **Exibir Botões de Controle**: Ativar/desativar os botões de fechar, minimizar e maximizar.
 4. **Posição do Título**: Escolher entre Esquerda, Centro ou Direita.
-5. **Posição dos Botões**: Escolher entre Esquerda ou Direita (sincronizado automaticamente).
-6. **Estilo dos Botões**: Tema do Sistema, macOS ou Minimalista.
-7. **Tamanho dos Botões**: Pequeno, Médio / Padrão ou Grande — distinguindo largura de clique (24, 32 e 44 px), tamanho-base dos ícones (14, 18 e 22 px) e altura adaptativa à espessura do painel.
-8. **Remover borda da janela maximizada**: Alterna `BorderlessMaximizedWindows` no KWin.
+5. **Centralizar em relação ao painel inteiro**: Caixa de seleção disponível quando o título está ao centro para mantê-lo matematicamente centralizado no painel completo (absoluto).
+6. **Posição dos Botões**: Escolher entre Esquerda ou Direita (sincronizado automaticamente e restrito às pontas livres do painel).
+7. **Estilo dos Botões**: Tema do Sistema, macOS ou Minimalista.
+8. **Tamanho dos Botões**: Pequeno, Médio / Padrão ou Grande — distinguindo largura de clique (24, 32 e 44 px), tamanho-base dos ícones (14, 18 e 22 px) e altura adaptativa à espessura do painel.
+9. **Remover borda da janela maximizada**: Alterna `BorderlessMaximizedWindows` no KWin.
 
 ---
 
