@@ -36,29 +36,27 @@ Kirigami.ScrollablePage {
     property alias cfg_borderlessMaximized: borderlessCheckBox.checked
     property var cfg_borderlessMaximizedDefault
 
-    // Estado das extremidades do painel detectado dinamicamente pelo widget
-    readonly property bool isAtLeftEdge: (Plasmoid.configuration && Plasmoid.configuration.isAtLeftEdge !== undefined)
-        ? Plasmoid.configuration.isAtLeftEdge : true
-    readonly property bool isAtRightEdge: (Plasmoid.configuration && Plasmoid.configuration.isAtRightEdge !== undefined)
-        ? Plasmoid.configuration.isAtRightEdge : true
+    property bool cfg_isAtLeftEdge: true
+    property var cfg_isAtLeftEdgeDefault
+
+    property bool cfg_isAtRightEdge: true
+    property var cfg_isAtRightEdgeDefault
+
+    // Estado das extremidades do painel fornecido pelas configurações sincronizadas do applet
+    readonly property bool isAtLeftEdge: cfg_isAtLeftEdge
+    readonly property bool isAtRightEdge: cfg_isAtRightEdge
     readonly property bool canShowButtons: isAtLeftEdge || isAtRightEdge
 
     onIsAtLeftEdgeChanged: enforceButtonEdgeConsistency()
     onIsAtRightEdgeChanged: enforceButtonEdgeConsistency()
 
     function enforceButtonEdgeConsistency() {
-        if (!canShowButtons) {
-            root.cfg_showButtons = false;
-        } else if (!isAtLeftEdge && isAtRightEdge) {
-            if (root.cfg_titlePosition === "right") {
-                root.cfg_showButtons = false;
-            } else {
+        if (!isAtLeftEdge && isAtRightEdge) {
+            if (root.cfg_buttonsPosition === "left") {
                 root.cfg_buttonsPosition = "right";
             }
         } else if (!isAtRightEdge && isAtLeftEdge) {
-            if (root.cfg_titlePosition === "left") {
-                root.cfg_showButtons = false;
-            } else {
+            if (root.cfg_buttonsPosition === "right") {
                 root.cfg_buttonsPosition = "left";
             }
         }
