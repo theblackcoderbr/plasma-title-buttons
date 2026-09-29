@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+    <kcfgfile/>
+    <group name="General">
+        <entry name="showIcon" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="showTitle" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="showButtons" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="titlePosition" type="String">
+            <default>left</default>
+        </entry>
+        <entry name="buttonsPosition" type="String">
+            <default>right</default>
+        </entry>
+        <entry name="buttonsStyle" type="String">
+            <default>system</default>
+        </entry>
+        <entry name="buttonsSize" type="String">
+            <default>medium</default>
+        </entry>
+        <entry name="borderlessMaximized" type="Bool">
+            <default>false</default>
+        </entry>
+    </group>
+</kcfg>

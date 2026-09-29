@@ -1,0 +1,26 @@
+# Build directories
+build/
+build-*/
+cmake-build-*/
+.cache/
+
+# User local installs
+prefix.sh
+
+# IDE files
+.vscode/
+.idea/
+*.kdev4
+.directory
+
+# C++ compiled files
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# Nix
+result
+result-*
+.direnv/

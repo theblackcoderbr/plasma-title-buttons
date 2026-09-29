@@ -1,0 +1,21 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Arthur"
+            }
+        ],
+        "Category": "Windows and Tasks",
+        "Description": "Active window title and control buttons directly in Plasma panels",
+        "Description[pt_BR]": "Título da janela ativa e botões de controle diretamente no painel do Plasma",
+        "Icon": "preferences-system-windows",
+        "Id": "org.kde.plasma.windowtitleandbuttons",
+        "Name": "Window Title & Buttons",
+        "Name[pt_BR]": "Título e Botões de Janela",
+        "Version": "1.0.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-NotificationArea": false,
+    "X-Plasma-MainScript": "ui/main.qml"
+}
