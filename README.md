@@ -33,7 +33,10 @@ Projetado especialmente para fluxos de trabalho estilo Unity ou macOS, permitind
   - **Expansão Automática**: Ocupa dinamicamente todo o espaço disponível no painel sem tamanhos fixos.
   - **Posicionamento do Título**: Escolha entre **Esquerda**, **Centro** ou **Direita**.
   - **Sincronização com os Botões**: A interface impede automaticamente que o título e os botões fiquem na mesma ponta (quando o título é à esquerda, os botões vão para a direita e vice-versa; no centro, permite escolher a ponta desejada com balanceamento de simetria).
-  - **Controle de Tamanho dos Botões**: Opções de tamanho **Pequeno (Compacto - 24px)**, **Normal / Padrão (32px)** e **Grande (Espaçoso - 44px)**.
+  - **Controle de Tamanho dos Botões**: Opções de tamanho **Pequeno (Compacto)**, **Normal / Padrão** e **Grande (Espaçoso)**, distinguindo com precisão:
+    - **Largura / área de clique**: 24 px (pequeno), 32 px (médio) e 44 px (grande);
+    - **Tamanho-base dos ícones**: 14 px (pequeno), 18 px (médio) e 22 px (grande);
+    - **Altura**: adaptativa conforme a espessura do painel (com suporte otimizado a painéis compactos de 24–26 px).
   - Ativação/desativação independente de cada elemento: Título, Ícone e Botões.
 - **Ocultação de Barra de Título Nativa**:
   - Integração com o KWin para habilitar/desabilitar `BorderlessMaximizedWindows`, ocultando a barra de título original da aplicação quando ela estiver maximizada.
@@ -94,8 +97,7 @@ plasmoidviewer -a org.kde.plasma.windowtitleandbuttons
 ├── README.md                     # Documentação para usuários e desenvolvedores
 ├── AGENTS.md                     # Diretrizes e regras de contexto para agentes de IA
 ├── src/                          # Backend C++ (integração KWin e LibTaskManager)
-│   ├── CMakeLists.txt
-│   ├── plugin.h / plugin.cpp     # Registro do plugin QML
+│   ├── CMakeLists.txt            # Módulo QML nativo gerado via qt_add_qml_module
 │   ├── windowcontroller.h        # Declaração do controlador de janelas
 │   └── windowcontroller.cpp      # Lógica de ciclo, foco e decorações
 └── package/                      # Pacote do Plasmoid Plasma 6
@@ -122,11 +124,11 @@ Clicando com o botão direito no widget e selecionando **Configurar Título e Bo
 4. **Posição do Título**: Escolher entre Esquerda, Centro ou Direita.
 5. **Posição dos Botões**: Escolher entre Esquerda ou Direita (sincronizado automaticamente).
 6. **Estilo dos Botões**: Tema do Sistema, macOS ou Minimalista.
-7. **Tamanho dos Botões**: Pequeno (16px), Médio / Padrão (22px) ou Grande (28px).
+7. **Tamanho dos Botões**: Pequeno, Médio / Padrão ou Grande — distinguindo largura de clique (24, 32 e 44 px), tamanho-base dos ícones (14, 18 e 22 px) e altura adaptativa à espessura do painel.
 8. **Remover borda da janela maximizada**: Alterna `BorderlessMaximizedWindows` no KWin.
 
 ---
 
 ## 📄 Licença
 
-Distribuído sob a licença GPLv3 (ou superior), compatível com o ecossistema KDE Plasma.
+Distribuído sob a licença **GPLv3** (**GNU General Public License version 3**), compatível com o ecossistema KDE Plasma.

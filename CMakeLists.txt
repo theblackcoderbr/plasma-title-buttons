@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2026 Arthur Celestino
+
 cmake_minimum_required(VERSION 3.20)
 
 project(plasma-title-buttons LANGUAGES CXX)

@@ -13,7 +13,8 @@
         "Id": "org.kde.plasma.windowtitleandbuttons",
         "Name": "Window Title & Buttons",
         "Name[pt_BR]": "Título e Botões de Janela",
-        "Version": "1.0.0"
+        "Version": "1.0.0",
+        "License": "GPL-3.0-only"
     },
     "X-Plasma-API-Minimum-Version": "6.0",
     "X-Plasma-NotificationArea": false,

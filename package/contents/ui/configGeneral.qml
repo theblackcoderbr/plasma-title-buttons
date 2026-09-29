@@ -1,8 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2026 Arthur Celestino
+
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import org.kde.plasma.plasma5support as Plasma5Support
 
 Kirigami.ScrollablePage {
     id: root
@@ -39,21 +41,6 @@ Kirigami.ScrollablePage {
         } else if (pos === "right" && root.cfg_buttonsPosition === "right") {
             root.cfg_buttonsPosition = "left";
         }
-    }
-
-    Plasma5Support.DataSource {
-        id: kwinConfigRunner
-        engine: "executable"
-        connectedSources: []
-        onNewData: (sourceName, data) => {
-            disconnectSource(sourceName);
-        }
-    }
-
-    function saveConfig() {
-        let val = borderlessCheckBox.checked ? "true" : "false";
-        let cmd = "kwriteconfig6 --file kwinrc --group Windows --key BorderlessMaximizedWindows " + val + " && (qdbus org.kde.KWin /KWin reconfigure || busctl --user call org.kde.KWin /KWin org.kde.KWin reconfigure)";
-        kwinConfigRunner.connectSource(cmd);
     }
 
     Kirigami.FormLayout {

@@ -67,7 +67,10 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
      - Scroll da roda do mouse ou clique do meio (scroll click): aciona `cycleWindow()` navegando pelas janelas abertas.
   7. **Estilos e Tamanhos dos Botões**:
      - Estilos: `system` (Tema do sistema ativo, padrão), `macos` (Círculos coloridos: vermelho, amarelo, verde) e `minimal` (Design geométrico limpo).
-     - Tamanhos: `small` (16px), `medium` (22px, padrão) e `large` (28px).
+     - Tamanhos dos Botões:
+       - Largura / área de clique: `small` (24px), `medium` (32px, padrão) e `large` (44px).
+       - Tamanho-base dos ícones: `small` (14px), `medium` (18px) e `large` (22px).
+       - Altura: adaptativa conforme a espessura do painel (com suporte otimizado a painéis compactos de 24–26px).
 
 ---
 

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2026 Arthur Celestino
+
 { pkgs ? import <nixpkgs> {} }:
 
 pkgs.mkShell {
@@ -37,7 +40,7 @@ pkgs.mkShell {
   shellHook = ''
     echo "=========================================================="
 
-    export QML2_IMPORT_PATH="$HOME/.local/lib/qml:$HOME/.local/lib64/qml:$PWD/build/src:$QML2_IMPORT_PATH"
+    export QML2_IMPORT_PATH="$HOME/.local/lib/qml:$HOME/.local/lib/qt-6/qml:$HOME/.local/lib64/qml:$PWD/build/src:$QML2_IMPORT_PATH"
     export QT_PLUGIN_PATH="$HOME/.local/lib/plugins:$QT_PLUGIN_PATH"
     export LD_LIBRARY_PATH="$HOME/.local/lib:$PWD/build/bin:$LD_LIBRARY_PATH"
     export XDG_DATA_DIRS="$HOME/.local/share:$XDG_DATA_DIRS"

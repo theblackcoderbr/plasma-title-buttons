@@ -1,7 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2026 Arthur Celestino
+
 import QtQuick
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.private.windowtitleandbuttons 1.0 as WTButtons
 
 PlasmoidItem {
     id: root
@@ -39,11 +43,12 @@ PlasmoidItem {
     readonly property bool titleOnCenter: titlePos === "center"
     readonly property bool titleOnRight: titlePos === "right"
 
-    // Controlador de Janelas nativo
-    WindowController {
+    // Controlador de Janelas nativo em C++
+    WTButtons.WindowController {
         id: windowController
         screenGeometry: root.screenGeometry
     }
+
 
     // Sincroniza a configuração de borda de janelas maximizadas com o KWin
     Connections {

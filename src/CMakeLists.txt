@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2026 Arthur Celestino
+
 set(PLUGIN_TARGET windowtitleandbuttonsplugin)
 
 qt_add_qml_module(${PLUGIN_TARGET}
@@ -7,6 +10,17 @@ qt_add_qml_module(${PLUGIN_TARGET}
     SOURCES
         windowcontroller.h
         windowcontroller.cpp
+)
+
+# Garante prefixo 'lib' no módulo de plugin para que o QQmlEngine resolva 'libwindowtitleandbuttonspluginplugin.so'
+# e configura o RPATH com $ORIGIN para carregar a biblioteca de suporte do mesmo diretório.
+set_target_properties(${PLUGIN_TARGET}plugin PROPERTIES
+    PREFIX "lib"
+    INSTALL_RPATH "$ORIGIN;${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_LIBDIR}"
+)
+
+set_target_properties(${PLUGIN_TARGET} PROPERTIES
+    INSTALL_RPATH "$ORIGIN;${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_LIBDIR}"
 )
 
 target_link_libraries(${PLUGIN_TARGET}
@@ -29,11 +43,17 @@ install(TARGETS ${PLUGIN_TARGET}
     DESTINATION "${KDE_INSTALL_QMLDIR}/org/kde/plasma/private/windowtitleandbuttons"
 )
 
+install(TARGETS ${PLUGIN_TARGET}
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+)
+
 install(TARGETS ${PLUGIN_TARGET}plugin
     DESTINATION "${KDE_INSTALL_QMLDIR}/org/kde/plasma/private/windowtitleandbuttons"
 )
 
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/org/kde/plasma/private/windowtitleandbuttons/qmldir"
+    "${CMAKE_CURRENT_BINARY_DIR}/org/kde/plasma/private/windowtitleandbuttons/${PLUGIN_TARGET}.qmltypes"
     DESTINATION "${KDE_INSTALL_QMLDIR}/org/kde/plasma/private/windowtitleandbuttons"
 )
+

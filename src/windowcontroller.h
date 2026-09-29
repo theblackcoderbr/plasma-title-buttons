@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2026 Arthur Celestino
+
 #pragma once
 
 #include <QObject>
@@ -41,7 +44,8 @@ public:
     int windowCount() const;
 
     bool borderlessMaximized() const;
-    void setBorderlessMaximized(bool enabled);
+    Q_INVOKABLE void setBorderlessMaximized(bool enabled);
+    Q_INVOKABLE void setBorderlessMaximizedWindows(bool enabled) { setBorderlessMaximized(enabled); }
 
     QRect screenGeometry() const;
     void setScreenGeometry(const QRect &geometry);

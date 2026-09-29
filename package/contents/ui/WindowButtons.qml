@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2026 Arthur Celestino
+
 import QtQuick
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami

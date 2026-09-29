@@ -33,7 +33,10 @@ Specially crafted for Unity-like or macOS-style workflows, providing maximum ver
   - **Automatic Expansion**: Dynamically occupies all available panel space without fixed sizing.
   - **Title Positioning**: Place the title on the **Left**, **Center**, or **Right**.
   - **Synchronized Button Placement**: The configuration interface automatically prevents the title and buttons from clashing on the same edge (when title is on the left, buttons shift to the right and vice versa; centered title allows selecting either edge with symmetry balancing).
-  - **Button Sizing Control**: Select between **Small (Compact - 24px)**, **Medium / Default (32px)**, and **Large (Spacious - 44px)**.
+  - **Button Sizing Control**: Select between **Small (Compact)**, **Medium / Default**, and **Large (Spacious)**, accurately distinguishing:
+    - **Width / Click target area**: 24 px (small), 32 px (medium), and 44 px (large);
+    - **Base icon size**: 14 px (small), 18 px (medium), and 22 px (large);
+    - **Height**: adaptive to panel thickness (with optimized support for compact 24–26 px panels).
   - Independent toggle switches for Window Title, Window Icon, and Control Buttons.
 - **Native Title Bar Removal**:
   - Seamless KWin integration to toggle `BorderlessMaximizedWindows`, hiding the native window title bar whenever an application is maximized.
@@ -95,8 +98,7 @@ plasmoidviewer -a org.kde.plasma.windowtitleandbuttons
 ├── README.en.md                  # English documentation
 ├── AGENTS.md                     # Architecture guidelines and rules for AI agents
 ├── src/                          # C++ backend (KWin and LibTaskManager integration)
-│   ├── CMakeLists.txt
-│   ├── plugin.h / plugin.cpp     # QML plugin registration
+│   ├── CMakeLists.txt            # Native QML module generated via qt_add_qml_module
 │   ├── windowcontroller.h        # Window controller header
 │   └── windowcontroller.cpp      # Cycling, focus, and decoration logic
 └── package/                      # Plasma 6 Plasmoid package
@@ -123,11 +125,11 @@ Right-clicking the widget and selecting **Configure Window Title and Buttons...*
 4. **Title Position**: Choose between Left, Center, or Right.
 5. **Button Position**: Choose between Left or Right (automatically synchronized).
 6. **Button Style**: System Theme, macOS, or Minimalist.
-7. **Button Size**: Small (16px), Medium / Default (22px), or Large (28px).
+7. **Button Size**: Small, Medium / Default, or Large — distinguishing click width (24, 32, and 44 px), base icon size (14, 18, and 22 px), and adaptive panel thickness height.
 8. **Remove border on maximized windows**: Toggles KWin's `BorderlessMaximizedWindows`.
 
 ---
 
 ## 📄 License
 
-Distributed under the GPLv3 (or later) license, fully compatible with the KDE Plasma ecosystem.
+Distributed under the **GPLv3** (**GNU General Public License version 3**) license, fully compatible with the KDE Plasma ecosystem.
