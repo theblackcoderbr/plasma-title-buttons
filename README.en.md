@@ -71,17 +71,17 @@ Clone the repository and build the project using CMake and Ninja:
 # 1. Configure the build for local user installation (~/.local)
 cmake -B build -S . -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=$HOME/.local
+  -DCMAKE_INSTALL_PREFIX="$HOME/.local" &&
 
-# 2. Build (use -j2 or adjust according to your system RAM)
-ninja -C build -j$(nproc)
+# 2. Build with the default limit of two jobs
+cmake --build build --parallel 2 &&
 
-# 3. Install
-ninja -C build install
+# 3. Install only after a successful build
+cmake --install build
 ```
 
 > [!TIP]
-> **RAM Resource Tip**: Compiling modern C++ with Qt 6 and KDE Frameworks headers can be memory-intensive. On systems with 8 GB of RAM or less, limiting parallel compilation jobs is recommended (e.g., `ninja -C build -j2`).
+> **Parallelism**: The project uses two build jobs on all machines as a conservative memory usage default. CMake also limits Ninja compilation and linking tasks to two concurrent jobs. Installation with `cmake --install` does not trigger another build.
 
 ### Option 2: Reproducible Environment with Nix / NixOS (`shell.nix`)
 

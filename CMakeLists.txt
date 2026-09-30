@@ -9,6 +9,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
+# Limite compartilhado de compilação e link para todos os alvos Ninja,
+# inclusive quando invocado diretamente ou pelo alvo install.
+set_property(GLOBAL APPEND PROPERTY JOB_POOLS applet_build=2)
+set(CMAKE_JOB_POOL_COMPILE applet_build)
+set(CMAKE_JOB_POOL_LINK applet_build)
+set(CMAKE_AUTOGEN_PARALLEL 2)
+
 set(QT_MIN_VERSION "6.6.0")
 set(KF6_MIN_VERSION "6.0.0")
 

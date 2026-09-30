@@ -32,8 +32,7 @@ pkgs.mkShell {
     kdePackages.plasma-sdk # provides plasmoidviewer
   ];
 
-  # Limita o paralelismo para evitar esgotamento de memória RAM (~7GB disponíveis)
-  # Previne OOM e swapping excessivo com 12 threads virtuais
+  # Padrão conservador do projeto: dois processos, independentemente do hardware.
   NIX_BUILD_CORES = 2;
   CMAKE_BUILD_PARALLEL_LEVEL = 2;
 
@@ -48,9 +47,10 @@ pkgs.mkShell {
     build-applet() {
       cmake -B build -S . -G Ninja \
         -DCMAKE_BUILD_TYPE=Debug \
-        -DCMAKE_INSTALL_PREFIX=$HOME/.local
-      ninja -C build -j2
-      ninja -C build install
+        -DCMAKE_INSTALL_PREFIX="$HOME/.local" || return $?
+      cmake --build build --parallel 2 || return $?
+      # Instala somente os artefatos já compilados, sem disparar outro build.
+      cmake --install build
     }
 
     run-test() {

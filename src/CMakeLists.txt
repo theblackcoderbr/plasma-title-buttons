@@ -16,11 +16,11 @@ qt_add_qml_module(${PLUGIN_TARGET}
 # e configura o RPATH com $ORIGIN para carregar a biblioteca de suporte do mesmo diretório.
 set_target_properties(${PLUGIN_TARGET}plugin PROPERTIES
     PREFIX "lib"
-    INSTALL_RPATH "$ORIGIN;${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_LIBDIR}"
+    INSTALL_RPATH "$ORIGIN"
 )
 
 set_target_properties(${PLUGIN_TARGET} PROPERTIES
-    INSTALL_RPATH "$ORIGIN;${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_LIBDIR}"
+    INSTALL_RPATH "$ORIGIN"
 )
 
 target_link_libraries(${PLUGIN_TARGET}
@@ -70,4 +70,3 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/org/kde/plasma/private/windowtitleandbuttons/${PLUGIN_TARGET}.qmltypes"
     DESTINATION "${PLASMOID_PLUGIN_DIR}"
 )
-

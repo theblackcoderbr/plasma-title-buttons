@@ -13,7 +13,8 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
   - A CPU possui 12 threads virtuais.
   - ⚠️ **REGRA CRÍTICA DE COMPILAÇÃO**:
     - **NUNCA** execute comandos de compilação sem restringir o paralelismo. Disparar 12 processos de compilação do `g++`/`clang++` com cabeçalhos do Qt6/KF6 causa estouro de memória (OOM) imediato e congelamento do sistema por *thrashing* no zram.
-    - **Sempre utilize `-j2`** (no máximo 3) no `ninja` ou `make`.
+    - **Sempre utilize dois processos**, independentemente do hardware: `cmake --build build --parallel 2` ou `-j2` no `ninja`/`make`. Esse é o padrão conservador global do projeto.
+    - Instale com `cmake --install build` após uma compilação bem-sucedida, sem disparar outra compilação. Scripts devem interromper imediatamente após falhas de configuração ou build.
     - No `shell.nix`, garanta que `CMAKE_BUILD_PARALLEL_LEVEL = 2;` e `NIX_BUILD_CORES = 2;` estejam mantidos.
 
 ---
