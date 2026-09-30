@@ -58,6 +58,8 @@ Item {
             Layout.fillWidth: true
 
             text: root.controller.windowTitle
+            // Títulos vêm de outros aplicativos e devem ser exibidos sem interpretar marcação.
+            textFormat: Text.PlainText
             font.bold: root.controller.hasActiveWindow
             font.pixelSize: Math.max(10, Math.min(13, Math.floor(root.panelThickness * 0.42)))
             elide: Text.ElideRight
