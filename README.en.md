@@ -164,7 +164,7 @@ This project was developed independently, but was inspired by the work of [Micha
 
 Special thanks also to [dhruv8sh](https://github.com/dhruv8sh) for porting Window Title to Plasma 6, and to [moodyhunter](https://github.com/moodyhunter) for porting Window Buttons to Plasma 6.
 
-No code from those projects has been directly incorporated into this repository.
+This project features an independent implementation and does not intentionally incorporate code from the mentioned projects.
 
 ---
 

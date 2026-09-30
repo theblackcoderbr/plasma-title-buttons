@@ -24,3 +24,7 @@ prefix.sh
 result
 result-*
 .direnv/
+
+# Local project reports
+/RELATORIO_DESENVOLVIMENTO.md
+/RELATORIO_REVISAO.md

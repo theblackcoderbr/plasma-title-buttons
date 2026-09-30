@@ -164,7 +164,7 @@ Este projeto foi desenvolvido de forma independente, mas foi inspirado pelo trab
 
 Também agradeço a [dhruv8sh](https://github.com/dhruv8sh), pela adaptação do Window Title para o Plasma 6, e a [moodyhunter](https://github.com/moodyhunter), pela adaptação do Window Buttons para o Plasma 6.
 
-Nenhum código desses projetos foi incorporado diretamente a este repositório.
+Este projeto possui implementação independente e não incorpora intencionalmente código dos projetos mencionados.
 
 ---
 
