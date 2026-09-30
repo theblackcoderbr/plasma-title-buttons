@@ -17,7 +17,7 @@ An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**,
   - Displays the focused window title with customizable application icon support.
   - When no window is focused, gently falls back to `Plasma Workspace`.
   - **Quick Title Bar Actions**:
-    - **Left click**: Toggles maximize/restore on the focused window.
+    - **Left click**: Minimizes the focused window when maximized; otherwise, maximizes it, if the window supports the action.
     - **Mouse wheel scroll or Middle click**: Cycles through open windows on the same screen and virtual desktop.
 - **Conditional Window Control Buttons**:
   - Close, Minimize, and Maximize/Restore buttons appear **only when the active window is maximized**, saving panel space during unmaximized work.

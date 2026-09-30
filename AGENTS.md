@@ -56,7 +56,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
   - Animações fluidas em transições de hover e visibilidade (usando `NumberAnimation` ou `Behavior on opacity`).
 - **Regras de Visibilidade e Interação da Interface**:
   1. **Expansão Dinâmica**: O widget ocupa dinamicamente todo o espaço disponível no painel (`Layout.fillWidth: true`, `Layout.fillHeight: true`).
-  2. O **Título** está sempre visível (exibindo o nome da janela ativa ou `"Plasma Workspace"`). Pode ser alinhado à **Esquerda**, **Centro** ou **Direita**.
+  2. O **Título** pode ser exibido ou oculto conforme a configuração, independentemente do ícone e dos botões. Quando habilitado, exibe o nome da janela ativa ou `"Plasma Workspace"`. Pode ser alinhado à **Esquerda**, **Centro** ou **Direita**.
   3. Os **Botões de controle** só devem ser visíveis quando a janela ativa estiver maximizada (`isMaximized === true`) e se a opção estiver ativada nas configurações.
   4. O **Ícone da janela** pode ser exibido ou oculto conforme a configuração.
   5. **Sincronização de Posição**:
@@ -68,7 +68,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
        - Se houver outros elementos em uma das extremidades, os botões só podem ser posicionados na extremidade livre.
        - Se houver outros elementos em **ambas as extremidades** (widget no meio do painel), a opção de botões de controle é desabilitada e desmarcada, exibindo um botão de ajuda contextual Kirigami (`?`) com tooltip explicativo.
   6. **Ações no Título**:
-     - Clique esquerdo: minimiza/maximiza a janela focada.
+     - Clique esquerdo: minimiza a janela focada quando maximizada; caso contrário, maximiza, respeitando as capacidades da janela. Sem janela ativa, não executa ação.
      - Scroll da roda do mouse ou clique do meio (scroll click): aciona `cycleWindow()` navegando pelas janelas abertas.
   7. **Estilos e Tamanhos dos Botões**:
      - Estilos: `system` (Tema do sistema ativo, padrão), `macos` (Círculos coloridos: vermelho, amarelo, verde) e `minimal` (Design geométrico limpo).

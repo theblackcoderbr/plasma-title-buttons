@@ -17,7 +17,7 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - Exibe o título da janela atualmente em foco com suporte a ícone customizável da aplicação.
   - Quando nenhuma janela estiver em foco, exibe suavemente `Plasma Workspace`.
   - **Ações Rápidas no Título**:
-    - **Clique esquerdo**: Alterna entre maximizar e restaurar a janela em foco.
+    - **Clique esquerdo**: Minimiza a janela em foco quando maximizada; caso contrário, maximiza, se a janela permitir a ação.
     - **Roda do mouse (Scroll) ou clique do botão do meio**: Percorre e alterna ciclicamente entre as janelas abertas na mesma tela e na mesma área de trabalho virtual.
 - **Botões de Controle Condicionais**:
   - Os botões de Fechar, Minimizar e Maximizar/Restaurar aparecem **apenas quando a janela ativa estiver maximizada**, liberando espaço nos outros momentos.

@@ -78,8 +78,16 @@ Item {
 
         onClicked: (mouse) => {
             if (mouse.button === Qt.LeftButton) {
-                // Clique comum: maximiza ou restaura a janela focada
-                root.controller.toggleMaximize();
+                // Clique comum: minimiza se maximizada; caso contrário, maximiza a janela focada.
+                if (root.controller.hasActiveWindow) {
+                    if (root.controller.isMaximized) {
+                        if (root.controller.canMinimize) {
+                            root.controller.minimize();
+                        }
+                    } else if (root.controller.canMaximize) {
+                        root.controller.toggleMaximize();
+                    }
+                }
             } else if (mouse.button === Qt.MiddleButton) {
                 // Clique do meio (scroll click): cicla para a próxima janela aberta
                 root.controller.cycleWindow(1);
