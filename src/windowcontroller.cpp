@@ -15,6 +15,9 @@ WindowController::WindowController(QObject *parent)
     : QObject(parent)
     , m_tasksModel(new TaskManager::TasksModel(this))
 {
+    // Cada índice deve representar uma janela individual, evitando ações sobre grupos do mesmo aplicativo.
+    m_tasksModel->setGroupMode(TaskManager::TasksModel::GroupDisabled);
+
     // Configura filtros para isolar a tela e desktop virtual correntes
     m_tasksModel->setFilterByVirtualDesktop(true);
     m_tasksModel->setFilterByCurrentVirtualDesktop(true);
