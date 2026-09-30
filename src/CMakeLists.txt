@@ -57,3 +57,17 @@ install(FILES
     DESTINATION "${KDE_INSTALL_QMLDIR}/org/kde/plasma/private/windowtitleandbuttons"
 )
 
+# Instalação direta no diretório do próprio Plasmoid (contents/plugin)
+# Torna o widget autossuficiente e imune a reinicializações que limpem variáveis de ambiente como QML2_IMPORT_PATH
+set(PLASMOID_PLUGIN_DIR "${KDE_INSTALL_DATADIR}/plasma/plasmoids/org.kde.plasma.windowtitleandbuttons/contents/plugin")
+
+install(TARGETS ${PLUGIN_TARGET} ${PLUGIN_TARGET}plugin
+    DESTINATION "${PLASMOID_PLUGIN_DIR}"
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/org/kde/plasma/private/windowtitleandbuttons/qmldir"
+    "${CMAKE_CURRENT_BINARY_DIR}/org/kde/plasma/private/windowtitleandbuttons/${PLUGIN_TARGET}.qmltypes"
+    DESTINATION "${PLASMOID_PLUGIN_DIR}"
+)
+

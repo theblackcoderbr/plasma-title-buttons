@@ -5,7 +5,7 @@ import QtQuick
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
-import org.kde.plasma.private.windowtitleandbuttons 1.0 as WTButtons
+import "../plugin" as WTButtons
 
 PlasmoidItem {
     id: root

@@ -31,8 +31,8 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
 
 ## 3. Arquitetura e Padrões de Projeto
 
-### 3.1. Backend C++ (`src/`)
-- Deve ser compilado como um plugin QML registrado sob um namespace seguro, ex: `org.kde.plasma.private.windowtitleandbuttons`.
+- Deve ser compilado como um plugin QML registrado sob um namespace seguro (`org.kde.plasma.private.windowtitleandbuttons`), instalado e empacotado tanto no QMLDIR quanto diretamente no diretório do Plasmoid (`contents/plugin/`).
+- O QML do Plasmoid carrega o módulo via import relativo (`import "../plugin" as WTButtons`), tornando o widget 100% autossuficiente e imune à perda de variáveis de ambiente de sessão (como `QML2_IMPORT_PATH`) após reinicializações.
 - Utiliza a biblioteca oficial de gerenciamento de tarefas do KDE Workspace (`PW::LibTaskManager` / `TaskManager::TasksModel`).
 - **Comportamento do Controlador**:
   - Filtra e rastreia a janela em foco na tela (`screen`) e área de trabalho virtual (`virtualDesktop`) ativas.
