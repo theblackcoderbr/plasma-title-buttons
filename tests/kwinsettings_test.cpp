@@ -58,6 +58,47 @@ class KWinSettingsTest : public QObject
     }
 
 private Q_SLOTS:
+    void buttonPlacementCombinations()
+    {
+        struct Scenario {
+            const char *title;
+            bool left;
+            bool right;
+            const char *preferLeft;
+            const char *preferRight;
+        };
+        const Scenario scenarios[] = {
+            {"left", false, false, "", ""},
+            {"left", true, false, "", ""},
+            {"left", false, true, "right", "right"},
+            {"left", true, true, "right", "right"},
+            {"center", false, false, "", ""},
+            {"center", true, false, "left", "left"},
+            {"center", false, true, "right", "right"},
+            {"center", true, true, "left", "right"},
+            {"right", false, false, "", ""},
+            {"right", true, false, "left", "left"},
+            {"right", false, true, "", ""},
+            {"right", true, true, "left", "left"},
+        };
+        QQmlEngine engine;
+        const QString path = QFileInfo(QStringLiteral(CONFIG_QML_PATH)).dir().filePath(QStringLiteral("ButtonPlacement.qml"));
+        QQmlComponent component(&engine, QUrl::fromLocalFile(path));
+        QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+        for (const auto &scenario : scenarios) {
+            for (const bool preferLeft : {true, false}) {
+                QScopedPointer<QObject> placement(component.create());
+                QVERIFY(placement);
+                placement->setProperty("titlePosition", QString::fromLatin1(scenario.title));
+                placement->setProperty("isAtLeftEdge", scenario.left);
+                placement->setProperty("isAtRightEdge", scenario.right);
+                placement->setProperty("preferredPosition", preferLeft ? QStringLiteral("left") : QStringLiteral("right"));
+                const QString expected = QString::fromLatin1(preferLeft ? scenario.preferLeft : scenario.preferRight);
+                QCOMPARE(placement->property("position").toString(), expected);
+                QCOMPARE(placement->property("available").toBool(), !expected.isEmpty());
+            }
+        }
+    }
     void initTestCase()
     {
         auto bus = QDBusConnection::sessionBus();
@@ -176,6 +217,30 @@ private Q_SLOTS:
         QVERIFY(checkbox);
         QVERIFY(checkbox->property("checked").toBool());
         QCOMPARE(m_kwin.calls, 0);
+
+        // A página usa a mesma regra do applet e permite sair de um conflito sem
+        // alterar silenciosamente a posição do título ou a preferência dos botões.
+        auto *leftRadio = page->findChild<QObject *>(QStringLiteral("buttonsLeftRadio"));
+        auto *rightRadio = page->findChild<QObject *>(QStringLiteral("buttonsRightRadio"));
+        QVERIFY(leftRadio);
+        QVERIFY(rightRadio);
+        page->setProperty("cfg_showButtons", true);
+        page->setProperty("cfg_buttonsPosition", QStringLiteral("right"));
+        page->setProperty("cfg_titlePosition", QStringLiteral("left"));
+        page->setProperty("cfg_isAtRightEdge", false);
+        QVERIFY(!page->property("canShowButtons").toBool());
+        QVERIFY(!leftRadio->property("enabled").toBool());
+        QVERIFY(!rightRadio->property("enabled").toBool());
+        QVERIFY(!leftRadio->property("checked").toBool());
+        QVERIFY(!rightRadio->property("checked").toBool());
+        QCOMPARE(page->property("cfg_titlePosition").toString(), QStringLiteral("left"));
+        page->setProperty("cfg_titlePosition", QStringLiteral("center"));
+        QVERIFY(page->property("canShowButtons").toBool());
+        QVERIFY(leftRadio->property("checked").toBool());
+        QCOMPARE(page->property("cfg_buttonsPosition").toString(), QStringLiteral("right"));
+        page->setProperty("cfg_isAtRightEdge", true);
+        QVERIFY(rightRadio->property("checked").toBool());
+        QVERIFY(page->property("cfg_showButtons").toBool());
 
         writeConfig("[Windows]\nBorderlessMaximizedWindows=false\n");
         QTRY_VERIFY(!checkbox->property("checked").toBool());

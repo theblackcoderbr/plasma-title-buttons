@@ -34,6 +34,7 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
     - Se uma das pontas do painel estiver ocupada por outros elementos, a configuração restringe os botões à extremidade livre.
     - Se ambas as pontas estiverem ocupadas (widget posicionado no meio de outros elementos), os botões são desativados com aviso de ajuda contextual explicativo (`?`).
   - **Sincronização com os Botões**: A interface impede automaticamente que o título e os botões ocupem a mesma ponta.
+    - Se o título ocupar a única extremidade livre, os botões ficam ocultos. A ajuda nas configurações orienta a centralizar ou reposicionar o título, ou mover o widget. As preferências são preservadas para quando houver uma posição válida.
   - **Controle de Tamanho dos Botões**: Opções de tamanho **Pequeno (Compacto)**, **Normal / Padrão** e **Grande (Espaçoso)**:
     - **Largura / área de clique**: 24 px (pequeno), 32 px (médio) e 44 px (grande);
     - **Tamanho-base dos ícones**: 14 px (pequeno), 18 px (médio) e 22 px (grande);

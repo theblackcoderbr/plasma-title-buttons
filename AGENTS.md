@@ -64,6 +64,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
   4. O **Ícone da janela** pode ser exibido ou oculto conforme a configuração.
   5. **Sincronização de Posição**:
      - O título e os botões não podem ocupar a mesma ponta (se título à esquerda, botões à direita; se título à direita, botões à esquerda).
+     - A posição é resolvida pela mesma regra no applet e na configuração (`ButtonPlacement.qml`). Se o título ocupar a única extremidade livre, os botões ficam ocultos e a configuração explica como resolver o conflito. Não se move o título nem se sobrescreve a preferência de lado dos botões automaticamente; quando houver uma combinação válida, a exibição pode retornar conforme a configuração.
      - Quando o título estiver ao centro, os botões podem ficar à esquerda ou à direita, com contrapesos de largura para garantir centralização matemática perfeita.
      - **Centralização Absoluta no Painel (`centerInPanel`)**: Opção extra com checkbox quando o título está ao centro. Garante que o título permaneça matematicamente centralizado no comprimento total do painel, calculando a posição global do widget e compensando elementos assimétricos (ex: bandeja do sistema à esquerda).
      - **Detecção de Extremidades do Painel**:

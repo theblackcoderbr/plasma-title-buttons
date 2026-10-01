@@ -34,6 +34,7 @@ An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**,
     - If other elements occupy one panel edge, buttons can only be placed on the free edge.
     - If other elements occupy both edges (plasmoid is in the middle of other icons), window control buttons are disabled with an informative Kirigami contextual help button (`?`).
   - **Synchronized Button Placement**: The configuration interface automatically prevents the title and buttons from clashing on the same edge.
+    - If the title occupies the only free edge, buttons are hidden. Settings help explains how to center or reposition the title, or move the widget. Preferences are preserved for when a valid position becomes available.
   - **Button Sizing Control**: Select between **Small (Compact)**, **Medium / Default**, and **Large (Spacious)**:
     - **Width / Click target area**: 24 px (small), 32 px (medium), and 44 px (large);
     - **Base icon size**: 14 px (small), 18 px (medium), and 22 px (large);

@@ -23,7 +23,7 @@ PlasmoidItem {
     // Estado das extremidades do painel
     property bool isAtLeftEdge: true
     property bool isAtRightEdge: true
-    readonly property bool canShowButtons: isAtLeftEdge || isAtRightEdge
+    readonly property bool canShowButtons: buttonPlacement.available
 
     readonly property bool showButtonsConfig: Plasmoid.configuration.showButtons && canShowButtons
     readonly property bool buttonsAreMaximized: windowController.isMaximized
@@ -31,23 +31,15 @@ PlasmoidItem {
 
     readonly property string titlePos: Plasmoid.configuration.titlePosition || "left"
 
-    // Sincronização estrita: se o título estiver na mesma ponta dos botões, força a ponta oposta.
-    // Além disso, se uma extremidade do painel estiver ocupada por outros itens, força a ponta livre.
-    readonly property string buttonsPos: {
-        let p = Plasmoid.configuration.buttonsPosition || "right";
-        if (titlePos === "left") {
-            p = "right";
-        } else if (titlePos === "right") {
-            p = "left";
-        }
-
-        if (!isAtLeftEdge && isAtRightEdge) {
-            return "right";
-        } else if (!isAtRightEdge && isAtLeftEdge) {
-            return "left";
-        }
-        return p;
+    // Resolve simultaneamente a posição do título e as extremidades livres.
+    ButtonPlacement {
+        id: buttonPlacement
+        titlePosition: root.titlePos
+        preferredPosition: Plasmoid.configuration.buttonsPosition || "right"
+        isAtLeftEdge: root.isAtLeftEdge
+        isAtRightEdge: root.isAtRightEdge
     }
+    readonly property string buttonsPos: buttonPlacement.position
 
     readonly property bool buttonsOnLeft: buttonsPos === "left"
     readonly property bool buttonsOnRight: buttonsPos === "right"
