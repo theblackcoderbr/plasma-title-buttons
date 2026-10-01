@@ -11,7 +11,7 @@
 #include <qqmlregistration.h>
 
 namespace TaskManager {
-class TasksModel;
+class TaskFilterProxyModel;
 }
 class KWinSettings;
 
@@ -69,7 +69,7 @@ private:
     QModelIndex activeIndex() const;
     QList<int> validWindowRows() const;
 
-    TaskManager::TasksModel *m_tasksModel{nullptr};
+    TaskManager::TaskFilterProxyModel *m_tasksModel{nullptr};
 
     bool m_hasActiveWindow{false};
     QString m_windowTitle{QStringLiteral("Plasma Workspace")};

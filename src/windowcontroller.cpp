@@ -6,22 +6,35 @@
 
 #include <taskmanager/tasksmodel.h>
 #include <taskmanager/abstracttasksmodel.h>
-
+#include <taskmanager/activityinfo.h>
+#include <taskmanager/taskfilterproxymodel.h>
 
 WindowController::WindowController(QObject *parent)
     : QObject(parent)
-    , m_tasksModel(new TaskManager::TasksModel(this))
+    , m_tasksModel(new TaskManager::TaskFilterProxyModel(this))
     , m_kwinSettings(new KWinSettings(this))
 {
     // Cada índice deve representar uma janela individual, evitando ações sobre grupos do mesmo aplicativo.
-    m_tasksModel->setGroupMode(TaskManager::TasksModel::GroupDisabled);
+    auto *sourceTasks = new TaskManager::TasksModel(m_tasksModel);
+    sourceTasks->setGroupMode(TaskManager::TasksModel::GroupDisabled);
+    m_tasksModel->setSourceModel(sourceTasks);
 
-    // Configura filtros para isolar a tela e desktop virtual correntes
+    // Centraliza os filtros na API pública do proxy, inclusive para janelas pedindo atenção.
+    m_tasksModel->setDemandingAttentionSkipsFilters(false);
+    // Configura filtros para isolar a tela, o desktop virtual e a atividade correntes.
     m_tasksModel->setFilterByVirtualDesktop(true);
     m_tasksModel->setFilterByCurrentVirtualDesktop(true);
     m_tasksModel->setFilterByActivity(true);
     m_tasksModel->setFilterHidden(true);
     m_tasksModel->setFilterByScreen(true);
+
+    auto *activityInfo = new TaskManager::ActivityInfo(this);
+    const auto updateActivity = [this, activityInfo]() {
+        m_tasksModel->setActivity(activityInfo->currentActivity());
+        updateWindowState();
+    };
+    connect(activityInfo, &TaskManager::ActivityInfo::currentActivityChanged, this, updateActivity);
+    updateActivity();
 
     connect(m_tasksModel, &QAbstractItemModel::dataChanged, this, &WindowController::updateWindowState);
     connect(m_tasksModel, &QAbstractItemModel::rowsInserted, this, &WindowController::updateWindowState);
