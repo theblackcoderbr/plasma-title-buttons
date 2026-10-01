@@ -39,17 +39,28 @@ Kirigami.ScrollablePage {
         id: kwinSettings
     }
 
-    property bool cfg_isAtLeftEdge: true
+    property bool cfg_isAtLeftEdge: false
     property var cfg_isAtLeftEdgeDefault
 
-    property bool cfg_isAtRightEdge: true
+    property bool cfg_isAtRightEdge: false
     property var cfg_isAtRightEdgeDefault
+    property bool cfg_edgesKnown: false
+    property var cfg_edgesKnownDefault
+
+    // Não desmarca durante carga/edição. Só confirma o bloqueio com layout conhecido.
+    Timer {
+        interval: 300
+        running: root.cfg_edgesKnown && !root.isAtLeftEdge && !root.isAtRightEdge && root.cfg_showButtons
+        onTriggered: root.cfg_showButtons = false
+    }
 
     // Estado das extremidades do painel fornecido pelas configurações sincronizadas do applet
     readonly property bool isAtLeftEdge: cfg_isAtLeftEdge
     readonly property bool isAtRightEdge: cfg_isAtRightEdge
-    readonly property bool canShowButtons: buttonPlacement.available
-    readonly property string buttonPlacementHelp: (!isAtLeftEdge && !isAtRightEdge)
+    readonly property bool canShowButtons: cfg_edgesKnown && buttonPlacement.available
+    readonly property string buttonPlacementHelp: !cfg_edgesKnown
+        ? i18n("The panel layout is not ready or is being edited. Window buttons are temporarily unavailable; your preference is preserved.")
+        : (!isAtLeftEdge && !isAtRightEdge)
         ? i18n("Both panel edges are occupied by other elements. Move this widget to a panel edge to show window buttons.")
         : (!canShowButtons
             ? i18n("The title occupies the only available panel edge. Center the title, move it to the opposite side, or move this widget to another panel edge to show window buttons.")
@@ -164,7 +175,7 @@ Kirigami.ScrollablePage {
                 objectName: "buttonsLeftRadio"
                 text: i18n("Left")
                 checked: buttonPlacement.position === "left"
-                enabled: buttonPlacement.leftAllowed
+                enabled: root.cfg_edgesKnown && buttonPlacement.leftAllowed
                 onClicked: root.cfg_buttonsPosition = "left"
             }
 
@@ -173,7 +184,7 @@ Kirigami.ScrollablePage {
                 objectName: "buttonsRightRadio"
                 text: i18n("Right")
                 checked: buttonPlacement.position === "right"
-                enabled: buttonPlacement.rightAllowed
+                enabled: root.cfg_edgesKnown && buttonPlacement.rightAllowed
                 onClicked: root.cfg_buttonsPosition = "right"
             }
 

@@ -30,9 +30,9 @@ An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**,
   - **Title Positioning**: Place the title on the **Left**, **Center**, or **Right**.
   - **Absolute Panel Centering**: Keeps the title mathematically centered relative to the entire panel width, compensating for asymmetrical elements (such as system tray, clock, or application launchers).
   - **Smart Panel Edge Detection**:
-    - Dynamically detects whether the plasmoid reaches the left or right edge of the panel.
+    - Detects neighboring panel applets, distinguishing margins from small widgets. While the panel loads or is being edited, it waits for a valid layout without clearing preferences.
     - If other elements occupy one panel edge, buttons can only be placed on the free edge.
-    - If other elements occupy both edges (plasmoid is in the middle of other icons), window control buttons are disabled with an informative Kirigami contextual help button (`?`).
+    - If other elements occupy both edges, the window buttons option is disabled and unchecked once the layout settles, with contextual help (`?`). After moving the widget to an edge, the option can be enabled again manually.
   - **Synchronized Button Placement**: The configuration interface automatically prevents the title and buttons from clashing on the same edge.
     - If the title occupies the only free edge, buttons are hidden. Settings help explains how to center or reposition the title, or move the widget. Preferences are preserved for when a valid position becomes available.
   - **Button Sizing Control**: Select between **Small (Compact)**, **Medium / Default**, and **Large (Spacious)**:

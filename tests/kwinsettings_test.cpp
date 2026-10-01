@@ -15,6 +15,7 @@
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QSaveFile>
+#include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -58,6 +59,70 @@ class KWinSettingsTest : public QObject
     }
 
 private Q_SLOTS:
+    void panelEdgesTrackRealNeighbors()
+    {
+        QQmlEngine engine;
+        QQmlComponent component(&engine);
+        component.setData(R"(
+import QtQuick
+Item {
+    width: 1000; height: 32
+    Item { x: 0; width: 64; height: 32 } // Margem auxiliar, não é applet.
+    Item {
+        objectName: "before"; property bool isAppletContainer: true
+        x: 64; width: 32; height: 32
+    }
+    Item {
+        objectName: "own"; property bool isAppletContainer: true
+        x: 100; width: 24; height: 32
+        Item { Item { id: target; width: 24; height: 32 } }
+    }
+    Item {
+        objectName: "after"; property bool isAppletContainer: true
+        x: 130; width: 1; height: 32
+    }
+    PanelEdges { objectName: "edges"; appletItem: target }
+}
+)", QUrl::fromLocalFile(QStringLiteral(CONFIG_QML_PATH)));
+        QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+        QScopedPointer<QObject> fixture(component.create());
+        QVERIFY2(fixture, qPrintable(component.errorString()));
+        auto *edges = fixture->findChild<QObject *>(QStringLiteral("edges"));
+        auto *before = fixture->findChild<QObject *>(QStringLiteral("before"));
+        auto *after = fixture->findChild<QObject *>(QStringLiteral("after"));
+        auto *own = fixture->findChild<QObject *>(QStringLiteral("own"));
+        QVERIFY(edges && before && after && own);
+        QSignalSpy blocked(edges, SIGNAL(bothEdgesOccupied()));
+        QVERIFY(edges->property("known").toBool());
+        QVERIFY(!edges->property("isAtLeftEdge").toBool());
+        QVERIFY(!edges->property("isAtRightEdge").toBool());
+        QTRY_COMPARE(blocked.count(), 1);
+        before->setProperty("visible", false);
+        QVERIFY(edges->property("isAtLeftEdge").toBool()); // Margem de 100px ignorada.
+        after->setProperty("visible", false);
+        QVERIFY(edges->property("isAtRightEdge").toBool());
+        own->setProperty("width", 0);
+        QVERIFY(!edges->property("known").toBool());
+        QVERIFY(!edges->property("isAtLeftEdge").toBool());
+        own->setProperty("width", 24);
+        QVERIFY(edges->property("known").toBool());
+        before->setProperty("visible", true);
+        after->setProperty("visible", true);
+        edges->setProperty("editing", true);
+        QTest::qWait(350);
+        QCOMPARE(blocked.count(), 1);
+        QVERIFY(!edges->property("known").toBool());
+        edges->setProperty("editing", false);
+        after->setProperty("x", 110); // Sobreposição transitória.
+        QVERIFY(!edges->property("known").toBool());
+        QTest::qWait(350);
+        QCOMPARE(blocked.count(), 1);
+        after->setProperty("x", 130);
+        QTRY_COMPARE(blocked.count(), 2);
+        before->setParent(nullptr);
+        delete before;
+        QVERIFY(edges->property("isAtLeftEdge").toBool());
+    }
     void buttonPlacementCombinations()
     {
         struct Scenario {
@@ -225,6 +290,8 @@ private Q_SLOTS:
         QVERIFY(leftRadio);
         QVERIFY(rightRadio);
         page->setProperty("cfg_showButtons", true);
+        page->setProperty("cfg_edgesKnown", true);
+        page->setProperty("cfg_isAtLeftEdge", true);
         page->setProperty("cfg_buttonsPosition", QStringLiteral("right"));
         page->setProperty("cfg_titlePosition", QStringLiteral("left"));
         page->setProperty("cfg_isAtRightEdge", false);
@@ -241,6 +308,19 @@ private Q_SLOTS:
         page->setProperty("cfg_isAtRightEdge", true);
         QVERIFY(rightRadio->property("checked").toBool());
         QVERIFY(page->property("cfg_showButtons").toBool());
+
+        // Geometria desconhecida não apaga preferências; bloqueio confirmado desmarca.
+        page->setProperty("cfg_edgesKnown", false);
+        page->setProperty("cfg_isAtLeftEdge", false);
+        page->setProperty("cfg_isAtRightEdge", false);
+        QTest::qWait(350);
+        QVERIFY(page->property("cfg_showButtons").toBool());
+        QVERIFY(!page->property("canShowButtons").toBool());
+        page->setProperty("cfg_edgesKnown", true);
+        QTRY_VERIFY(!page->property("cfg_showButtons").toBool());
+        page->setProperty("cfg_isAtLeftEdge", true);
+        QVERIFY(page->property("canShowButtons").toBool());
+        QVERIFY(!page->property("cfg_showButtons").toBool());
 
         writeConfig("[Windows]\nBorderlessMaximizedWindows=false\n");
         QTRY_VERIFY(!checkbox->property("checked").toBool());

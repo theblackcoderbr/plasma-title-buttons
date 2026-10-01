@@ -21,8 +21,8 @@ PlasmoidItem {
     readonly property real panelThickness: isVertical ? root.width : root.height
 
     // Estado das extremidades do painel
-    property bool isAtLeftEdge: true
-    property bool isAtRightEdge: true
+    readonly property bool isAtLeftEdge: panelEdges.isAtLeftEdge
+    readonly property bool isAtRightEdge: panelEdges.isAtRightEdge
     readonly property bool canShowButtons: buttonPlacement.available
 
     readonly property bool showButtonsConfig: Plasmoid.configuration.showButtons && canShowButtons
@@ -49,6 +49,25 @@ PlasmoidItem {
     readonly property bool titleOnRight: titlePos === "right"
 
     readonly property bool centerInPanel: Plasmoid.configuration.centerInPanel || false
+
+    PanelEdges {
+        id: panelEdges
+        appletItem: root
+        vertical: root.isVertical
+        layoutReady: !!Plasmoid.containment && Plasmoid.containment.isUiReady
+        editing: !!(Plasmoid.containment && Plasmoid.containment.corona && Plasmoid.containment.corona.editMode)
+        onKnownChanged: root.syncEdges()
+        onIsAtLeftEdgeChanged: root.syncEdges()
+        onIsAtRightEdgeChanged: root.syncEdges()
+        onBothEdgesOccupied: Plasmoid.configuration.showButtons = false
+        Component.onCompleted: root.syncEdges()
+    }
+
+    function syncEdges() {
+        Plasmoid.configuration.edgesKnown = panelEdges.known;
+        Plasmoid.configuration.isAtLeftEdge = panelEdges.isAtLeftEdge;
+        Plasmoid.configuration.isAtRightEdge = panelEdges.isAtRightEdge;
+    }
 
     // Controlador de Janelas nativo em C++
     WTButtons.WindowController {
@@ -92,41 +111,6 @@ PlasmoidItem {
                 if (val > 0) return val;
             }
             return 0.0;
-        }
-
-        // Tolerância de 40px para cobrir margens/padding externos do painel
-        readonly property bool detectedAtLeftEdge: (currentLength > 50 && totalPanelLength > 100)
-            ? (globalPos <= 40)
-            : true
-
-        readonly property bool detectedAtRightEdge: (currentLength > 50 && totalPanelLength > 100)
-            ? ((totalPanelLength - (globalPos + currentLength)) <= 40)
-            : true
-
-        function syncEdges() {
-            if (currentLength > 50 && totalPanelLength > 100) {
-                root.isAtLeftEdge = detectedAtLeftEdge;
-                root.isAtRightEdge = detectedAtRightEdge;
-                if (Plasmoid.configuration.isAtLeftEdge !== detectedAtLeftEdge) {
-                    Plasmoid.configuration.isAtLeftEdge = detectedAtLeftEdge;
-                }
-                if (Plasmoid.configuration.isAtRightEdge !== detectedAtRightEdge) {
-                    Plasmoid.configuration.isAtRightEdge = detectedAtRightEdge;
-                }
-            }
-        }
-
-        onDetectedAtLeftEdgeChanged: syncEdges()
-        onDetectedAtRightEdgeChanged: syncEdges()
-        onCurrentLengthChanged: syncEdges()
-        onGlobalPosChanged: syncEdges()
-
-        Timer {
-            id: initialEdgeSyncTimer
-            interval: 400
-            running: true
-            repeat: false
-            onTriggered: container.syncEdges()
         }
 
         RowLayout {

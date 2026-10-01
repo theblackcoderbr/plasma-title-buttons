@@ -30,9 +30,9 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - **Posicionamento do Título**: Escolha entre **Esquerda**, **Centro** ou **Direita**.
   - **Centralização Absoluta no Painel**: Opção que mantém o título matematicamente centralizado na largura total do painel, compensando assimetrias causadas por outros elementos (como bandeja do sistema, relógio ou lançadores de aplicativos).
   - **Detecção Inteligente de Bordas do Painel**:
-    - Detecta dinamicamente se o applet está encostado na ponta esquerda ou direita da barra.
+    - Detecta os applets vizinhos no painel, distinguindo margens de widgets pequenos. Durante carga ou edição do painel, aguarda um layout válido sem apagar preferências.
     - Se uma das pontas do painel estiver ocupada por outros elementos, a configuração restringe os botões à extremidade livre.
-    - Se ambas as pontas estiverem ocupadas (widget posicionado no meio de outros elementos), os botões são desativados com aviso de ajuda contextual explicativo (`?`).
+    - Se ambas as pontas estiverem ocupadas (widget posicionado no meio de outros elementos), a opção dos botões é desabilitada e desmarcada após estabilização, com ajuda contextual (`?`). Após mover o widget para uma extremidade, é possível reativá-la manualmente.
   - **Sincronização com os Botões**: A interface impede automaticamente que o título e os botões ocupem a mesma ponta.
     - Se o título ocupar a única extremidade livre, os botões ficam ocultos. A ajuda nas configurações orienta a centralizar ou reposicionar o título, ou mover o widget. As preferências são preservadas para quando houver uma posição válida.
   - **Controle de Tamanho dos Botões**: Opções de tamanho **Pequeno (Compacto)**, **Normal / Padrão** e **Grande (Espaçoso)**:

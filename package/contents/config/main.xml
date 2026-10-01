@@ -30,10 +30,13 @@
             <default>false</default>
         </entry>
         <entry name="isAtLeftEdge" type="Bool">
-            <default>true</default>
+            <default>false</default>
         </entry>
         <entry name="isAtRightEdge" type="Bool">
-            <default>true</default>
+            <default>false</default>
+        </entry>
+        <entry name="edgesKnown" type="Bool">
+            <default>false</default>
         </entry>
     </group>
 </kcfg>
