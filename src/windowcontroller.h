@@ -13,6 +13,7 @@
 namespace TaskManager {
 class TasksModel;
 }
+class KWinSettings;
 
 class WindowController : public QObject
 {
@@ -67,7 +68,6 @@ private Q_SLOTS:
 private:
     QModelIndex activeIndex() const;
     QList<int> validWindowRows() const;
-    void reloadKWinConfig();
 
     TaskManager::TasksModel *m_tasksModel{nullptr};
 
@@ -81,5 +81,5 @@ private:
     int m_windowCount{0};
 
     QRect m_screenGeometry;
-    bool m_borderlessMaximized{false};
+    KWinSettings *m_kwinSettings{nullptr};
 };

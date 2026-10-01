@@ -49,6 +49,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
     - `close()`
     - `cycleWindow(int direction)`: Alterna o foco para a próxima ou anterior janela ativa na mesma tela/desktop (ciclo circular).
     - `setBorderlessMaximizedWindows(bool enabled)`: Ajusta a opção no arquivo `kwinrc` (`[Windows] BorderlessMaximizedWindows`) e solicita ao KWin a recarga via DBus (`qdbus6 org.kde.KWin /KWin reconfigure`).
+  - **Preferência global do KWin**: `KWinSettings` é a fonte reativa de `BorderlessMaximizedWindows`. A inicialização apenas lê o estado; nunca aplica valores salvos por instância. A interface altera essa preferência explicitamente, com efeito imediato em todos os monitores, e acompanha alterações externas em `kwinrc`. Falhas de gravação e de recarga via D-Bus devem ser exibidas, sem reverter alterações concorrentes de outras instâncias.
 
 ### 3.2. Frontend QML (`package/contents/`)
 - Segue estritamente as diretrizes do **Plasma 6 / Kirigami**:
@@ -93,6 +94,14 @@ build-applet
 
 # Execução em janela isolada de teste
 run-test
+```
+
+Testes automatizados isolam `kwinrc` em um diretório temporário e usam um serviço KWin simulado em D-Bus privado (requerem Qt Test e `dbus-run-session`, disponíveis no shell Nix):
+
+```bash
+cmake -B build -S . -DBUILD_TESTING=ON
+cmake --build build --parallel 2
+ctest --test-dir build --output-on-failure
 ```
 
 ---

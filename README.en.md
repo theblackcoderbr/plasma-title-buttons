@@ -100,6 +100,8 @@ run-test
 
 ### Applying Changes to the Plasma Session
 
+Automated tests are optional (`-DBUILD_TESTING=ON`) and require Qt Test and `dbus-run-session`, available in the Nix shell. After building with this option, run `ctest --test-dir build --output-on-failure`. Tests use temporary configuration and a private D-Bus session without modifying the desktop session's KWin.
+
 After installation, restart the Plasma shell to load the updated applet:
 
 ```bash
@@ -120,7 +122,7 @@ Right-clicking the widget and selecting **Configure Window Title and Buttons...*
 6. **Button Position**: Choose between **Left** or **Right** (automatically synchronized and restricted to available panel edges).
 7. **Button Style**: System Theme, macOS (Traffic Lights), or Minimalist.
 8. **Button Size**: Small, Medium (Default), or Large.
-9. **Remove border on maximized windows**: Toggles KWin's `BorderlessMaximizedWindows`.
+9. **Remove border on maximized windows**: Toggles KWin's global `BorderlessMaximizedWindows` setting. Changes apply immediately to all monitors and widget instances and are not undone by Cancel. Opening settings or adding another instance only reads the existing state. External changes are tracked automatically; save or reload failures are displayed in the interface.
 
 ---
 
@@ -136,7 +138,9 @@ Right-clicking the widget and selecting **Configure Window Title and Buttons...*
 ├── src/                          # C++ backend (KWin and LibTaskManager integration)
 │   ├── CMakeLists.txt            # Native QML module configuration (qt_add_qml_module)
 │   ├── windowcontroller.h        # Window controller class declaration
-│   └── windowcontroller.cpp      # Focus tracking, window cycling, and KWin integration
+│   ├── windowcontroller.cpp      # Focus tracking and window cycling
+│   ├── kwinsettings.h            # Global KWin settings state
+│   └── kwinsettings.cpp          # kwinrc synchronization and D-Bus reload
 └── package/                      # Plasmoid package for Plasma 6
     ├── metadata.json             # Applet metadata and manifest
     └── contents/

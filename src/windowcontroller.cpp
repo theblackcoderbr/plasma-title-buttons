@@ -2,18 +2,16 @@
 // SPDX-FileCopyrightText: 2026 Arthur Celestino
 
 #include "windowcontroller.h"
+#include "kwinsettings.h"
 
 #include <taskmanager/tasksmodel.h>
 #include <taskmanager/abstracttasksmodel.h>
 
-#include <KConfigGroup>
-#include <KSharedConfig>
-#include <QDBusConnection>
-#include <QDBusMessage>
 
 WindowController::WindowController(QObject *parent)
     : QObject(parent)
     , m_tasksModel(new TaskManager::TasksModel(this))
+    , m_kwinSettings(new KWinSettings(this))
 {
     // Cada índice deve representar uma janela individual, evitando ações sobre grupos do mesmo aplicativo.
     m_tasksModel->setGroupMode(TaskManager::TasksModel::GroupDisabled);
@@ -30,8 +28,9 @@ WindowController::WindowController(QObject *parent)
     connect(m_tasksModel, &QAbstractItemModel::rowsRemoved, this, &WindowController::updateWindowState);
     connect(m_tasksModel, &QAbstractItemModel::modelReset, this, &WindowController::updateWindowState);
 
-    // Carrega o estado de BorderlessMaximizedWindows do KWin
-    reloadKWinConfig();
+    // Mantém a API do controlador sincronizada com a preferência global do KWin.
+    connect(m_kwinSettings, &KWinSettings::borderlessMaximizedChanged,
+            this, &WindowController::borderlessMaximizedChanged);
 
     updateWindowState();
 }
@@ -80,37 +79,12 @@ int WindowController::windowCount() const
 
 bool WindowController::borderlessMaximized() const
 {
-    return m_borderlessMaximized;
-}
-
-void WindowController::reloadKWinConfig()
-{
-    KConfigGroup kwinConfig(KSharedConfig::openConfig(QStringLiteral("kwinrc")), QStringLiteral("Windows"));
-    m_borderlessMaximized = kwinConfig.readEntry("BorderlessMaximizedWindows", false);
+    return m_kwinSettings->borderlessMaximized();
 }
 
 void WindowController::setBorderlessMaximized(bool enabled)
 {
-    if (m_borderlessMaximized == enabled) {
-        return;
-    }
-
-    m_borderlessMaximized = enabled;
-
-    KConfigGroup kwinConfig(KSharedConfig::openConfig(QStringLiteral("kwinrc")), QStringLiteral("Windows"));
-    kwinConfig.writeEntry(QStringLiteral("BorderlessMaximizedWindows"), enabled);
-    kwinConfig.sync();
-
-    // Notifica o KWin para recarregar as configurações de janela
-    QDBusMessage msg = QDBusMessage::createMethodCall(
-        QStringLiteral("org.kde.KWin"),
-        QStringLiteral("/KWin"),
-        QStringLiteral("org.kde.KWin"),
-        QStringLiteral("reconfigure")
-    );
-    QDBusConnection::sessionBus().send(msg);
-
-    Q_EMIT borderlessMaximizedChanged();
+    m_kwinSettings->setBorderlessMaximized(enabled);
 }
 
 QRect WindowController::screenGeometry() const

@@ -64,19 +64,7 @@ PlasmoidItem {
         screenGeometry: root.screenGeometry
     }
 
-    // Sincroniza a configuração de borda de janelas maximizadas com o KWin
-    Connections {
-        target: Plasmoid.configuration
-        function onBorderlessMaximizedChanged() {
-            windowController.setBorderlessMaximized(Plasmoid.configuration.borderlessMaximized);
-        }
-    }
-
-    Component.onCompleted: {
-        if (Plasmoid.configuration.borderlessMaximized !== undefined) {
-            windowController.setBorderlessMaximized(Plasmoid.configuration.borderlessMaximized);
-        }
-    }
+    // Preferências globais do KWin são alteradas somente pela ação explícita na configuração.
 
     fullRepresentation: Item {
         id: container

@@ -10,6 +10,8 @@ qt_add_qml_module(${PLUGIN_TARGET}
     SOURCES
         windowcontroller.h
         windowcontroller.cpp
+        kwinsettings.h
+        kwinsettings.cpp
 )
 
 # Garante prefixo 'lib' no módulo de plugin para que o QQmlEngine resolva 'libwindowtitleandbuttonspluginplugin.so'

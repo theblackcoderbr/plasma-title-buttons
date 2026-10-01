@@ -5,6 +5,7 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
+import "../plugin" as WTButtons
 
 Kirigami.ScrollablePage {
     id: root
@@ -33,8 +34,10 @@ Kirigami.ScrollablePage {
     property string cfg_buttonsSize: "medium"
     property var cfg_buttonsSizeDefault
 
-    property alias cfg_borderlessMaximized: borderlessCheckBox.checked
-    property var cfg_borderlessMaximizedDefault
+    // Estado global: não participa do salvamento/restauração das preferências locais.
+    WTButtons.KWinSettings {
+        id: kwinSettings
+    }
 
     property bool cfg_isAtLeftEdge: true
     property var cfg_isAtLeftEdgeDefault
@@ -273,13 +276,44 @@ Kirigami.ScrollablePage {
 
         QQC2.CheckBox {
             id: borderlessCheckBox
+            objectName: "borderlessCheckBox"
             Kirigami.FormData.label: i18n("Maximized Windows:")
             text: i18n("Hide original window title bar when maximized (KWin)")
+            checked: kwinSettings.borderlessMaximized
+            enabled: !kwinSettings.busy
+            onClicked: {
+                kwinSettings.setBorderlessMaximized(checked);
+                // Restaura o binding mesmo se a gravação falhar sem mudar o valor global.
+                checked = Qt.binding(() => kwinSettings.borderlessMaximized);
+            }
         }
 
         Kirigami.ContextualHelpButton {
             Kirigami.FormData.label: ""
-            toolTipText: i18n("Enables KWin's BorderlessMaximizedWindows setting, removing the window's original decoration when maximized to save screen space.")
+            toolTipText: i18n("This KWin setting applies to all monitors and widget instances. Changes take effect immediately and are not undone by Cancel.")
+        }
+
+        QQC2.Label {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: i18n("Global setting for all monitors. Changes apply immediately.")
+        }
+
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            visible: kwinSettings.error !== WTButtons.KWinSettings.NoError
+            type: Kirigami.MessageType.Error
+            text: kwinSettings.error === WTButtons.KWinSettings.WriteError
+                ? i18n("Could not save the KWin setting. Check write permissions for kwinrc and whether the setting is locked.")
+                : i18n("The setting was saved, but KWin could not reload it. Retry to apply the saved setting.")
+            actions: [
+                Kirigami.Action {
+                    text: i18n("Retry")
+                    visible: kwinSettings.error === WTButtons.KWinSettings.ReloadError
+                    enabled: !kwinSettings.busy
+                    onTriggered: kwinSettings.reconfigure()
+                }
+            ]
         }
     }
 }

@@ -16,6 +16,8 @@ set(CMAKE_JOB_POOL_COMPILE applet_build)
 set(CMAKE_JOB_POOL_LINK applet_build)
 set(CMAKE_AUTOGEN_PARALLEL 2)
 
+option(BUILD_TESTING "Build isolated integration tests" OFF)
+
 set(QT_MIN_VERSION "6.6.0")
 set(KF6_MIN_VERSION "6.0.0")
 
@@ -52,6 +54,11 @@ find_package(Plasma REQUIRED)
 find_package(LibTaskManager REQUIRED)
 
 add_subdirectory(src)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
 
 # Instala o pacote do Plasmoid para o diretório padrão do Plasma 6
 plasma_install_package(package org.kde.plasma.windowtitleandbuttons)

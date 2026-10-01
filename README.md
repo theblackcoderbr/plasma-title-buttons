@@ -100,6 +100,8 @@ run-test
 
 ### Aplicando as Alterações na Sessão do Plasma
 
+Os testes automatizados são opcionais (`-DBUILD_TESTING=ON`) e requerem Qt Test e `dbus-run-session`, disponíveis no shell Nix. Após compilar com essa opção, execute `ctest --test-dir build --output-on-failure`. Os testes usam configuração temporária e D-Bus privado, sem modificar o KWin da sessão.
+
 Após a instalação, reinicie a barra de tarefas do Plasma para carregar a nova versão:
 
 ```bash
@@ -120,7 +122,7 @@ Clicando com o botão direito no widget e selecionando **Configurar Título e Bo
 6. **Posição dos Botões**: Escolha entre **Esquerda** ou **Direita** (sincronizado automaticamente e restrito às pontas livres do painel).
 7. **Estilo dos Botões**: Tema do Sistema, macOS (Círculos coloridos) ou Minimalista.
 8. **Tamanho dos Botões**: Pequeno, Médio (Padrão) ou Grande.
-9. **Remover borda da janela maximizada**: Alterna a opção `BorderlessMaximizedWindows` do KWin.
+9. **Remover borda da janela maximizada**: Alterna a opção global `BorderlessMaximizedWindows` do KWin. A mudança é imediata, vale para todos os monitores e instâncias do widget e não é desfeita por Cancelar. Abrir as configurações ou adicionar outra instância apenas lê o estado existente. Alterações externas são acompanhadas automaticamente; falhas ao salvar ou recarregar são exibidas na interface.
 
 ---
 
@@ -136,7 +138,9 @@ Clicando com o botão direito no widget e selecionando **Configurar Título e Bo
 ├── src/                          # Backend C++ (integração KWin e LibTaskManager)
 │   ├── CMakeLists.txt            # Módulo QML nativo (qt_add_qml_module)
 │   ├── windowcontroller.h        # Declaração do controlador de janelas
-│   └── windowcontroller.cpp      # Lógica de foco, ciclo de janelas e KWin
+│   ├── windowcontroller.cpp      # Lógica de foco e ciclo de janelas
+│   ├── kwinsettings.h            # Estado global das preferências do KWin
+│   └── kwinsettings.cpp          # Sincronização de kwinrc e recarga via D-Bus
 └── package/                      # Pacote Plasmoid para Plasma 6
     ├── metadata.json             # Metadados e manifesto do widget
     └── contents/

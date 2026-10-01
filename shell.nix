@@ -10,6 +10,7 @@ pkgs.mkShell {
     cmake
     ninja
     pkg-config
+    dbus # dbus-run-session para testes isolados da sessão real
     kdePackages.extra-cmake-modules
   ];
 
