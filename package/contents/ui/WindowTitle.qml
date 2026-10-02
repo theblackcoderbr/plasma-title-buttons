@@ -14,6 +14,7 @@ Item {
     property bool showTitle: true
     property string alignment: "left" // "left", "center", "right"
     property real panelThickness: 32
+    property bool vertical: false
 
     implicitHeight: root.panelThickness
     implicitWidth: contentLayout.implicitWidth
@@ -40,6 +41,8 @@ Item {
         // Ícone da Janela Ativa
         Kirigami.Icon {
             id: iconItem
+            // O texto acompanha o painel, mas o ícone da aplicação fica de pé.
+            rotation: root.vertical ? -90 : 0
             visible: root.showIcon && root.controller.hasActiveWindow && (root.controller.windowIcon !== undefined)
             Layout.alignment: Qt.AlignVCenter
             Layout.preferredWidth: Math.min(22, Math.max(14, root.panelThickness - 8))

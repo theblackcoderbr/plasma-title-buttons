@@ -27,6 +27,7 @@ An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**,
   - **macOS / Traffic Lights**: Classic circular buttons (red, yellow, green) with symbols revealing on hover.
   - **Minimalist**: Clean, geometric monochrome design.
 - **Dynamic Layout & Synchronized Alignment**:
+  - **Vertical panels**: Top-to-bottom title and stacked buttons, with upright icons. Left/right correspond to top/bottom; centering follows the panel's length.
   - **Automatic Expansion**: Dynamically occupies all available panel space without fixed sizing.
   - **Title Positioning**: Place the title on the **Left**, **Center**, or **Right**.
   - **Absolute Panel Centering**: Keeps the title mathematically centered relative to the entire panel width, compensating for asymmetrical elements (such as system tray, clock, or application launchers).

@@ -63,6 +63,108 @@ class KWinSettingsTest : public QObject
     }
 
 private Q_SLOTS:
+    void verticalPanelGeometry_data()
+    {
+        QTest::addColumn<QString>("style");
+        QTest::addColumn<int>("thickness");
+        for (const QString &style : {QStringLiteral("system"), QStringLiteral("macos"), QStringLiteral("minimal")}) {
+            for (int thickness : {24, 26, 44}) {
+                const QByteArray name = style.toUtf8() + QByteArray::number(thickness);
+                QTest::newRow(name.constData()) << style << thickness;
+            }
+        }
+    }
+
+    void verticalPanelGeometry()
+    {
+        QFETCH(QString, style);
+        QFETCH(int, thickness);
+        QQmlEngine engine;
+        engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
+        QQuickWindow window;
+        window.resize(thickness, 800);
+        QQmlComponent component(&engine);
+        component.setData(R"(
+            import QtQuick
+            Item {
+                width: 26; height: 800
+                QtObject {
+                    id: fakeController
+                    property string windowTitle: "A very long window title ".repeat(100)
+                    property bool hasActiveWindow: true
+                    property bool isMaximized: true
+                    property bool canClose: true
+                    property bool canMinimize: true
+                    property bool canMaximize: true
+                    property int calls: 0
+                    function close() { calls++; }
+                    function minimize() { calls++; }
+                    function toggleMaximize() { calls++; }
+                    objectName: "controller"
+                }
+                PanelAxis {
+                    id: axis; objectName: "axis"; vertical: true
+                    WindowButtons {
+                        id: buttons; objectName: "buttons"
+                        controller: fakeController
+                        vertical: axis.vertical
+                        panelThickness: axis.height
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    PanelCenteredTitle {
+                        objectName: "title"
+                        controller: fakeController
+                        vertical: axis.vertical
+                        panelThickness: axis.height
+                        showIcon: false
+                        panelLength: 1000; panelOffset: 100
+                        leftInset: buttons.width + 6
+                    }
+                }
+            }
+        )", QUrl::fromLocalFile(QStringLiteral(CONFIG_QML_PATH)));
+        QScopedPointer<QObject> fixture(component.create());
+        QVERIFY2(fixture, qPrintable(component.errorString()));
+        auto *item = qobject_cast<QQuickItem *>(fixture.data());
+        item->setWidth(thickness);
+        item->setParentItem(window.contentItem());
+        auto *axis = fixture->findChild<QQuickItem *>(QStringLiteral("axis"));
+        auto *buttons = fixture->findChild<QQuickItem *>(QStringLiteral("buttons"));
+        auto *title = fixture->findChild<QQuickItem *>(QStringLiteral("title"));
+        QVERIFY(axis && buttons && title);
+        buttons->setProperty("buttonStyle", style);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        QTRY_COMPARE(title->width(), 520.0);
+        QCOMPARE(axis->width(), 800.0);
+        QCOMPARE(axis->height(), qreal(thickness));
+        const auto center = title->mapToScene(QPointF(title->width() / 2, title->height() / 2));
+        QVERIFY(qAbs(center.x() - thickness / 2.0) < 0.01);
+        QVERIFY(qAbs(center.y() - 400) < 0.01);
+        qreal previousBottom = -1;
+        for (const QString &action : {QStringLiteral("minimize"), QStringLiteral("maximize"), QStringLiteral("close")}) {
+            auto *button = fixture->findChild<QQuickItem *>(style + QLatin1Char('-') + action);
+            QVERIFY(button);
+            const QRectF rect = button->mapRectToScene(QRectF(0, 0, button->width(), button->height()));
+            QVERIFY(rect.left() >= -0.01 && rect.right() <= thickness + 0.01);
+            QVERIFY(rect.top() >= previousBottom);
+            previousBottom = rect.bottom();
+            QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, rect.center().toPoint());
+        }
+        QCOMPARE(fixture->findChild<QObject *>(QStringLiteral("controller"))->property("calls").toInt(), 3);
+        // O título respeita a reserva dos botões quando o centro não cabe.
+        title->setProperty("panelOffset", 490);
+        const QRectF titleRect = title->mapRectToScene(QRectF(0, 0, title->width(), title->height()));
+        QVERIFY(titleRect.top() >= previousBottom);
+        // Trocar a orientação reutiliza a mesma geometria, sem recriar o conteúdo.
+        item->setWidth(800);
+        item->setHeight(thickness);
+        axis->setProperty("vertical", false);
+        QCOMPARE(axis->width(), 800.0);
+        QCOMPARE(axis->height(), qreal(thickness));
+        QCOMPARE(axis->rotation(), 0.0);
+    }
+
     void windowButtonsAreAccessible_data()
     {
         QTest::addColumn<QString>("style");
@@ -282,34 +384,49 @@ Item {
         QTRY_COMPARE(title->property("width").toDouble(), 0.0);
         QVERIFY(title->property("x").toDouble() <= 150);
     }
+    void panelEdgesTrackRealNeighbors_data()
+    {
+        QTest::addColumn<bool>("vertical");
+        QTest::newRow("horizontal") << false;
+        QTest::newRow("vertical") << true;
+    }
+
     void panelEdgesTrackRealNeighbors()
     {
+        QFETCH(bool, vertical);
         QQmlEngine engine;
         QQmlComponent component(&engine);
         component.setData(R"(
 import QtQuick
 Item {
+    id: panel
+    property bool vertical: false
     width: 1000; height: 32
     Item { x: 0; width: 64; height: 32 } // Margem auxiliar, não é applet.
     Item {
         objectName: "before"; property bool isAppletContainer: true
-        x: 64; width: 32; height: 32
+        x: panel.vertical ? 0 : 64; y: panel.vertical ? 64 : 0; width: 32; height: 32
     }
     Item {
         objectName: "own"; property bool isAppletContainer: true
-        x: 100; width: 24; height: 32
+        x: panel.vertical ? 0 : 100; y: panel.vertical ? 100 : 0
+        width: panel.vertical ? 32 : 24; height: panel.vertical ? 24 : 32
         Item { Item { id: target; width: 24; height: 32 } }
     }
     Item {
         objectName: "after"; property bool isAppletContainer: true
-        x: 130; width: 1; height: 32
+        x: panel.vertical ? 0 : 130; y: panel.vertical ? 130 : 0
+        width: panel.vertical ? 32 : 1; height: panel.vertical ? 1 : 32
     }
-    PanelEdges { objectName: "edges"; appletItem: target }
+    PanelEdges { objectName: "edges"; appletItem: target; vertical: panel.vertical }
 }
 )", QUrl::fromLocalFile(QStringLiteral(CONFIG_QML_PATH)));
         QVERIFY2(component.isReady(), qPrintable(component.errorString()));
         QScopedPointer<QObject> fixture(component.create());
         QVERIFY2(fixture, qPrintable(component.errorString()));
+        fixture->setProperty("vertical", vertical);
+        const char *lengthProperty = vertical ? "height" : "width";
+        const char *positionProperty = vertical ? "y" : "x";
         auto *edges = fixture->findChild<QObject *>(QStringLiteral("edges"));
         auto *before = fixture->findChild<QObject *>(QStringLiteral("before"));
         auto *after = fixture->findChild<QObject *>(QStringLiteral("after"));
@@ -324,10 +441,10 @@ Item {
         QVERIFY(edges->property("isAtLeftEdge").toBool()); // Margem de 100px ignorada.
         after->setProperty("visible", false);
         QVERIFY(edges->property("isAtRightEdge").toBool());
-        own->setProperty("width", 0);
+        own->setProperty(lengthProperty, 0);
         QVERIFY(!edges->property("known").toBool());
         QVERIFY(!edges->property("isAtLeftEdge").toBool());
-        own->setProperty("width", 24);
+        own->setProperty(lengthProperty, 24);
         QVERIFY(edges->property("known").toBool());
         before->setProperty("visible", true);
         after->setProperty("visible", true);
@@ -336,11 +453,11 @@ Item {
         QCOMPARE(blocked.count(), 1);
         QVERIFY(!edges->property("known").toBool());
         edges->setProperty("editing", false);
-        after->setProperty("x", 110); // Sobreposição transitória.
+        after->setProperty(positionProperty, 110); // Sobreposição transitória.
         QVERIFY(!edges->property("known").toBool());
         QTest::qWait(350);
         QCOMPARE(blocked.count(), 1);
-        after->setProperty("x", 130);
+        after->setProperty(positionProperty, 130);
         QTRY_COMPARE(blocked.count(), 2);
         before->setParent(nullptr);
         delete before;

@@ -83,6 +83,7 @@ PlasmoidItem {
         anchors.fill: parent
         Layout.fillWidth: true
         Layout.fillHeight: true
+        clip: true
 
         // =========================================================================
         // GEOMETRIA REAL E DETECÇÃO DE BORDAS NO PAINEL
@@ -113,139 +114,150 @@ PlasmoidItem {
             return 0.0;
         }
 
-        RowLayout {
-            id: contentLayout
-            anchors.fill: parent
-            spacing: 6
+        PanelAxis {
+            id: panelAxis
+            vertical: root.isVertical
 
-            // =============================================================
-            // 1. SEÇÃO ESQUERDA
-            // =============================================================
+            RowLayout {
+                id: contentLayout
+                anchors.fill: parent
+                spacing: 6
 
-            // Botões de controle à esquerda
-            WindowButtons {
-                id: buttonsLeft
-                controller: windowController
-                panelThickness: root.panelThickness
-                buttonStyle: Plasmoid.configuration.buttonsStyle
-                buttonsSize: Plasmoid.configuration.buttonsSize
-                visible: root.buttonsOnLeft && root.buttonsVisible
-                opacity: (root.buttonsOnLeft && root.buttonsVisible) ? 1.0 : 0.0
-                Behavior on opacity { NumberAnimation { duration: 150 } }
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                Layout.fillHeight: true
+                // =============================================================
+                // 1. SEÇÃO ESQUERDA
+                // =============================================================
+
+                // Botões de controle à esquerda
+                WindowButtons {
+                    id: buttonsLeft
+                    vertical: root.isVertical
+                    controller: windowController
+                    panelThickness: root.panelThickness
+                    buttonStyle: Plasmoid.configuration.buttonsStyle
+                    buttonsSize: Plasmoid.configuration.buttonsSize
+                    visible: root.buttonsOnLeft && root.buttonsVisible
+                    opacity: (root.buttonsOnLeft && root.buttonsVisible) ? 1.0 : 0.0
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                    Layout.fillHeight: true
+                }
+
+                // Título à esquerda
+                WindowTitle {
+                    id: titleLeft
+                    vertical: root.isVertical
+                    controller: windowController
+                    panelThickness: root.panelThickness
+                    showIcon: Plasmoid.configuration.showIcon
+                    showTitle: Plasmoid.configuration.showTitle
+                    alignment: "left"
+                    visible: root.titleOnLeft
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                    Layout.fillWidth: root.titleOnLeft
+                    Layout.fillHeight: true
+                    Layout.maximumWidth: parent.width * 0.8
+                }
+
+                // Contrapeso de simetria (para centralizar o título quando botões estão à direita, no modo relativo)
+                Item {
+                    id: leftCounterweight
+                    visible: root.titleOnCenter && !root.centerInPanel
+                    implicitWidth: (buttonsRight.visible && root.buttonsOnRight) ? buttonsRight.width : 0
+                    Behavior on implicitWidth { NumberAnimation { duration: 150 } }
+                }
+
+                // =============================================================
+                // 2. ESPAÇADOR EXPANSIVO ESQUERDO
+                // =============================================================
+                Item {
+                    id: spacerLeft
+
+                    Layout.fillWidth: true
+                    visible: root.titleOnCenter || (!root.titleOnLeft && !root.buttonsOnLeft) || (root.titleOnLeft && root.buttonsOnRight)
+                }
+
+                // =============================================================
+                // 3. SEÇÃO CENTRAL (Título centralizado)
+                // =============================================================
+                WindowTitle {
+                    id: titleCenter
+                    vertical: root.isVertical
+                    controller: windowController
+                    panelThickness: root.panelThickness
+                    showIcon: Plasmoid.configuration.showIcon
+                    showTitle: Plasmoid.configuration.showTitle
+                    alignment: "center"
+                    visible: root.titleOnCenter && !root.centerInPanel
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+                    Layout.fillHeight: true
+                    Layout.maximumWidth: parent.width * 0.65
+                }
+
+                // =============================================================
+                // 4. ESPAÇADOR EXPANSIVO DIREITO
+                // =============================================================
+                Item {
+                    id: spacerRight
+                    Layout.fillWidth: true
+                    visible: root.titleOnCenter || (!root.titleOnRight && !root.buttonsOnRight) || (root.titleOnRight && root.buttonsOnLeft)
+                }
+
+                // =============================================================
+                // 5. SEÇÃO DIREITA
+                // =============================================================
+
+                // Contrapeso de simetria (para centralizar o título quando botões estão à esquerda, no modo relativo)
+                Item {
+                    id: rightCounterweight
+                    visible: root.titleOnCenter && !root.centerInPanel
+                    implicitWidth: (buttonsLeft.visible && root.buttonsOnLeft) ? buttonsLeft.width : 0
+                    Behavior on implicitWidth { NumberAnimation { duration: 150 } }
+                }
+
+                // Título à direita
+                WindowTitle {
+                    id: titleRight
+                    vertical: root.isVertical
+                    controller: windowController
+                    panelThickness: root.panelThickness
+                    showIcon: Plasmoid.configuration.showIcon
+                    showTitle: Plasmoid.configuration.showTitle
+                    alignment: "right"
+                    visible: root.titleOnRight
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                    Layout.fillWidth: root.titleOnRight
+                    Layout.fillHeight: true
+                    Layout.maximumWidth: parent.width * 0.8
+                }
+
+                // Botões de controle à direita
+                WindowButtons {
+                    id: buttonsRight
+                    vertical: root.isVertical
+                    controller: windowController
+                    panelThickness: root.panelThickness
+                    buttonStyle: Plasmoid.configuration.buttonsStyle
+                    buttonsSize: Plasmoid.configuration.buttonsSize
+                    visible: root.buttonsOnRight && root.buttonsVisible
+                    opacity: (root.buttonsOnRight && root.buttonsVisible) ? 1.0 : 0.0
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                    Layout.fillHeight: true
+                }
             }
 
-            // Título à esquerda
-            WindowTitle {
-                id: titleLeft
+            PanelCenteredTitle {
+                vertical: root.isVertical
                 controller: windowController
                 panelThickness: root.panelThickness
                 showIcon: Plasmoid.configuration.showIcon
                 showTitle: Plasmoid.configuration.showTitle
-                alignment: "left"
-                visible: root.titleOnLeft
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                Layout.fillWidth: root.titleOnLeft
-                Layout.fillHeight: true
-                Layout.maximumWidth: parent.width * 0.8
+                visible: root.titleOnCenter && root.centerInPanel
+                panelLength: container.totalPanelLength
+                panelOffset: container.globalPos
+                leftInset: buttonsLeft.visible ? buttonsLeft.x + buttonsLeft.width + contentLayout.spacing : 0
+                rightInset: buttonsRight.visible ? panelAxis.width - buttonsRight.x + contentLayout.spacing : 0
             }
-
-            // Contrapeso de simetria (para centralizar o título quando botões estão à direita, no modo relativo)
-            Item {
-                id: leftCounterweight
-                visible: root.titleOnCenter && !root.centerInPanel
-                implicitWidth: (buttonsRight.visible && root.buttonsOnRight) ? buttonsRight.width : 0
-                Behavior on implicitWidth { NumberAnimation { duration: 150 } }
-            }
-
-            // =============================================================
-            // 2. ESPAÇADOR EXPANSIVO ESQUERDO
-            // =============================================================
-            Item {
-                id: spacerLeft
-
-                Layout.fillWidth: true
-                visible: root.titleOnCenter || (!root.titleOnLeft && !root.buttonsOnLeft) || (root.titleOnLeft && root.buttonsOnRight)
-            }
-
-            // =============================================================
-            // 3. SEÇÃO CENTRAL (Título centralizado)
-            // =============================================================
-            WindowTitle {
-                id: titleCenter
-                controller: windowController
-                panelThickness: root.panelThickness
-                showIcon: Plasmoid.configuration.showIcon
-                showTitle: Plasmoid.configuration.showTitle
-                alignment: "center"
-                visible: root.titleOnCenter && !root.centerInPanel
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                Layout.fillHeight: true
-                Layout.maximumWidth: parent.width * 0.65
-            }
-
-            // =============================================================
-            // 4. ESPAÇADOR EXPANSIVO DIREITO
-            // =============================================================
-            Item {
-                id: spacerRight
-                Layout.fillWidth: true
-                visible: root.titleOnCenter || (!root.titleOnRight && !root.buttonsOnRight) || (root.titleOnRight && root.buttonsOnLeft)
-            }
-
-            // =============================================================
-            // 5. SEÇÃO DIREITA
-            // =============================================================
-
-            // Contrapeso de simetria (para centralizar o título quando botões estão à esquerda, no modo relativo)
-            Item {
-                id: rightCounterweight
-                visible: root.titleOnCenter && !root.centerInPanel
-                implicitWidth: (buttonsLeft.visible && root.buttonsOnLeft) ? buttonsLeft.width : 0
-                Behavior on implicitWidth { NumberAnimation { duration: 150 } }
-            }
-
-            // Título à direita
-            WindowTitle {
-                id: titleRight
-                controller: windowController
-                panelThickness: root.panelThickness
-                showIcon: Plasmoid.configuration.showIcon
-                showTitle: Plasmoid.configuration.showTitle
-                alignment: "right"
-                visible: root.titleOnRight
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                Layout.fillWidth: root.titleOnRight
-                Layout.fillHeight: true
-                Layout.maximumWidth: parent.width * 0.8
-            }
-
-            // Botões de controle à direita
-            WindowButtons {
-                id: buttonsRight
-                controller: windowController
-                panelThickness: root.panelThickness
-                buttonStyle: Plasmoid.configuration.buttonsStyle
-                buttonsSize: Plasmoid.configuration.buttonsSize
-                visible: root.buttonsOnRight && root.buttonsVisible
-                opacity: (root.buttonsOnRight && root.buttonsVisible) ? 1.0 : 0.0
-                Behavior on opacity { NumberAnimation { duration: 150 } }
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                Layout.fillHeight: true
-            }
-        }
-
-        PanelCenteredTitle {
-            controller: windowController
-            panelThickness: root.panelThickness
-            showIcon: Plasmoid.configuration.showIcon
-            showTitle: Plasmoid.configuration.showTitle
-            visible: root.titleOnCenter && root.centerInPanel
-            panelLength: container.totalPanelLength
-            panelOffset: container.globalPos
-            leftInset: buttonsLeft.visible ? buttonsLeft.x + buttonsLeft.width + contentLayout.spacing : 0
-            rightInset: buttonsRight.visible ? container.width - buttonsRight.x + contentLayout.spacing : 0
         }
     }
 }

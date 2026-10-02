@@ -27,6 +27,7 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - **macOS / Círculos Coloridos**: Botões circulares clássicos (vermelho, amarelo e verde) com ícones que se revelam no hover.
   - **Minimalista**: Visual geométrico limpo e discreto.
 - **Disposição Dinâmica e Alinhamento Sincronizado**:
+  - **Painéis verticais**: Título de cima para baixo e botões empilhados, com ícones na posição normal. Esquerda/direita correspondem a topo/base; a centralização acompanha o comprimento do painel.
   - **Expansão Automática**: Ocupa dinamicamente todo o espaço disponível no painel sem comprimentos fixos arbitrários.
   - **Posicionamento do Título**: Escolha entre **Esquerda**, **Centro** ou **Direita**.
   - **Centralização Absoluta no Painel**: Opção que mantém o título matematicamente centralizado na largura total do painel, compensando assimetrias causadas por outros elementos (como bandeja do sistema, relógio ou lançadores de aplicativos).

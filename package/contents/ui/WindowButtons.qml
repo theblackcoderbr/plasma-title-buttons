@@ -13,6 +13,7 @@ RowLayout {
     property string buttonStyle: "system" // "system", "macos", "minimal"
     property string buttonsSize: "medium" // "small", "medium", "large"
     property real panelThickness: 32
+    property bool vertical: false
 
     // Altura do botão respeitando a altura disponível no painel
     readonly property real buttonHeight: Math.max(16, Math.min(baseTargetHeight, panelThickness - 2))
@@ -132,6 +133,12 @@ RowLayout {
         focusPolicy: Qt.StrongFocus
         Accessible.role: Accessible.Button
         Accessible.name: text
+        // O contêiner gira o layout inteiro; apenas o desenho é contrarrotacionado.
+        Binding {
+            target: sysBtn.contentItem
+            property: "rotation"
+            value: root.vertical ? -90 : 0
+        }
         PlasmaComponents3.ToolTip.text: text
         PlasmaComponents3.ToolTip.visible: hovered || visualFocus
         PlasmaComponents3.ToolTip.delay: Kirigami.Units.toolTipDelay

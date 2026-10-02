@@ -65,8 +65,8 @@ Kirigami.ScrollablePage {
         : (!canShowButtons
             ? i18n("The title occupies the only available panel edge. Center the title, move it to the opposite side, or move this widget to another panel edge to show window buttons.")
             : (!isAtLeftEdge
-                ? i18n("The left edge of the panel is occupied by other elements. Window buttons can only be placed on the right edge.")
-                : i18n("The right edge of the panel is occupied by other elements. Window buttons can only be placed on the left edge.")))
+                ? i18n("The left or top edge of the panel is occupied by other elements. Window buttons can only be placed on the right or bottom edge.")
+                : i18n("The right or bottom edge of the panel is occupied by other elements. Window buttons can only be placed on the left or top edge.")))
 
     ButtonPlacement {
         id: buttonPlacement
@@ -133,7 +133,7 @@ Kirigami.ScrollablePage {
             spacing: Kirigami.Units.largeSpacing
 
             QQC2.RadioButton {
-                text: i18n("Left")
+                text: i18n("Left / Top")
                 checked: root.cfg_titlePosition === "left"
                 onToggled: if (checked) root.onTitlePositionSelected("left")
             }
@@ -145,7 +145,7 @@ Kirigami.ScrollablePage {
             }
 
             QQC2.RadioButton {
-                text: i18n("Right")
+                text: i18n("Right / Bottom")
                 checked: root.cfg_titlePosition === "right"
                 onToggled: if (checked) root.onTitlePositionSelected("right")
             }
@@ -162,7 +162,7 @@ Kirigami.ScrollablePage {
             }
 
             Kirigami.ContextualHelpButton {
-                toolTipText: i18n("Maintains the window title mathematically centered on the full panel width, even when asymmetric elements (such as the system tray or application launcher) exist on the panel.")
+                toolTipText: i18n("Maintains the window title mathematically centered on the full panel length, even when asymmetric elements (such as the system tray or application launcher) exist on the panel.")
             }
         }
 
@@ -173,7 +173,7 @@ Kirigami.ScrollablePage {
             QQC2.RadioButton {
                 id: buttonsLeftRadio
                 objectName: "buttonsLeftRadio"
-                text: i18n("Left")
+                text: i18n("Left / Top")
                 checked: buttonPlacement.position === "left"
                 enabled: root.cfg_edgesKnown && buttonPlacement.leftAllowed
                 onClicked: root.cfg_buttonsPosition = "left"
@@ -182,7 +182,7 @@ Kirigami.ScrollablePage {
             QQC2.RadioButton {
                 id: buttonsRightRadio
                 objectName: "buttonsRightRadio"
-                text: i18n("Right")
+                text: i18n("Right / Bottom")
                 checked: buttonPlacement.position === "right"
                 enabled: root.cfg_edgesKnown && buttonPlacement.rightAllowed
                 onClicked: root.cfg_buttonsPosition = "right"

@@ -55,7 +55,9 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
 ### 3.2. Frontend QML (`package/contents/`)
 - Segue estritamente as diretrizes do **Plasma 6 / Kirigami**:
   - Importação de `org.kde.plasma.plasmoid`, `org.kde.plasma.core`, `org.kde.plasma.components 3.0 as PlasmaComponents3` e `org.kde.kirigami as Kirigami`.
-  - Layout dinâmico que respeita a espessura e orientação do painel (horizontal ou vertical).
+- Layout dinâmico que respeita a espessura e orientação do painel (horizontal ou vertical).
+  - `PanelAxis.qml` mantém um eixo local ao longo do painel: em vertical, troca largura/altura e gira o conteúdo 90°. Título segue de cima para baixo; ícone da aplicação e símbolos dos botões recebem contrarrotação para permanecerem de pé. As posições `left`/`right` correspondem a topo/base, sem alterar preferências salvas.
+  - Centralização, limites do título, espaçadores e contrapesos usam as dimensões locais desse eixo. A posição e o comprimento globais usam x/largura no painel horizontal e y/altura no vertical.
   - Animações fluidas em transições de hover e visibilidade (usando `NumberAnimation` ou `Behavior on opacity`).
 - **Regras de Visibilidade e Interação da Interface**:
   1. **Expansão Dinâmica**: O widget ocupa dinamicamente todo o espaço disponível no painel (`Layout.fillWidth: true`, `Layout.fillHeight: true`).
