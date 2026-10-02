@@ -37,6 +37,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
 - Utiliza a biblioteca oficial de gerenciamento de tarefas do KDE Workspace (`PW::LibTaskManager` / `TaskManager::TasksModel`).
 - Um `TaskFilterProxyModel` público filtra o `TasksModel` sem agrupamento. Todos os estados e comandos do controlador usam os índices desse proxy, que encaminha as ações à janela de origem.
 - **Comportamento do Controlador**:
+  - Atualizações de estado ignoram `dataChanged` com papéis não utilizados pelo widget; uma lista vazia de papéis exige atualização completa. Contagem e identificação da janela ativa usam uma única passagem sem lista intermediária. Inserções, remoções, reset, movimentos e mudanças de layout do proxy continuam atualizando o estado.
   - Filtra e rastreia a janela em foco na tela (`screen`), área de trabalho virtual (`virtualDesktop`) e atividade atuais. A atividade acompanha `ActivityInfo::currentActivityChanged`; janelas solicitando atenção não ignoram os filtros (`demandingAttentionSkipsFilters = false`). Janelas configuradas para todas as atividades/desktops continuam elegíveis nesses contextos.
   - Propriedades reativas para o QML (`Q_PROPERTY` com sinais `NOTIFY`):
     - `hasActiveWindow` (bool)

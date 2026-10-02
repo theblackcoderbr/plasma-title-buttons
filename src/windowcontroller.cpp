@@ -39,10 +39,36 @@ WindowController::WindowController(QObject *parent)
     connect(activityInfo, &TaskManager::ActivityInfo::currentActivityChanged, this, updateActivity);
     updateActivity();
 
-    connect(m_tasksModel, &QAbstractItemModel::dataChanged, this, &WindowController::updateWindowState);
+    connect(m_tasksModel, &QAbstractItemModel::dataChanged, this,
+            [this](const QModelIndex &, const QModelIndex &, const QList<int> &roles) {
+        // Lista vazia significa que qualquer papel pode ter mudado. Alterações
+        // nos filtros são tratadas pelos sinais estruturais do próprio proxy.
+        if (roles.isEmpty()) {
+            updateWindowState();
+            return;
+        }
+        for (int role : roles) {
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::DecorationRole:
+            case TaskManager::AbstractTasksModel::IsWindow:
+            case TaskManager::AbstractTasksModel::IsActive:
+            case TaskManager::AbstractTasksModel::IsMaximized:
+            case TaskManager::AbstractTasksModel::IsMaximizable:
+            case TaskManager::AbstractTasksModel::IsMinimizable:
+            case TaskManager::AbstractTasksModel::IsClosable:
+                updateWindowState();
+                return;
+            default:
+                break;
+            }
+        }
+    });
     connect(m_tasksModel, &QAbstractItemModel::rowsInserted, this, &WindowController::updateWindowState);
     connect(m_tasksModel, &QAbstractItemModel::rowsRemoved, this, &WindowController::updateWindowState);
     connect(m_tasksModel, &QAbstractItemModel::modelReset, this, &WindowController::updateWindowState);
+    connect(m_tasksModel, &QAbstractItemModel::rowsMoved, this, &WindowController::updateWindowState);
+    connect(m_tasksModel, &QAbstractItemModel::layoutChanged, this, &WindowController::updateWindowState);
 
     // Mantém a API do controlador sincronizada com a preferência global do KWin.
     connect(m_kwinSettings, &KWinSettings::borderlessMaximizedChanged,
@@ -160,14 +186,23 @@ void WindowController::updateWindowState()
         return;
     }
 
-    const QList<int> winRows = validWindowRows();
-    const int newCount = winRows.size();
+    // Conta as janelas e encontra a ativa na mesma passagem, sem alocar uma lista.
+    int newCount = 0;
+    QModelIndex active;
+    const int rowCount = m_tasksModel->rowCount();
+    for (int row = 0; row < rowCount; ++row) {
+        const QModelIndex index = m_tasksModel->index(row, 0);
+        if (index.data(TaskManager::AbstractTasksModel::IsWindow).toBool()) {
+            ++newCount;
+            if (!active.isValid() && index.data(TaskManager::AbstractTasksModel::IsActive).toBool()) {
+                active = index;
+            }
+        }
+    }
     if (m_windowCount != newCount) {
         m_windowCount = newCount;
         Q_EMIT windowCountChanged();
     }
-
-    const QModelIndex active = activeIndex();
 
     bool hasActive = false;
     QString title = QStringLiteral("Plasma Workspace");
@@ -177,7 +212,7 @@ void WindowController::updateWindowState()
     bool canMin = false;
     bool canCls = false;
 
-    if (active.isValid() && active.data(TaskManager::AbstractTasksModel::IsWindow).toBool()) {
+    if (active.isValid()) {
         hasActive = true;
         title = active.data(Qt::DisplayRole).toString();
         if (title.trimmed().isEmpty()) {

@@ -10,6 +10,7 @@
 #include <QGuiApplication>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QSignalSpy>
 
 class FakeWindows : public TaskManager::AbstractTasksModel
 {
@@ -28,12 +29,17 @@ public:
         bool canClose = true;
         bool canMinimize = true;
         bool canMaximize = true;
+        bool maximized = false;
+        QVariant icon{};
+        bool isWindow = true;
     };
     QList<Window> windows;
     int activated = -1;
     int closed = -1;
     int minimized = -1;
     int maximized = -1;
+    mutable int windowReads = 0;
+    mutable int titleReads = 0;
 
     int rowCount(const QModelIndex &parent = {}) const override { return parent.isValid() ? 0 : windows.size(); }
     QVariant data(const QModelIndex &index, int role) const override
@@ -43,8 +49,10 @@ public:
         }
         const auto &window = windows[index.row()];
         switch (role) {
-        case Qt::DisplayRole: return window.title;
-        case IsWindow: return true;
+        case Qt::DisplayRole: ++titleReads; return window.title;
+        case Qt::DecorationRole: return window.icon;
+        case IsWindow: ++windowReads; return window.isWindow;
+        case IsMaximized: return window.maximized;
         case IsActive: return window.active;
         case Activities: return window.activities;
         case VirtualDesktops: return window.desktops;
@@ -70,6 +78,80 @@ class WindowControllerTest : public QObject
 {
     Q_OBJECT
 private Q_SLOTS:
+    void selectiveStateUpdates()
+    {
+        FakeWindows source;
+        source.windows = {
+            {QStringLiteral("focused"), {}, {}, QRect(), false, true, true},
+            {QStringLiteral("other"), {}, {}, QRect(), false, false, true},
+        };
+        WindowController controller;
+        auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);
+        QVERIFY(filter);
+        filter->setSourceModel(&source);
+        QCOMPARE(controller.windowCount(), 2);
+        QSignalSpy stateChanged(&controller, &WindowController::activeWindowChanged);
+        QSignalSpy countChanged(&controller, &WindowController::windowCountChanged);
+        source.windowReads = source.titleReads = 0;
+        // Eventos reais atravessam o proxy, mas não provocam leitura do estado.
+        for (int i = 0; i < 100; ++i) {
+            Q_EMIT source.dataChanged(source.index(0), source.index(1), {TaskManager::AbstractTasksModel::IsKeepAbove});
+        }
+        QCOMPARE(source.titleReads, 0);
+        QCOMPARE(source.windowReads, 0);
+        QCOMPARE(stateChanged.count(), 0);
+        source.windows[0].title = QStringLiteral("renamed");
+        Q_EMIT source.dataChanged(source.index(0), source.index(0), {Qt::DisplayRole});
+        QCOMPARE(controller.windowTitle(), QStringLiteral("renamed"));
+        QCOMPARE(stateChanged.count(), 1);
+        QCOMPARE(countChanged.count(), 0);
+        QCOMPARE(source.windowReads, 2); // Uma passagem, sem lista intermediária.
+
+        source.windows[0].icon = QStringLiteral("test-icon");
+        source.windows[0].maximized = true;
+        Q_EMIT source.dataChanged(source.index(0), source.index(0),
+                                 {Qt::DecorationRole, TaskManager::AbstractTasksModel::IsMaximized});
+        QCOMPARE(controller.windowIcon().toString(), QStringLiteral("test-icon"));
+        QVERIFY(controller.isMaximized());
+        QCOMPARE(stateChanged.count(), 2); // Uma atualização mesmo com vários papéis.
+        source.windows[0].canClose = false;
+        Q_EMIT source.dataChanged(source.index(0), source.index(0), {TaskManager::AbstractTasksModel::IsClosable});
+        QVERIFY(!controller.canClose());
+        source.windows[0].canMinimize = false;
+        Q_EMIT source.dataChanged(source.index(0), source.index(0), {TaskManager::AbstractTasksModel::IsMinimizable});
+        QVERIFY(!controller.canMinimize());
+        source.windows[0].canMaximize = false;
+        Q_EMIT source.dataChanged(source.index(0), source.index(0), {TaskManager::AbstractTasksModel::IsMaximizable});
+        QVERIFY(!controller.canMaximize());
+        source.windows[0].active = false;
+        source.windows[1].active = true;
+        Q_EMIT source.dataChanged(source.index(0), source.index(1), {TaskManager::AbstractTasksModel::IsActive});
+        QCOMPARE(controller.windowTitle(), QStringLiteral("other"));
+        source.windows[1].title = QStringLiteral("unspecified roles");
+        Q_EMIT source.dataChanged(source.index(1), source.index(1));
+        QCOMPARE(controller.windowTitle(), QStringLiteral("unspecified roles"));
+
+        source.windows[1].isWindow = false;
+        Q_EMIT source.dataChanged(source.index(1), source.index(1), {TaskManager::AbstractTasksModel::IsWindow});
+        QCOMPARE(controller.windowCount(), 1);
+        QVERIFY(!controller.hasActiveWindow());
+        source.windows[1].isWindow = true;
+        Q_EMIT source.dataChanged(source.index(1), source.index(1), {TaskManager::AbstractTasksModel::IsWindow});
+        QCOMPARE(controller.windowCount(), 2);
+        QVERIFY(controller.hasActiveWindow());
+
+        // SkipTaskbar não é um papel exibido, mas altera a estrutura do proxy.
+        source.windows[1].skipTaskbar = true;
+        Q_EMIT source.dataChanged(source.index(1), source.index(1), {TaskManager::AbstractTasksModel::SkipTaskbar});
+        QCOMPARE(controller.windowCount(), 1);
+        QVERIFY(!controller.hasActiveWindow());
+        QCOMPARE(controller.windowTitle(), QStringLiteral("Plasma Workspace"));
+        source.windows[1].skipTaskbar = false;
+        Q_EMIT source.dataChanged(source.index(1), source.index(1), {TaskManager::AbstractTasksModel::SkipTaskbar});
+        QCOMPARE(controller.windowCount(), 2);
+        QCOMPARE(controller.windowTitle(), QStringLiteral("unspecified roles"));
+    }
+
     void actionsRespectCapabilities()
     {
         FakeWindows source;
