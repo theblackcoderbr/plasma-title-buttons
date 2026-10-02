@@ -23,6 +23,8 @@ public:
         bool active = false;
         bool allDesktops = false;
         bool hidden = false;
+        bool minimized = false;
+        bool skipTaskbar = false;
     };
     QList<Window> windows;
     int activated = -1;
@@ -47,6 +49,8 @@ public:
         case IsDemandingAttention: return window.attention;
         case IsOnAllVirtualDesktops: return window.allDesktops;
         case IsHidden: return window.hidden;
+        case IsMinimized: return window.minimized;
+        case SkipTaskbar: return window.skipTaskbar;
         default: return {};
         }
     }
@@ -88,7 +92,8 @@ private Q_SLOTS:
             {QStringLiteral("other screen"), {QStringLiteral("A")}, {1}, QRect(1920, 0, 1920, 1080), false, !active},
         };
         if (available) {
-            source.windows.append({QStringLiteral("local"), {QStringLiteral("A")}, {1}, screen, false, active});
+            // Sem foco, simula uma janela minimizada e oculta pelo compositor.
+            source.windows.append({QStringLiteral("local"), {QStringLiteral("A")}, {1}, screen, false, active, false, !active, !active});
         }
         WindowController controller;
         auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);
@@ -114,6 +119,8 @@ private Q_SLOTS:
         QVERIFY(filter->filterByCurrentVirtualDesktop());
         QVERIFY(filter->filterByActivity());
         QVERIFY(!filter->demandingAttentionSkipsFilters());
+        QVERIFY(!filter->filterHidden());
+        QVERIFY(!filter->filterMinimized());
         auto *source = qobject_cast<TaskManager::TasksModel *>(filter->sourceModel());
         QVERIFY(source);
         QCOMPARE(source->groupMode(), TaskManager::TasksModel::GroupDisabled);
@@ -131,12 +138,12 @@ private Q_SLOTS:
         const QRect otherScreen(1920, 0, 1920, 1080);
         source.windows = {
             {QStringLiteral("other activity"), {QStringLiteral("B")}, {1}, screen, true, true},
-            {QStringLiteral("other desktop"), {QStringLiteral("A")}, {2}, screen, true},
-            {QStringLiteral("other screen"), {QStringLiteral("A")}, {1}, otherScreen, true},
+            {QStringLiteral("other desktop"), {QStringLiteral("A")}, {2}, screen, true, false, false, true, true},
+            {QStringLiteral("other screen"), {QStringLiteral("A")}, {1}, otherScreen, true, false, false, true, true},
             {QStringLiteral("focused"), {QStringLiteral("A")}, {1}, screen, true, true},
-            {QStringLiteral("next"), {QStringLiteral("A")}, {1}, screen},
-            {QStringLiteral("all contexts"), {}, {}, screen, false, false, true},
-            {QStringLiteral("hidden"), {QStringLiteral("A")}, {1}, screen, true, false, false, true},
+            {QStringLiteral("next minimized"), {QStringLiteral("A")}, {1}, screen, false, false, false, true, true},
+            {QStringLiteral("all contexts minimized"), {}, {}, screen, false, false, true, true, true},
+            {QStringLiteral("skip taskbar"), {QStringLiteral("A")}, {1}, screen, true, false, false, true, false, true},
         };
         WindowController controller;
         auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);

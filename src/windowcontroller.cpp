@@ -25,7 +25,10 @@ WindowController::WindowController(QObject *parent)
     m_tasksModel->setFilterByVirtualDesktop(true);
     m_tasksModel->setFilterByCurrentVirtualDesktop(true);
     m_tasksModel->setFilterByActivity(true);
-    m_tasksModel->setFilterHidden(true);
+    // Janelas minimizadas também podem estar marcadas como ocultas pelo compositor.
+    // requestActivate() restaura a janela escolhida; os filtros de contexto permanecem ativos.
+    m_tasksModel->setFilterHidden(false);
+    m_tasksModel->setFilterMinimized(false);
     m_tasksModel->setFilterByScreen(true);
 
     auto *activityInfo = new TaskManager::ActivityInfo(this);

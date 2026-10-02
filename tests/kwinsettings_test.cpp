@@ -20,6 +20,7 @@
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QWheelEvent>
 
 class FakeKWin : public QObject, protected QDBusContext
 {
@@ -61,6 +62,72 @@ class KWinSettingsTest : public QObject
     }
 
 private Q_SLOTS:
+    void titleScrollIsPaced()
+    {
+        QQmlEngine engine;
+        QQuickWindow window;
+        window.resize(400, 32);
+        QQmlComponent component(&engine);
+        component.setData(R"(
+            import QtQuick
+            WindowTitle {
+                id: scrollTitle
+                width: 400; height: 32; showIcon: false
+                property int calls: 0
+                property int lastDirection: 0
+                controller: QtObject {
+                    property string windowTitle: "Scroll test"
+                    property bool hasActiveWindow: false
+                    function cycleWindow(direction) { scrollTitle.calls++; scrollTitle.lastDirection = direction; }
+                }
+            }
+        )", QUrl::fromLocalFile(QStringLiteral(CONFIG_QML_PATH)));
+        QScopedPointer<QObject> title(component.create());
+        QVERIFY2(title, qPrintable(component.errorString()));
+        auto *item = qobject_cast<QQuickItem *>(title.data());
+        QVERIFY(item);
+        item->setParentItem(window.contentItem());
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        const auto wheel = [&window](QPoint pixels, QPoint angles) {
+            QWheelEvent event(QPointF(100, 16), window.mapToGlobal(QPoint(100, 16)), pixels, angles,
+                              Qt::NoButton, Qt::NoModifier, Qt::NoScrollPhase, false);
+            QCoreApplication::sendEvent(&window, &event);
+        };
+        const auto calls = [&title]() { return title->property("calls").toInt(); };
+        for (int i = 0; i < 3; ++i) {
+            wheel({}, QPoint(0, 30));
+        }
+        QCOMPARE(calls(), 0);
+        wheel({}, QPoint(0, 30));
+        QCOMPARE(calls(), 1);
+        QCOMPARE(title->property("lastDirection").toInt(), -1);
+        for (int i = 0; i < 50; ++i) {
+            wheel(QPoint(0, -20), QPoint(0, -120));
+        }
+        QCOMPARE(calls(), 1);
+        QTest::qWait(350);
+        QCOMPARE(calls(), 1); // Nenhuma troca pendente após a rajada.
+        wheel(QPoint(0, -20), QPoint(0, -120));
+        QCOMPARE(calls(), 1); // Usa pixels, sem contar também o delta angular.
+        wheel(QPoint(0, -20), QPoint(0, -120));
+        QCOMPARE(calls(), 2);
+        QCOMPARE(title->property("lastDirection").toInt(), 1);
+        QTest::qWait(350);
+        wheel(QPoint(0, 30), {});
+        wheel(QPoint(0, -20), {});
+        QCOMPARE(calls(), 2); // Inverter a direção descarta o movimento anterior.
+        QTest::qWait(250);
+        wheel(QPoint(0, -20), {});
+        QCOMPARE(calls(), 2); // Uma pausa também descarta o movimento residual.
+        wheel(QPoint(40, 0), {});
+        QCOMPARE(calls(), 2);
+        wheel(QPoint(0, -20), {});
+        QCOMPARE(calls(), 3);
+        QTest::mouseClick(&window, Qt::MiddleButton, Qt::NoModifier, QPoint(100, 16));
+        QCOMPARE(calls(), 4); // Clique do meio não sofre o limite do scroll.
+    }
+
     void absoluteTitleUsesDisplayedWidth()
     {
         QQmlEngine engine;

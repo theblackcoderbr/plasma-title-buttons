@@ -75,7 +75,8 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
        - Se houver outros elementos em **ambas as extremidades** (widget no meio do painel), a opção de botões de controle é desabilitada e desmarcada, exibindo um botão de ajuda contextual Kirigami (`?`) com tooltip explicativo.
   6. **Ações no Título**:
      - Clique esquerdo: minimiza a janela focada quando maximizada; caso contrário, maximiza, respeitando as capacidades da janela. Sem janela ativa, não executa ação.
-     - Scroll da roda do mouse ou clique do meio (scroll click): aciona `cycleWindow()` navegando pelas janelas abertas.
+     - Scroll da roda do mouse ou clique do meio (scroll click): aciona `cycleWindow()` navegando pelas janelas abertas, incluindo minimizadas. Os filtros de janela oculta e minimizada devem permanecer desativados; monitor, desktop, atividade e exclusão da barra de tarefas continuam respeitados.
+     - O scroll acumula movimento vertical até 120 unidades angulares ou 40 pixels, preferindo pixels quando disponíveis. Cada evento troca no máximo uma janela, com intervalo mínimo de 300 ms e descarte de excesso, sem fila. Pausa de 200 ms, saída do ponteiro ou inversão de direção descarta movimento parcial. O clique do meio continua imediato.
   7. **Estilos e Tamanhos dos Botões**:
      - Estilos: `system` (Tema do sistema ativo, padrão), `macos` (Círculos coloridos: vermelho, amarelo, verde) e `minimal` (Design geométrico limpo).
      - Tamanhos dos Botões:
