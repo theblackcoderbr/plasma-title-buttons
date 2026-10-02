@@ -4,6 +4,8 @@
 
 An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**, integrating the active window title and window control buttons (Minimize, Maximize/Restore, and Close) directly into your taskbar or top panel.
 
+![Demonstração](docs/demo.gif)
+
 > Specially crafted for Unity-like or macOS-style workflows, providing maximum vertical screen estate savings by removing the native title bar on maximized windows.
 
 > [!IMPORTANT]
