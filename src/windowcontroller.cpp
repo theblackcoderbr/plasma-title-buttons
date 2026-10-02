@@ -213,7 +213,7 @@ void WindowController::updateWindowState()
 void WindowController::toggleMaximize()
 {
     const QModelIndex idx = activeIndex();
-    if (idx.isValid() && m_tasksModel) {
+    if (idx.isValid() && m_tasksModel && idx.data(TaskManager::AbstractTasksModel::IsMaximizable).toBool()) {
         m_tasksModel->requestToggleMaximized(idx);
     }
 }
@@ -221,7 +221,7 @@ void WindowController::toggleMaximize()
 void WindowController::minimize()
 {
     const QModelIndex idx = activeIndex();
-    if (idx.isValid() && m_tasksModel) {
+    if (idx.isValid() && m_tasksModel && idx.data(TaskManager::AbstractTasksModel::IsMinimizable).toBool()) {
         m_tasksModel->requestToggleMinimized(idx);
     }
 }
@@ -229,7 +229,7 @@ void WindowController::minimize()
 void WindowController::close()
 {
     const QModelIndex idx = activeIndex();
-    if (idx.isValid() && m_tasksModel) {
+    if (idx.isValid() && m_tasksModel && idx.data(TaskManager::AbstractTasksModel::IsClosable).toBool()) {
         m_tasksModel->requestClose(idx);
     }
 }

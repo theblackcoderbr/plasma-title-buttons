@@ -78,6 +78,9 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
      - Scroll da roda do mouse ou clique do meio (scroll click): aciona `cycleWindow()` navegando pelas janelas abertas, incluindo minimizadas. Os filtros de janela oculta e minimizada devem permanecer desativados; monitor, desktop, atividade e exclusão da barra de tarefas continuam respeitados.
      - O scroll acumula movimento vertical até 120 unidades angulares ou 40 pixels, preferindo pixels quando disponíveis. Cada evento troca no máximo uma janela, com intervalo mínimo de 300 ms e descarte de excesso, sem fila. Pausa de 200 ms, saída do ponteiro ou inversão de direção descarta movimento parcial. O clique do meio continua imediato.
   7. **Estilos e Tamanhos dos Botões**:
+     - Todos os estilos mantêm a mesma ordem: Minimizar, Maximizar/Restaurar, Fechar. No estilo macOS, as cores acompanham as ações: amarelo, verde, vermelho.
+     - Todos os estilos usam controles nativos com foco por Tab, ativação por Espaço, indicação visual de foco e nomes acessíveis traduzidos via `i18n()`. Maximizar muda para Restaurar quando a janela está maximizada.
+     - Cada botão exige janela ativa e a capacidade correspondente (`canClose`, `canMinimize`, `canMaximize`); botões indisponíveis ficam desabilitados. A ação de acessibilidade e os métodos do backend também respeitam essa disponibilidade.
      - Estilos: `system` (Tema do sistema ativo, padrão), `macos` (Círculos coloridos: vermelho, amarelo, verde) e `minimal` (Design geométrico limpo).
      - Tamanhos dos Botões:
        - Largura / área de clique: `small` (24px), `medium` (32px, padrão) e `large` (44px).

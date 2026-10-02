@@ -21,6 +21,7 @@
 #include <QTemporaryDir>
 #include <QTest>
 #include <QWheelEvent>
+#include <QAccessible>
 
 class FakeKWin : public QObject, protected QDBusContext
 {
@@ -62,6 +63,98 @@ class KWinSettingsTest : public QObject
     }
 
 private Q_SLOTS:
+    void windowButtonsAreAccessible_data()
+    {
+        QTest::addColumn<QString>("style");
+        QTest::newRow("system") << QStringLiteral("system");
+        QTest::newRow("macos") << QStringLiteral("macos");
+        QTest::newRow("minimal") << QStringLiteral("minimal");
+    }
+
+    void windowButtonsAreAccessible()
+    {
+        QFETCH(QString, style);
+        QQmlEngine engine;
+        engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
+        QQuickWindow window;
+        window.resize(200, 40);
+        QQmlComponent component(&engine);
+        component.setData(R"(
+            import QtQuick
+            WindowButtons {
+                controller: QtObject {
+                    objectName: "controller"
+                    property bool hasActiveWindow: true
+                    property bool isMaximized: false
+                    property bool canClose: true
+                    property bool canMinimize: true
+                    property bool canMaximize: true
+                    property int closeCalls: 0
+                    property int minimizeCalls: 0
+                    property int maximizeCalls: 0
+                    function close() { closeCalls++; }
+                    function minimize() { minimizeCalls++; }
+                    function toggleMaximize() { maximizeCalls++; }
+                }
+            }
+        )", QUrl::fromLocalFile(QStringLiteral(CONFIG_QML_PATH)));
+        QScopedPointer<QObject> buttons(component.create());
+        QVERIFY2(buttons, qPrintable(component.errorString()));
+        buttons->setProperty("buttonStyle", style);
+        auto *item = qobject_cast<QQuickItem *>(buttons.data());
+        QVERIFY(item);
+        item->setParentItem(window.contentItem());
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        auto *controller = buttons->findChild<QObject *>(QStringLiteral("controller"));
+        QVERIFY(controller);
+        const QStringList actions{QStringLiteral("close"), QStringLiteral("minimize"), QStringLiteral("maximize")};
+        const QStringList capabilities{QStringLiteral("canClose"), QStringLiteral("canMinimize"), QStringLiteral("canMaximize")};
+        const QStringList names{QStringLiteral("Close window"), QStringLiteral("Minimize window"), QStringLiteral("Maximize window")};
+        for (int i = 0; i < actions.size(); ++i) {
+            auto *button = buttons->findChild<QQuickItem *>(style + QLatin1Char('-') + actions[i]);
+            QVERIFY(button);
+            QVERIFY(button->isVisible());
+            auto *accessible = QAccessible::queryAccessibleInterface(button);
+            QVERIFY(accessible);
+            QCOMPARE(accessible->role(), QAccessible::Button);
+            QCOMPARE(accessible->text(QAccessible::Name), names[i]);
+            const QByteArray capability = capabilities[i].toUtf8();
+            const QByteArray counter = (actions[i] + QStringLiteral("Calls")).toUtf8();
+            button->forceActiveFocus(Qt::TabFocusReason);
+            QVERIFY(button->hasActiveFocus());
+            QTest::keyClick(&window, Qt::Key_Space);
+            QCOMPARE(controller->property(counter.constData()).toInt(), 1);
+            QTest::keyClick(&window, Qt::Key_Tab);
+            QVERIFY(window.activeFocusItem() != button);
+            QVERIFY(window.activeFocusItem());
+            QVERIFY(window.activeFocusItem()->isVisible());
+            controller->setProperty(capability.constData(), false);
+            QVERIFY(!button->isEnabled());
+            QVERIFY(accessible->state().disabled);
+            auto *accessibleActions = accessible->actionInterface();
+            QVERIFY(accessibleActions);
+            accessibleActions->doAction(QAccessibleActionInterface::pressAction());
+            QCOMPARE(controller->property(counter.constData()).toInt(), 1);
+            const QPoint position = button->mapToScene(QPointF(button->width() / 2, button->height() / 2)).toPoint();
+            QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, position);
+            QCOMPARE(controller->property(counter.constData()).toInt(), 1);
+            controller->setProperty(capability.constData(), true);
+            QVERIFY(button->isEnabled());
+            QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, position);
+            QCOMPARE(controller->property(counter.constData()).toInt(), 2);
+            accessibleActions->doAction(QAccessibleActionInterface::pressAction());
+            QCOMPARE(controller->property(counter.constData()).toInt(), 3);
+        }
+        controller->setProperty("isMaximized", true);
+        auto *maximize = buttons->findChild<QQuickItem *>(style + QStringLiteral("-maximize"));
+        QCOMPARE(QAccessible::queryAccessibleInterface(maximize)->text(QAccessible::Name), QStringLiteral("Restore window"));
+        controller->setProperty("hasActiveWindow", false);
+        for (const QString &action : actions) {
+            QVERIFY(!buttons->findChild<QQuickItem *>(style + QLatin1Char('-') + action)->isEnabled());
+        }
+    }
+
     void titleScrollIsPaced()
     {
         QQmlEngine engine;

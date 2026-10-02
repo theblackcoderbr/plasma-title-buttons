@@ -25,6 +25,9 @@ public:
         bool hidden = false;
         bool minimized = false;
         bool skipTaskbar = false;
+        bool canClose = true;
+        bool canMinimize = true;
+        bool canMaximize = true;
     };
     QList<Window> windows;
     int activated = -1;
@@ -51,6 +54,9 @@ public:
         case IsHidden: return window.hidden;
         case IsMinimized: return window.minimized;
         case SkipTaskbar: return window.skipTaskbar;
+        case IsClosable: return window.canClose;
+        case IsMinimizable: return window.canMinimize;
+        case IsMaximizable: return window.canMaximize;
         default: return {};
         }
     }
@@ -64,6 +70,32 @@ class WindowControllerTest : public QObject
 {
     Q_OBJECT
 private Q_SLOTS:
+    void actionsRespectCapabilities()
+    {
+        FakeWindows source;
+        source.windows = {{QStringLiteral("focused"), {}, {}, QRect(), false, true, true}};
+        WindowController controller;
+        auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);
+        QVERIFY(filter);
+        filter->setSourceModel(&source);
+        for (int mask = 0; mask < 8; ++mask) {
+            source.windows[0].canClose = mask & 1;
+            source.windows[0].canMinimize = mask & 2;
+            source.windows[0].canMaximize = mask & 4;
+            Q_EMIT source.dataChanged(source.index(0), source.index(0));
+            QCOMPARE(controller.canClose(), bool(mask & 1));
+            QCOMPARE(controller.canMinimize(), bool(mask & 2));
+            QCOMPARE(controller.canMaximize(), bool(mask & 4));
+            source.closed = source.minimized = source.maximized = -1;
+            controller.close();
+            controller.minimize();
+            controller.toggleMaximize();
+            QCOMPARE(source.closed, mask & 1 ? 0 : -1);
+            QCOMPARE(source.minimized, mask & 2 ? 0 : -1);
+            QCOMPARE(source.maximized, mask & 4 ? 0 : -1);
+        }
+    }
+
     void cycleSingleWindow_data()
     {
         QTest::addColumn<int>("direction");

@@ -21,6 +21,7 @@ An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**,
     - **Mouse wheel scroll or Middle click**: Cycles through open windows, including minimized ones, on the same screen, current virtual desktop, and current activity. Scrolling accumulates small touchpad movements and limits switching to once every 300 ms; middle click remains immediate. Attention requests do not let windows from other contexts enter the cycle.
 - **Conditional Window Control Buttons**:
   - Close, Minimize, and Maximize/Restore buttons appear **only when the active window is maximized**, saving panel space during unmaximized work.
+  - Actions unsupported by the window are disabled. All three styles support Tab navigation, Space activation, focus indicators, and translatable accessible names.
 - **Selectable Button Styles**:
   - **System Theme (Default)**: Uses native icons from the active Plasma/KWin window decoration theme (Breeze, etc.).
   - **macOS / Traffic Lights**: Classic circular buttons (red, yellow, green) with symbols revealing on hover.

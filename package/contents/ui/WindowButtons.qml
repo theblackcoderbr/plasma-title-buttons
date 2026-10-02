@@ -80,40 +80,41 @@ RowLayout {
     // ==========================================
     // 1. ESTILO MAC-OS (Círculos Coloridos)
     // ==========================================
-    component MacButton: Rectangle {
+    component MacButton: SystemButton {
         id: macBtn
         property color normalColor: "#FF5F56"
         property color hoverBorderColor: "#E0443E"
         property string symbolText: ""
-        signal clicked()
-
-        width: root.macDiameter
-        height: root.macDiameter
-        radius: root.macDiameter / 2
-        color: normalColor
-        border.color: mouseArea.containsMouse ? hoverBorderColor : Qt.darker(normalColor, 1.15)
-        border.width: 1
-
-        scale: mouseArea.pressed ? 0.92 : (mouseArea.containsMouse ? 1.08 : 1.0)
+        implicitWidth: root.macDiameter
+        implicitHeight: root.macDiameter
+        padding: 0
+        leftPadding: 0
+        rightPadding: 0
+        topPadding: 0
+        bottomPadding: 0
+        opacity: enabled ? 1 : 0.4
+        background: Rectangle {
+            radius: width / 2
+            color: macBtn.normalColor
+            border.color: macBtn.visualFocus ? Kirigami.Theme.highlightColor
+                : (macBtn.hovered ? macBtn.hoverBorderColor : Qt.darker(macBtn.normalColor, 1.15))
+            border.width: macBtn.visualFocus ? 2 : 1
+        }
+        scale: down ? 0.92 : (hovered ? 1.08 : 1.0)
         Behavior on scale { NumberAnimation { duration: 120 } }
 
-        Text {
-            anchors.centerIn: parent
+        contentItem: Text {
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
             text: macBtn.symbolText
             font.pixelSize: root.macSymbolSize
             font.bold: true
             color: "#4A0000"
-            opacity: mouseArea.containsMouse ? 0.85 : 0.0
+            opacity: macBtn.hovered || macBtn.visualFocus ? 0.85 : 0.0
+            Accessible.ignored: true
             Behavior on opacity { NumberAnimation { duration: 100 } }
         }
 
-        MouseArea {
-            id: mouseArea
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: macBtn.clicked()
-        }
     }
 
     // ==========================================
@@ -127,6 +128,13 @@ RowLayout {
         implicitWidth: root.buttonWidth
         implicitHeight: root.buttonHeight
         display: PlasmaComponents3.AbstractButton.IconOnly
+        // O controle nativo fornece Tab, Espaço e a ação de acessibilidade.
+        focusPolicy: Qt.StrongFocus
+        Accessible.role: Accessible.Button
+        Accessible.name: text
+        PlasmaComponents3.ToolTip.text: text
+        PlasmaComponents3.ToolTip.visible: hovered || visualFocus
+        PlasmaComponents3.ToolTip.delay: Kirigami.Units.toolTipDelay
 
         padding: 0
         leftPadding: 2
@@ -138,69 +146,80 @@ RowLayout {
         icon.width: root.iconSize
         icon.height: root.iconSize
 
-        onClicked: clickedAction()
+        // A ação acessível do Plasma emite clicked() diretamente, inclusive se
+        // solicitada por código. Valida o estado antes de encaminhar a operação.
+        onClicked: {
+            if (enabled && visible) {
+                clickedAction();
+            }
+        }
     }
 
     // ==========================================
     // 3. ESTILO MINIMALISTA (Geométrico Clean)
     // ==========================================
-    component MinimalButton: Rectangle {
+    component MinimalButton: SystemButton {
         id: minBtn
-        property string iconName: ""
-        signal clicked()
-
-        implicitWidth: root.buttonWidth
-        implicitHeight: root.buttonHeight
-        radius: 4
-        color: minMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
-        Behavior on color { ColorAnimation { duration: 150 } }
-
-        Kirigami.Icon {
-            anchors.centerIn: parent
-            width: root.iconSize
-            height: root.iconSize
-            source: minBtn.iconName
-            opacity: minMouse.containsMouse ? 1.0 : 0.75
-            Behavior on opacity { NumberAnimation { duration: 120 } }
+        opacity: enabled ? 1 : 0.4
+        background: Rectangle {
+            radius: 4
+            color: minBtn.down ? Qt.rgba(1, 1, 1, 0.25)
+                : (minBtn.hovered ? Qt.rgba(1, 1, 1, 0.15) : "transparent")
+            border.color: Kirigami.Theme.highlightColor
+            border.width: minBtn.visualFocus ? 2 : 0
+            Behavior on color { ColorAnimation { duration: 150 } }
         }
 
-        MouseArea {
-            id: minMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: minBtn.clicked()
+        contentItem: Item {
+            Kirigami.Icon {
+                anchors.centerIn: parent
+                width: root.iconSize
+                height: root.iconSize
+                source: minBtn.iconName
+                opacity: minBtn.hovered || minBtn.visualFocus ? 1.0 : 0.75
+                Accessible.ignored: true
+                Behavior on opacity { NumberAnimation { duration: 120 } }
+            }
         }
     }
 
     // LAYOUT SEGUNDO O ESTILO SELECIONADO:
 
     // ------------------------------------------
-    // Renderizador: Estilo macOS (Fechar, Minimizar, Maximizar)
+    // Renderizador: Estilo macOS (Minimizar, Maximizar/Restaurar, Fechar)
     // ------------------------------------------
     Row {
         spacing: root.spacing
         visible: root.buttonStyle === "macos"
 
         MacButton {
-            normalColor: "#FF5F56"
-            hoverBorderColor: "#E0443E"
-            symbolText: "×"
-            onClicked: root.controller.close()
-        }
-
-        MacButton {
+            objectName: "macos-minimize"
+            text: i18n("Minimize window")
+            enabled: root.controller.hasActiveWindow && root.controller.canMinimize
             normalColor: "#FFBD2E"
             hoverBorderColor: "#DEA123"
             symbolText: "−"
-            onClicked: root.controller.minimize()
+            onClickedAction: root.controller.minimize()
         }
 
         MacButton {
+            objectName: "macos-maximize"
+            text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
+            enabled: root.controller.hasActiveWindow && root.controller.canMaximize
             normalColor: "#27C93F"
             hoverBorderColor: "#1AAB29"
             symbolText: "+"
-            onClicked: root.controller.toggleMaximize()
+            onClickedAction: root.controller.toggleMaximize()
+        }
+
+        MacButton {
+            objectName: "macos-close"
+            text: i18n("Close window")
+            enabled: root.controller.hasActiveWindow && root.controller.canClose
+            normalColor: "#FF5F56"
+            hoverBorderColor: "#E0443E"
+            symbolText: "×"
+            onClickedAction: root.controller.close()
         }
     }
 
@@ -212,16 +231,25 @@ RowLayout {
         visible: root.buttonStyle === "system"
 
         SystemButton {
+            objectName: "system-minimize"
+            text: i18n("Minimize window")
+            enabled: root.controller.hasActiveWindow && root.controller.canMinimize
             iconName: "window-minimize"
             onClickedAction: root.controller.minimize()
         }
 
         SystemButton {
+            objectName: "system-maximize"
+            text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
+            enabled: root.controller.hasActiveWindow && root.controller.canMaximize
             iconName: root.controller.isMaximized ? "window-restore" : "window-maximize"
             onClickedAction: root.controller.toggleMaximize()
         }
 
         SystemButton {
+            objectName: "system-close"
+            text: i18n("Close window")
+            enabled: root.controller.hasActiveWindow && root.controller.canClose
             iconName: "window-close"
             onClickedAction: root.controller.close()
         }
@@ -235,18 +263,27 @@ RowLayout {
         visible: root.buttonStyle === "minimal"
 
         MinimalButton {
+            objectName: "minimal-minimize"
+            text: i18n("Minimize window")
+            enabled: root.controller.hasActiveWindow && root.controller.canMinimize
             iconName: "window-minimize"
-            onClicked: root.controller.minimize()
+            onClickedAction: root.controller.minimize()
         }
 
         MinimalButton {
+            objectName: "minimal-maximize"
+            text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
+            enabled: root.controller.hasActiveWindow && root.controller.canMaximize
             iconName: root.controller.isMaximized ? "window-restore" : "window-maximize"
-            onClicked: root.controller.toggleMaximize()
+            onClickedAction: root.controller.toggleMaximize()
         }
 
         MinimalButton {
+            objectName: "minimal-close"
+            text: i18n("Close window")
+            enabled: root.controller.hasActiveWindow && root.controller.canClose
             iconName: "window-close"
-            onClicked: root.controller.close()
+            onClickedAction: root.controller.close()
         }
     }
 }
