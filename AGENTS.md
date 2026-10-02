@@ -48,7 +48,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
     - `toggleMaximize()`
     - `minimize()`
     - `close()`
-    - `cycleWindow(int direction)`: Alterna o foco para a próxima ou anterior janela ativa na mesma tela/desktop (ciclo circular).
+    - `cycleWindow(int direction)`: Alterna o foco entre as janelas elegíveis na mesma tela/desktop/atividade (ciclo circular). Uma única janela sem foco deve ser ativada; se já estiver ativa, não executa ação. Sem janelas ou com direção zero, não executa ação.
     - `setBorderlessMaximizedWindows(bool enabled)`: Ajusta a opção no arquivo `kwinrc` (`[Windows] BorderlessMaximizedWindows`) e solicita ao KWin a recarga via DBus (`qdbus6 org.kde.KWin /KWin reconfigure`).
   - **Preferência global do KWin**: `KWinSettings` é a fonte reativa de `BorderlessMaximizedWindows`. A inicialização apenas lê o estado; nunca aplica valores salvos por instância. A interface altera essa preferência explicitamente, com efeito imediato em todos os monitores, e acompanha alterações externas em `kwinrc`. Falhas de gravação e de recarga via D-Bus devem ser exibidas, sem reverter alterações concorrentes de outras instâncias.
 
@@ -67,6 +67,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
      - A posição é resolvida pela mesma regra no applet e na configuração (`ButtonPlacement.qml`). Se o título ocupar a única extremidade livre, os botões ficam ocultos e a configuração explica como resolver o conflito. Não se move o título nem se sobrescreve a preferência de lado dos botões automaticamente; quando houver uma combinação válida, a exibição pode retornar conforme a configuração.
      - Quando o título estiver ao centro, os botões podem ficar à esquerda ou à direita, com contrapesos de largura para garantir centralização matemática perfeita.
      - **Centralização Absoluta no Painel (`centerInPanel`)**: Opção extra com checkbox quando o título está ao centro. Garante que o título permaneça matematicamente centralizado no comprimento total do painel, calculando a posição global do widget e compensando elementos assimétricos (ex: bandeja do sistema à esquerda).
+       - `PanelCenteredTitle.qml` usa a largura efetivamente exibida, fora do `RowLayout`, e reserva espaço apenas para botões visíveis. Quando o centro não cabe na área disponível, limita a posição à área livre do widget para evitar sobreposição.
      - **Detecção de Extremidades do Painel**:
        - Detecta se o applet está encostado na ponta esquerda (`isAtLeftEdge`) ou direita (`isAtRightEdge`) do painel.
        - `PanelEdges.qml` identifica os vizinhos visíveis por `isAppletContainer` no painel Plasma 6.7, sem tolerância fixa em pixels. Margens auxiliares não contam como widgets. Layout desconhecido, sobreposto, sem tamanho ou em edição invalida as extremidades (`edgesKnown = false`) sem apagar preferências. A desmarcação por dois lados ocupados só ocorre após estabilização.

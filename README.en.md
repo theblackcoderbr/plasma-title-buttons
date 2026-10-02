@@ -29,6 +29,7 @@ An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**,
   - **Automatic Expansion**: Dynamically occupies all available panel space without fixed sizing.
   - **Title Positioning**: Place the title on the **Left**, **Center**, or **Right**.
   - **Absolute Panel Centering**: Keeps the title mathematically centered relative to the entire panel width, compensating for asymmetrical elements (such as system tray, clock, or application launchers).
+    - The calculation uses the displayed width, including when text is elided. If the panel center cannot fit within the widget's free space, the title stays within the available area to avoid overlapping the buttons.
   - **Smart Panel Edge Detection**:
     - Detects neighboring panel applets, distinguishing margins from small widgets. While the panel loads or is being edited, it waits for a valid layout without clearing preferences.
     - If other elements occupy one panel edge, buttons can only be placed on the free edge.

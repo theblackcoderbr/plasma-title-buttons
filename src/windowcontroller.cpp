@@ -238,7 +238,7 @@ void WindowController::cycleWindow(int direction)
     }
 
     const QList<int> rows = validWindowRows();
-    if (rows.size() <= 1) {
+    if (rows.isEmpty()) {
         return;
     }
 
@@ -249,6 +249,11 @@ void WindowController::cycleWindow(int direction)
             currentPos = i;
             break;
         }
+    }
+
+    // Uma única janela sem foco ainda precisa ser ativada, por exemplo em outro monitor.
+    if (rows.size() == 1 && currentPos != -1) {
+        return;
     }
 
     int nextPos = 0;

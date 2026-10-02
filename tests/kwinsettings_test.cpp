@@ -14,6 +14,8 @@
 #include <QQmlComponent>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QQuickItem>
+#include <QQuickWindow>
 #include <QSaveFile>
 #include <QSignalSpy>
 #include <QTemporaryDir>
@@ -59,6 +61,67 @@ class KWinSettingsTest : public QObject
     }
 
 private Q_SLOTS:
+    void absoluteTitleUsesDisplayedWidth()
+    {
+        QQmlEngine engine;
+        QQuickWindow window;
+        window.resize(800, 32);
+        QQmlComponent component(&engine);
+        component.setData(R"(
+import QtQuick
+Item {
+    width: 800; height: 32
+    QtObject {
+        id: titleController
+        objectName: "controller"
+        property string windowTitle: "A very long title ".repeat(100)
+        property bool hasActiveWindow: true
+        property var windowIcon: "application-x-executable"
+    }
+    PanelCenteredTitle {
+        objectName: "title"
+        controller: titleController
+        panelLength: 1000
+        panelOffset: 100
+        showIcon: false
+    }
+}
+)", QUrl::fromLocalFile(QStringLiteral(CONFIG_QML_PATH)));
+        QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+        QScopedPointer<QObject> fixture(component.create());
+        QVERIFY2(fixture, qPrintable(component.errorString()));
+        qobject_cast<QQuickItem *>(fixture.data())->setParentItem(window.contentItem());
+        window.show(); // Permite que os layouts internos atualizem a largura implícita.
+        auto *title = fixture->findChild<QObject *>(QStringLiteral("title"));
+        auto *controller = fixture->findChild<QObject *>(QStringLiteral("controller"));
+        QVERIFY(title && controller);
+        QTRY_COMPARE(title->property("width").toDouble(), 520.0);
+        QVERIFY(title->property("implicitWidth").toDouble() > 800);
+        QCOMPARE(title->property("x").toDouble(), 140.0);
+
+        // Nenhum espaçamento fantasma: o centro permanece exato com os botões
+        // à esquerda, à direita ou ocultos, desde que exista espaço suficiente.
+        for (const bool left : {true, false}) {
+            title->setProperty("leftInset", left ? 106 : 0);
+            title->setProperty("rightInset", left ? 0 : 106);
+            QCOMPARE(title->property("x").toDouble() + title->property("width").toDouble() / 2, 400.0);
+        }
+        title->setProperty("showIcon", true);
+        QTRY_COMPARE(title->property("width").toDouble(), 520.0);
+        controller->setProperty("windowTitle", QStringLiteral("Short title"));
+        QTRY_VERIFY(title->property("width").toDouble() < 520);
+        QCOMPARE(title->property("x").toDouble() + title->property("width").toDouble() / 2, 400.0);
+        controller->setProperty("windowTitle", QString(2000, QLatin1Char('W')));
+        QTRY_COMPARE(title->property("width").toDouble(), 520.0);
+        title->setProperty("panelOffset", 450);
+        title->setProperty("leftInset", 106);
+        QCOMPARE(title->property("x").toDouble(), 106.0);
+        title->setProperty("panelOffset", -400);
+        QCOMPARE(title->property("x").toDouble() + title->property("width").toDouble(), 694.0);
+        fixture->setProperty("width", 150);
+        QTRY_COMPARE(title->property("width").toDouble(), 0.0);
+        QVERIFY(title->property("x").toDouble() <= 150);
+    }
     void panelEdgesTrackRealNeighbors()
     {
         QQmlEngine engine;

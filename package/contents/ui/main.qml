@@ -165,29 +165,8 @@ PlasmoidItem {
             Item {
                 id: spacerLeft
 
-                readonly property bool useAbsoluteCenter: root.titleOnCenter && root.centerInPanel
-
-                readonly property real absoluteWidth: {
-                    if (!useAbsoluteCenter) return -1;
-                    let panelLen = container.totalPanelLength;
-                    if (panelLen <= 0) return -1;
-
-                    let panelCenter = panelLen / 2;
-                    let localCenter = panelCenter - container.globalPos;
-                    let titleW = (titleCenter.implicitWidth > 0) ? titleCenter.implicitWidth : titleCenter.width;
-                    let titleLeft = localCenter - (titleW / 2);
-
-                    let leftOccupied = (buttonsLeft.visible && root.buttonsOnLeft) ? (buttonsLeft.width + contentLayout.spacing) : 0;
-                    return Math.max(0, titleLeft - leftOccupied - contentLayout.spacing);
-                }
-
-                Layout.fillWidth: !useAbsoluteCenter
-                Layout.preferredWidth: useAbsoluteCenter ? absoluteWidth : -1
-                Layout.minimumWidth: useAbsoluteCenter ? absoluteWidth : 0
-                Layout.maximumWidth: useAbsoluteCenter ? absoluteWidth : -1
+                Layout.fillWidth: true
                 visible: root.titleOnCenter || (!root.titleOnLeft && !root.buttonsOnLeft) || (root.titleOnLeft && root.buttonsOnRight)
-
-                Behavior on Layout.preferredWidth { NumberAnimation { duration: 150 } }
             }
 
             // =============================================================
@@ -200,8 +179,8 @@ PlasmoidItem {
                 showIcon: Plasmoid.configuration.showIcon
                 showTitle: Plasmoid.configuration.showTitle
                 alignment: "center"
-                visible: root.titleOnCenter
-                Layout.alignment: Qt.AlignVCenter | (spacerLeft.useAbsoluteCenter ? Qt.AlignLeft : Qt.AlignHCenter)
+                visible: root.titleOnCenter && !root.centerInPanel
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 Layout.fillHeight: true
                 Layout.maximumWidth: parent.width * 0.65
             }
@@ -255,6 +234,18 @@ PlasmoidItem {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 Layout.fillHeight: true
             }
+        }
+
+        PanelCenteredTitle {
+            controller: windowController
+            panelThickness: root.panelThickness
+            showIcon: Plasmoid.configuration.showIcon
+            showTitle: Plasmoid.configuration.showTitle
+            visible: root.titleOnCenter && root.centerInPanel
+            panelLength: container.totalPanelLength
+            panelOffset: container.globalPos
+            leftInset: buttonsLeft.visible ? buttonsLeft.x + buttonsLeft.width + contentLayout.spacing : 0
+            rightInset: buttonsRight.visible ? container.width - buttonsRight.x + contentLayout.spacing : 0
         }
     }
 }

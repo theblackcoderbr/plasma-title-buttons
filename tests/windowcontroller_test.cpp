@@ -60,6 +60,49 @@ class WindowControllerTest : public QObject
 {
     Q_OBJECT
 private Q_SLOTS:
+    void cycleSingleWindow_data()
+    {
+        QTest::addColumn<int>("direction");
+        QTest::addColumn<bool>("active");
+        QTest::addColumn<bool>("available");
+        for (int direction : {-1, 0, 1}) {
+            for (bool active : {false, true}) {
+                for (bool available : {false, true}) {
+                    const QByteArray name = QByteArray::number(direction) + '-' + QByteArray::number(active)
+                        + '-' + QByteArray::number(available);
+                    QTest::newRow(name.constData()) << direction << active << available;
+                }
+            }
+        }
+    }
+
+    void cycleSingleWindow()
+    {
+        QFETCH(int, direction);
+        QFETCH(bool, active);
+        QFETCH(bool, available);
+        FakeWindows source;
+        const QRect screen(0, 0, 1920, 1080);
+        // O foco em outro monitor não deve impedir a ativação da janela local.
+        source.windows = {
+            {QStringLiteral("other screen"), {QStringLiteral("A")}, {1}, QRect(1920, 0, 1920, 1080), false, !active},
+        };
+        if (available) {
+            source.windows.append({QStringLiteral("local"), {QStringLiteral("A")}, {1}, screen, false, active});
+        }
+        WindowController controller;
+        auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);
+        QVERIFY(filter);
+        filter->setFilterByCurrentVirtualDesktop(false);
+        filter->setVirtualDesktop(1);
+        filter->setActivity(QStringLiteral("A"));
+        controller.setScreenGeometry(screen);
+        filter->setSourceModel(&source);
+        QCOMPARE(controller.windowCount(), available ? 1 : 0);
+        controller.cycleWindow(direction);
+        QCOMPARE(source.activated, available && !active && direction != 0 ? 1 : -1);
+    }
+
     void followsActivityNotifications()
     {
         WindowController controller;

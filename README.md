@@ -29,6 +29,7 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - **Expansão Automática**: Ocupa dinamicamente todo o espaço disponível no painel sem comprimentos fixos arbitrários.
   - **Posicionamento do Título**: Escolha entre **Esquerda**, **Centro** ou **Direita**.
   - **Centralização Absoluta no Painel**: Opção que mantém o título matematicamente centralizado na largura total do painel, compensando assimetrias causadas por outros elementos (como bandeja do sistema, relógio ou lançadores de aplicativos).
+    - O cálculo usa a largura exibida, mesmo com reticências. Se o centro do painel não couber no espaço livre do widget, o título fica limitado à área disponível para não sobrepor os botões.
   - **Detecção Inteligente de Bordas do Painel**:
     - Detecta os applets vizinhos no painel, distinguindo margens de widgets pequenos. Durante carga ou edição do painel, aguarda um layout válido sem apagar preferências.
     - Se uma das pontas do painel estiver ocupada por outros elementos, a configuração restringe os botões à extremidade livre.
