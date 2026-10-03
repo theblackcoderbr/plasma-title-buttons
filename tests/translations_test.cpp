@@ -111,8 +111,8 @@ private Q_SLOTS:
         }
         QVERIFY(displayed.contains(portuguese ? QStringLiteral("Exibir o ícone do aplicativo") : QStringLiteral("Show application icon")));
         QVERIFY(displayed.contains(portuguese ? QStringLiteral("Exibir o título da janela ativa") : QStringLiteral("Show active window title")));
-        QVERIFY(displayed.contains(portuguese ? QStringLiteral("Configuração global para todos os monitores. As alterações são aplicadas imediatamente.")
-                                             : QStringLiteral("Global setting for all monitors. Changes apply immediately.")));
+        QVERIFY(displayed.contains(portuguese ? QStringLiteral("A configuração anterior do KWin é restaurada quando nenhum widget precisa ocultar as barras de título.")
+                                             : QStringLiteral("The previous KWin setting is restored when no widget needs to hide title bars.")));
 
         QQmlComponent categoriesComponent(&engine, QUrl::fromLocalFile(QStringLiteral(PACKAGE_PATH "/contents/config/config.qml")));
         QScopedPointer<QObject> categories(categoriesComponent.create());

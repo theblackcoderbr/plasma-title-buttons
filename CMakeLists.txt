@@ -31,10 +31,7 @@ include(FeatureSummary)
 
 find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS
     Core
-    Gui
     Qml
-    Quick
-    Svg
     DBus
 )
 
@@ -43,11 +40,7 @@ if(POLICY QTP0001)
 endif()
 
 find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
-    CoreAddons
     Config
-    ConfigWidgets
-    I18n
-    WindowSystem
 )
 
 find_package(Plasma REQUIRED)

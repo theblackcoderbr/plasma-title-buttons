@@ -19,6 +19,9 @@ Kirigami.ScrollablePage {
     property alias cfg_showButtons: showButtonsCheckBox.checked
     property var cfg_showButtonsDefault
 
+    property alias cfg_hideOriginalTitlebar: borderlessCheckBox.checked
+    property var cfg_hideOriginalTitlebarDefault
+
     property string cfg_titlePosition: "left"
     property var cfg_titlePositionDefault
 
@@ -34,7 +37,7 @@ Kirigami.ScrollablePage {
     property string cfg_buttonsSize: "medium"
     property var cfg_buttonsSizeDefault
 
-    // Estado global: não participa do salvamento/restauração das preferências locais.
+    // Observa o KWin e os erros compartilhados; não mantém uma concessão ativa.
     WTButtons.KWinSettings {
         id: kwinSettings
     }
@@ -272,24 +275,33 @@ Kirigami.ScrollablePage {
             objectName: "borderlessCheckBox"
             Kirigami.FormData.label: i18n("Maximized Windows:")
             text: i18n("Hide original window title bar when maximized (KWin)")
-            checked: kwinSettings.borderlessMaximized
-            enabled: !kwinSettings.busy
-            onClicked: {
-                kwinSettings.setBorderlessMaximized(checked);
-                // Restaura o binding mesmo se a gravação falhar sem mudar o valor global.
-                checked = Qt.binding(() => kwinSettings.borderlessMaximized);
-            }
+            checked: false
         }
 
         Kirigami.ContextualHelpButton {
             Kirigami.FormData.label: ""
-            toolTipText: i18n("This KWin setting applies to all monitors and widget instances. Changes take effect immediately and are not undone by Cancel.")
+            toolTipText: i18n("After applying, title bars are hidden on all monitors while at least one widget has this option and its control buttons enabled. Disabling the buttons or removing the last participating widget restores the previous KWin setting. External changes are preserved.")
         }
 
         QQC2.Label {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: i18n("Global setting for all monitors. Changes apply immediately.")
+            text: i18n("The previous KWin setting is restored when no widget needs to hide title bars.")
+        }
+
+        QQC2.Button {
+            objectName: "restoreTitlebarsButton"
+            visible: kwinSettings.borderlessMaximized && !root.cfg_hideOriginalTitlebar
+            enabled: !kwinSettings.busy
+            text: i18n("Restore title bars now")
+            onClicked: kwinSettings.setBorderlessMaximized(false)
+        }
+
+        QQC2.Label {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            visible: kwinSettings.borderlessMaximized && !root.cfg_hideOriginalTitlebar
+            text: i18n("Earlier versions did not save the previous KWin setting. Use Restore to explicitly show title bars on all monitors; this action takes effect immediately and is not undone by Cancel.")
         }
 
         Kirigami.InlineMessage {

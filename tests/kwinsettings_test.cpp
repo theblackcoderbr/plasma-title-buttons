@@ -23,6 +23,7 @@
 #include <QTest>
 #include <QWheelEvent>
 #include <QAccessible>
+#include <QLockFile>
 
 class FakeKWin : public QObject, protected QDBusContext
 {
@@ -686,6 +687,7 @@ Item {
     }
     void initTestCase()
     {
+        qmlRegisterType<KWinSettings>("Test.WTButtons", 1, 0, "KWinSettings");
         auto bus = QDBusConnection::sessionBus();
         QVERIFY(bus.registerService(QStringLiteral("org.kde.KWin")));
         QVERIFY(bus.registerObject(QStringLiteral("/KWin"), &m_kwin, QDBusConnection::ExportAllSlots));
@@ -710,6 +712,195 @@ Item {
         QTRY_VERIFY(empty.borderlessMaximized());
         QCOMPARE(readConfig(), original);
         QCOMPARE(m_kwin.calls, 0);
+    }
+    void managedLifetimeRestoresOriginal_data()
+    {
+        QTest::addColumn<QByteArray>("original");
+        QTest::newRow("absent") << QByteArray("[Windows]\nOtherSetting=keep\n");
+        QTest::newRow("false") << QByteArray("[Windows]\nBorderlessMaximizedWindows=false\nOtherSetting=keep\n");
+        QTest::newRow("true") << QByteArray("[Windows]\nBorderlessMaximizedWindows=true\nOtherSetting=keep\n");
+    }
+    void managedLifetimeRestoresOriginal()
+    {
+        QFETCH(QByteArray, original);
+        writeConfig(original);
+        {
+            KWinSettings first;
+            first.setManaged(true);
+            QVERIFY(first.borderlessMaximized());
+            QTRY_VERIFY(!first.busy());
+            KWinSettings observer;
+            {
+                KWinSettings second;
+                second.setManaged(true);
+                first.setManaged(false);
+                QVERIFY(first.borderlessMaximized());
+            }
+            QTRY_COMPARE(observer.borderlessMaximized(), original.contains("=true"));
+        }
+        QCOMPARE(readConfig(), original);
+        if (!original.contains("=true")) {
+            QTRY_COMPARE(m_kwin.calls, 2);
+        } else {
+            QCOMPARE(m_kwin.calls, 0);
+        }
+    }
+    void managedRemovalDuringReload()
+    {
+        writeConfig("[Windows]\nBorderlessMaximizedWindows=false\n");
+        auto *settings = new KWinSettings;
+        settings->setManaged(true);
+        QVERIFY(settings->busy());
+        delete settings;
+        QVERIFY(readConfig().contains("BorderlessMaximizedWindows=false"));
+        QTRY_COMPARE(m_kwin.calls, 2);
+    }
+    void managedExternalChangesArePreserved()
+    {
+        writeConfig("[Windows]\nBorderlessMaximizedWindows=false\n");
+        KWinSettings settings;
+        settings.setManaged(true);
+        QTRY_VERIFY(!settings.busy());
+        const auto changeExternally = [](bool enabled) {
+            KConfig config(QStringLiteral("kwinrc"), KConfig::NoGlobals);
+            KConfigGroup windows(&config, QStringLiteral("Windows"));
+            windows.writeEntry("BorderlessMaximizedWindows", enabled);
+            windows.writeEntry("OtherSetting", "external");
+            return config.sync();
+        };
+        QVERIFY(changeExternally(false));
+        QTRY_VERIFY(!settings.borderlessMaximized());
+        QVERIFY(!readConfig().contains("WindowTitleAndButtonsOwnership"));
+        QVERIFY(changeExternally(true));
+        QTRY_VERIFY(settings.borderlessMaximized());
+        settings.setManaged(false);
+        QVERIFY(settings.borderlessMaximized());
+        QVERIFY(readConfig().contains("OtherSetting=external"));
+        QVERIFY(!readConfig().contains("WindowTitleAndButtonsOwnership"));
+        QCOMPARE(m_kwin.calls, 1);
+    }
+    void managedPackageRemovalRestores()
+    {
+        QTemporaryDir package;
+        const QString metadata = package.filePath(QStringLiteral("metadata.json"));
+        QFile file(metadata);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.close();
+        KWinSettings settings;
+        settings.setPackageFile(QUrl::fromLocalFile(metadata));
+        settings.setManaged(true);
+        QTRY_VERIFY(!settings.busy());
+        QVERIFY(QFile::remove(metadata));
+        QTRY_VERIFY(!settings.managed());
+        QTRY_VERIFY(!settings.borderlessMaximized());
+        QTRY_COMPARE(m_kwin.calls, 2);
+    }
+    void managedRecoveryRestoresRecordedChangeOnly()
+    {
+        writeConfig("[Windows]\nBorderlessMaximizedWindows=true\nOtherSetting=keep\n"
+                    "\n[WindowTitleAndButtonsOwnership]\nActive=true\nHadEntry=false\n");
+        KWinSettings recovered;
+        QVERIFY(!recovered.borderlessMaximized());
+        QVERIFY(!readConfig().contains("BorderlessMaximizedWindows"));
+        QVERIFY(readConfig().contains("OtherSetting=keep"));
+        QTRY_COMPARE(m_kwin.calls, 1);
+    }
+    void managedLockPreventsCompetingOwner()
+    {
+        QLockFile lock(qEnvironmentVariable("XDG_CONFIG_HOME") + QStringLiteral("/windowtitleandbuttons-kwin.lock"));
+        QVERIFY(lock.tryLock());
+        KWinSettings settings;
+        settings.setManaged(true);
+        QVERIFY(!settings.managed());
+        QCOMPARE(settings.error(), KWinSettings::WriteError);
+        QVERIFY(!QFile::exists(path()));
+        QCOMPARE(m_kwin.calls, 0);
+        lock.unlock();
+        settings.setManaged(true);
+        QVERIFY(settings.managed());
+        QTRY_VERIFY(!settings.busy());
+        settings.setManaged(false);
+        QTRY_COMPARE(m_kwin.calls, 2);
+    }
+    void managedLockedRestoreRetainsRecoveryRecord()
+    {
+        KWinSettings settings;
+        settings.setManaged(true);
+        QTRY_VERIFY(!settings.busy());
+        QByteArray locked = readConfig();
+        locked.replace("BorderlessMaximizedWindows=true", "BorderlessMaximizedWindows[$i]=true");
+        writeConfig(locked);
+        settings.setManaged(false);
+        QCOMPARE(settings.error(), KWinSettings::WriteError);
+        QVERIFY(readConfig().contains("Active=true"));
+        locked.replace("BorderlessMaximizedWindows[$i]=true", "BorderlessMaximizedWindows=true");
+        writeConfig(locked);
+        KWinSettings recovered;
+        QVERIFY(!recovered.borderlessMaximized());
+        QTRY_COMPARE(m_kwin.calls, 2);
+    }
+    void managedRestoreFailureIsVisibleAndRecoverable()
+    {
+        KWinSettings observer;
+        KWinSettings settings;
+        settings.setManaged(true);
+        QTRY_VERIFY(!settings.busy());
+        m_kwin.fail = true;
+        settings.setManaged(false);
+        QTRY_COMPARE(observer.error(), KWinSettings::ReloadError);
+        QVERIFY(!settings.borderlessMaximized());
+        m_kwin.fail = false;
+        observer.reconfigure();
+        QTRY_VERIFY(!observer.busy());
+        QCOMPARE(observer.error(), KWinSettings::NoError);
+    }
+    void appletTitlebarLifecycleBindings()
+    {
+        QFile source(QFileInfo(QStringLiteral(CONFIG_QML_PATH)).dir().filePath(QStringLiteral("main.qml")));
+        QVERIFY(source.open(QIODevice::ReadOnly));
+        const QByteArray main = source.readAll();
+        const auto start = main.indexOf("    WTButtons.KWinSettings {");
+        const auto end = main.indexOf("    fullRepresentation:", start);
+        QVERIFY(start >= 0 && end > start);
+        QByteArray lifecycle = main.mid(start, end - start);
+        lifecycle.replace("Plasmoid", "fakePlasmoid");
+        QQmlEngine engine;
+        QQmlComponent component(&engine);
+        component.setData(R"(
+            import QtQuick
+            import Test.WTButtons 1.0 as WTButtons
+            Item {
+                property alias config: configuration
+                property alias applet: fakePlasmoid
+                QtObject {
+                    id: configuration
+                    property bool showButtons: true
+                    property bool hideOriginalTitlebar: false
+                }
+                QtObject {
+                    id: fakePlasmoid
+                    property var configuration: config
+                    signal destroyedChanged(bool destroyed)
+                }
+        )" + lifecycle + "}", QUrl::fromLocalFile(source.fileName()));
+        QScopedPointer<QObject> applet(component.create());
+        QVERIFY2(applet, qPrintable(component.errorString()));
+        auto *config = applet->property("config").value<QObject *>();
+        auto *plasma = applet->property("applet").value<QObject *>();
+        KWinSettings observer;
+        QVERIFY(config->setProperty("hideOriginalTitlebar", true));
+        QTRY_VERIFY(observer.borderlessMaximized());
+        QVERIFY(config->setProperty("showButtons", false));
+        QTRY_VERIFY(!observer.borderlessMaximized());
+        QVERIFY(config->setProperty("showButtons", true));
+        QTRY_VERIFY(observer.borderlessMaximized());
+        QVERIFY(QMetaObject::invokeMethod(plasma, "destroyedChanged", Q_ARG(bool, true)));
+        QTRY_VERIFY(!observer.borderlessMaximized());
+        QVERIFY(QMetaObject::invokeMethod(plasma, "destroyedChanged", Q_ARG(bool, false)));
+        QTRY_VERIFY(observer.borderlessMaximized());
+        applet.reset();
+        QTRY_VERIFY(!observer.borderlessMaximized());
+        QTRY_COMPARE(m_kwin.calls, 6);
     }
     void instancesFollowExplicitChanges()
     {
@@ -784,7 +975,6 @@ Item {
     void configurationPageTracksGlobalState()
     {
         writeConfig("[Windows]\nBorderlessMaximizedWindows=true\n");
-        qmlRegisterType<KWinSettings>("Test.WTButtons", 1, 0, "KWinSettings");
         QQmlEngine engine;
         engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
         QFile source(QStringLiteral(CONFIG_QML_PATH));
@@ -800,7 +990,7 @@ Item {
         QVERIFY2(page, qPrintable(component.errorString()));
         auto *checkbox = page->findChild<QObject *>(QStringLiteral("borderlessCheckBox"));
         QVERIFY(checkbox);
-        QVERIFY(checkbox->property("checked").toBool());
+        QVERIFY(!checkbox->property("checked").toBool());
         QCOMPARE(m_kwin.calls, 0);
 
         // A página usa a mesma regra do applet e permite sair de um conflito sem
@@ -845,17 +1035,19 @@ Item {
         writeConfig("[Windows]\nBorderlessMaximizedWindows=false\n");
         QTRY_VERIFY(!checkbox->property("checked").toBool());
         QCOMPARE(m_kwin.calls, 0);
-        // Simula a ação explícita; mudanças de estado programáticas acima não salvam.
+        // A preferência agora participa de Aplicar/Cancelar; editar não muda o KWin.
         checkbox->setProperty("checked", true);
         QVERIFY(QMetaObject::invokeMethod(checkbox, "clicked"));
+        QVERIFY(page->property("cfg_hideOriginalTitlebar").toBool());
+        QCOMPARE(m_kwin.calls, 0);
+        checkbox->setProperty("checked", false);
+        writeConfig("[Windows]\nBorderlessMaximizedWindows=true\n");
+        auto *restore = page->findChild<QObject *>(QStringLiteral("restoreTitlebarsButton"));
+        QVERIFY(restore);
+        QTRY_VERIFY(restore->property("visible").toBool());
+        QVERIFY(QMetaObject::invokeMethod(restore, "clicked"));
         QTRY_COMPARE(m_kwin.calls, 1);
-        QTRY_VERIFY(checkbox->property("enabled").toBool());
-        writeConfig("[Windows]\nBorderlessMaximizedWindows[$i]=false\n");
-        QTRY_VERIFY(!checkbox->property("checked").toBool());
-        checkbox->setProperty("checked", true);
-        QVERIFY(QMetaObject::invokeMethod(checkbox, "clicked"));
-        QVERIFY(!checkbox->property("checked").toBool());
-        QCOMPARE(m_kwin.calls, 1);
+        QTRY_VERIFY(!restore->property("visible").toBool());
     }
 };
 

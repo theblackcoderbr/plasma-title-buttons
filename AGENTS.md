@@ -23,8 +23,9 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
 
 - **Linguagem**: C++20 (backend) e QML / QtQuick (frontend).
 - **Frameworks**:
-  - Qt 6 (Core, Gui, Qml, Quick, Svg, DBus)
-  - KDE Frameworks 6 (ECM, KCoreAddons, KI18n, KConfig, KConfigWidgets, KWindowSystem)
+  - Backend: Qt 6 (Core, Qml, DBus) e KDE Frameworks 6 (KConfig/ConfigCore).
+  - Interface: Qt Quick/Gui, módulos QML do Plasma e Kirigami; dependências transitivas resolvidas pelos pacotes Qt/KDE.
+  - Testes: Qt Test, Qt Quick e KI18n, exigidos explicitamente quando `BUILD_TESTING=ON`.
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
 - **Sistema de Build**: CMake 3.20+ com Extra CMake Modules (ECM) e gerador Ninja.
 - **Traduções**: GNU Gettext para extrair, atualizar, validar e compilar os catálogos.
@@ -52,8 +53,8 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
     - `minimize()`
     - `close()`
     - `cycleWindow(int direction)`: Alterna o foco entre as janelas elegíveis na mesma tela/desktop/atividade (ciclo circular). Uma única janela sem foco deve ser ativada; se já estiver ativa, não executa ação. Sem janelas ou com direção zero, não executa ação.
-    - `setBorderlessMaximizedWindows(bool enabled)`: Encaminha a alteração a `KWinSettings`, que grava `kwinrc` (`[Windows] BorderlessMaximizedWindows`) e solicita a recarga assíncrona via QtDBus (`org.kde.KWin`, `/KWin`, método `reconfigure`).
-  - **Preferência global do KWin**: `KWinSettings` é a fonte reativa de `BorderlessMaximizedWindows`. A inicialização apenas lê o estado; nunca aplica valores salvos por instância. A interface altera essa preferência explicitamente, com efeito imediato em todos os monitores, e acompanha alterações externas em `kwinrc`. Falhas de gravação e de recarga via D-Bus devem ser exibidas, sem reverter alterações concorrentes de outras instâncias.
+    - `setBorderlessMaximizedWindows(bool enabled)`: Solicita/libera o gerenciamento temporário por `KWinSettings`, que grava `kwinrc` (`[Windows] BorderlessMaximizedWindows`) e solicita a recarga assíncrona via QtDBus (`org.kde.KWin`, `/KWin`, método `reconfigure`). A solicitação também é liberada na destruição do controlador.
+  - **Preferência global do KWin**: `KWinSettings` acompanha `BorderlessMaximizedWindows`. A opção por instância `hideOriginalTitlebar` (padrão falso) usa Aplicar/OK; `main.qml` mantém uma solicitação `managed` somente enquanto essa opção e `showButtons` estiverem ativas e o applet não estiver marcado para remoção. A última liberação restaura a origem registrada, incluindo ausência da chave; um valor verdadeiro preexistente é preservado. Observadores na configuração e no controlador não contam como solicitantes. Remoção/desfazer, destruição, saída normal do Shell e exclusão de metadata.json são acompanhados. O registro `WindowTitleAndButtonsOwnership` em `kwinrc` permite recuperar alterações após queda no próximo carregamento; não existe recuperação imediata enquanto o processo estiver encerrado à força. Um QLockFile impede disputa entre processos. Mudanças externas observadas cancelam a restauração. Erros são compartilhados entre instâncias; recargas pendentes não impedem a restauração. A ação explícita de restaurar barras herdadas de versões antigas continua imediata, sem presumir qual era a preferência anterior do usuário.
 
 ### 3.2. Frontend QML (`package/contents/`)
 - Segue estritamente as diretrizes do **Plasma 6 / Kirigami**:
@@ -108,6 +109,8 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
 ---
 
 ## 4. Comandos de Validação e Teste
+
+Após validar alterações, sincronize sempre a instalação local em `~/.local` e reinicie o Plasma Shell para os testes manuais do usuário. Instale somente após compilação bem-sucedida, sem recompilar durante a instalação, e confirme que `plasma-plasmashell.service` voltou a ficar ativo.
 
 Para compilar e testar alterações:
 

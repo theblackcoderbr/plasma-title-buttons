@@ -75,7 +75,19 @@ PlasmoidItem {
         screenGeometry: root.screenGeometry
     }
 
-    // Preferências globais do KWin são alteradas somente pela ação explícita na configuração.
+    WTButtons.KWinSettings {
+        id: titlebarSettings
+        property bool removed: false
+        packageFile: Qt.resolvedUrl("../../metadata.json")
+        managed: Plasmoid.configuration.hideOriginalTitlebar && Plasmoid.configuration.showButtons && !removed
+    }
+
+    Connections {
+        target: Plasmoid
+        function onDestroyedChanged(destroyed) {
+            titlebarSettings.removed = destroyed;
+        }
+    }
 
     fullRepresentation: Item {
         id: container

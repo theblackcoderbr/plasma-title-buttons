@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma-title-buttons\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-02 22:52-0300\n"
+"POT-Creation-Date: 2026-10-02 23:50-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -166,11 +166,19 @@ msgid "Hide original window title bar when maximized (KWin)"
 msgstr ""
 
 #: package/contents/ui/configGeneral.qml
-msgid "This KWin setting applies to all monitors and widget instances. Changes take effect immediately and are not undone by Cancel."
+msgid "After applying, title bars are hidden on all monitors while at least one widget has this option and its control buttons enabled. Disabling the buttons or removing the last participating widget restores the previous KWin setting. External changes are preserved."
 msgstr ""
 
 #: package/contents/ui/configGeneral.qml
-msgid "Global setting for all monitors. Changes apply immediately."
+msgid "The previous KWin setting is restored when no widget needs to hide title bars."
+msgstr ""
+
+#: package/contents/ui/configGeneral.qml
+msgid "Restore title bars now"
+msgstr ""
+
+#: package/contents/ui/configGeneral.qml
+msgid "Earlier versions did not save the previous KWin setting. Use Restore to explicitly show title bars on all monitors; this action takes effect immediately and is not undone by Cancel."
 msgstr ""
 
 #: package/contents/ui/configGeneral.qml

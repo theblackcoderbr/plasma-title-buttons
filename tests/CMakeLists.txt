@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-FileCopyrightText: 2026 Arthur Celestino
 
-find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Test)
+find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Test Quick)
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS I18n)
 find_program(DBUS_RUN_SESSION_EXECUTABLE dbus-run-session REQUIRED)
 
 add_executable(kwinsettings_test

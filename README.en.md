@@ -69,10 +69,11 @@ An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**,
   - Extra CMake Modules (ECM)
   - Ninja (recommended) or Make
   - GNU Gettext (translation catalogs)
-  - Qt 6 (Core, Gui, Qml, Quick, Svg, DBus)
-  - KDE Frameworks 6 (KCoreAddons, KI18n, KConfig, KConfigWidgets, KWindowSystem)
+  - Qt 6 (Core, Qml, and DBus used directly by the backend)
+  - KDE Frameworks 6 (KConfig, ConfigCore component)
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
-- **Validation and preview**: Qt Test, `dbus-run-session`, and the `en_US.UTF-8` locale for tests; Plasma SDK (`plasmoidviewer`) for visual previews. The Nix shell provides these resources.
+- **Interface and transitive dependencies**: Qt Quick/Gui, the Plasma QML modules, and Kirigami remain necessary. `libplasma` also provides the package installation CMake macros; transitive dependencies are resolved by the Qt/KDE packages.
+- **Validation and preview**: Qt Test, Qt Quick, KI18n, `dbus-run-session`, and the `en_US.UTF-8` locale for tests; Plasma SDK (`plasmoidviewer`) for visual previews. The Nix shell provides these resources.
 
 ---
 
@@ -160,7 +161,11 @@ Right-clicking the widget and selecting **Configure Window Title and Buttons...*
 6. **Button Position**: Choose between **Left / Top** or **Right / Bottom**, respecting the title position and free panel edges. Conflicts hide the buttons without overwriting the preferred side.
 7. **Button Style**: System Theme, macOS (Traffic Lights), or Minimalist.
 8. **Button Size**: Small, Medium (Default), or Large.
-9. **Hide original window title bar when maximized (KWin)**: Toggles KWin's global `BorderlessMaximizedWindows` setting. Changes apply immediately to all monitors and widget instances and are not undone by Cancel. Opening settings or adding another instance only reads the existing state. External changes are tracked automatically; save or reload failures are displayed in the interface.
+9. **Hide original window title bar when maximized (KWin)**: A per-instance preference, off by default and saved with **Apply/OK**. While at least one instance has both this option and **Show Control Buttons** enabled, the widget requests `BorderlessMaximizedWindows` for all monitors. Disabling the buttons, clearing this option, removing the last participating instance, or uninstalling its package restores the previous state. Undoing removal reactivates the request. Closing the settings window does not affect active instances.
+
+A KWin preference that already hid title bars before activation is preserved. When upgrading from older versions, clear the option and use **Restore title bars now** to explicitly remove the inherited global setting; this button acts immediately and is not undone by Cancel. Then enable the new option and apply to use automatic restoration.
+
+The widget records its change in `kwinrc`, preserves other settings, and relinquishes restoration when it observes an external preference change. Normal Plasma shutdown restores the state; after an abrupt crash, the record allows recovery the next time the widget loads. There is no separate service to restore settings while Plasma remains forcibly stopped. Separate processes, such as a preview and the Shell, cannot control the preference simultaneously. Write/reload errors appear in settings; failures during removal are also logged.
 
 ---
 

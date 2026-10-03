@@ -126,7 +126,7 @@ bool WindowController::borderlessMaximized() const
 
 void WindowController::setBorderlessMaximized(bool enabled)
 {
-    m_kwinSettings->setBorderlessMaximized(enabled);
+    m_kwinSettings->setManaged(enabled);
 }
 
 QRect WindowController::screenGeometry() const

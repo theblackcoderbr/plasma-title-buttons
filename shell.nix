@@ -19,15 +19,11 @@ pkgs.mkShell {
     # Qt 6
     kdePackages.qtbase
     kdePackages.qtdeclarative
-    kdePackages.qtsvg
 
     # KDE Frameworks 6 & Plasma 6
     kdePackages.libplasma
-    kdePackages.kwindowsystem
-    kdePackages.kcoreaddons
     kdePackages.ki18n
     kdePackages.kconfig
-    kdePackages.kconfigwidgets
     kdePackages.plasma-workspace
 
     # Development and test tools

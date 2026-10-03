@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma-title-buttons 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-02 22:52-0300\n"
+"POT-Creation-Date: 2026-10-02 23:50-0300\n"
 "PO-Revision-Date: 2026-10-02 22:48-0300\n"
 "Last-Translator: Plasma Title & Buttons contributors\n"
 "Language-Team: Brazilian Portuguese\n"
@@ -165,12 +165,20 @@ msgid "Hide original window title bar when maximized (KWin)"
 msgstr "Ocultar a barra de título original da janela quando maximizada (KWin)"
 
 #: package/contents/ui/configGeneral.qml
-msgid "This KWin setting applies to all monitors and widget instances. Changes take effect immediately and are not undone by Cancel."
-msgstr "Esta configuração do KWin se aplica a todos os monitores e instâncias do widget. As alterações têm efeito imediato e não são desfeitas ao clicar em Cancelar."
+msgid "After applying, title bars are hidden on all monitors while at least one widget has this option and its control buttons enabled. Disabling the buttons or removing the last participating widget restores the previous KWin setting. External changes are preserved."
+msgstr "Após aplicar, as barras de título ficam ocultas em todos os monitores enquanto pelo menos um widget tiver esta opção e seus botões de controle ativados. Desativar os botões ou remover o último widget participante restaura a configuração anterior do KWin. Alterações externas são preservadas."
 
 #: package/contents/ui/configGeneral.qml
-msgid "Global setting for all monitors. Changes apply immediately."
-msgstr "Configuração global para todos os monitores. As alterações são aplicadas imediatamente."
+msgid "The previous KWin setting is restored when no widget needs to hide title bars."
+msgstr "A configuração anterior do KWin é restaurada quando nenhum widget precisa ocultar as barras de título."
+
+#: package/contents/ui/configGeneral.qml
+msgid "Restore title bars now"
+msgstr "Restaurar barras de título agora"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Earlier versions did not save the previous KWin setting. Use Restore to explicitly show title bars on all monitors; this action takes effect immediately and is not undone by Cancel."
+msgstr "Versões anteriores não salvaram a configuração anterior do KWin. Use Restaurar para exibir explicitamente as barras de título em todos os monitores; esta ação tem efeito imediato e não é desfeita por Cancelar."
 
 #: package/contents/ui/configGeneral.qml
 msgid "Could not save the KWin setting. Check write permissions for kwinrc and whether the setting is locked."
@@ -183,3 +191,9 @@ msgstr "A configuração foi salva, mas o KWin não conseguiu recarregá-la. Ten
 #: package/contents/ui/configGeneral.qml
 msgid "Retry"
 msgstr "Tentar novamente"
+
+#~ msgid "This KWin setting applies to all monitors and widget instances. Changes take effect immediately and are not undone by Cancel."
+#~ msgstr "Esta configuração do KWin se aplica a todos os monitores e instâncias do widget. As alterações têm efeito imediato e não são desfeitas ao clicar em Cancelar."
+
+#~ msgid "Global setting for all monitors. Changes apply immediately."
+#~ msgstr "Configuração global para todos os monitores. As alterações são aplicadas imediatamente."

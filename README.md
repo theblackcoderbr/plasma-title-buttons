@@ -69,10 +69,11 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - Extra CMake Modules (ECM)
   - Ninja (recomendado) ou Make
   - GNU Gettext (catálogos de tradução)
-  - Qt 6 (Core, Gui, Qml, Quick, Svg, DBus)
-  - KDE Frameworks 6 (KCoreAddons, KI18n, KConfig, KConfigWidgets, KWindowSystem)
+  - Qt 6 (Core, Qml e DBus usados diretamente pelo backend)
+  - KDE Frameworks 6 (KConfig, componente ConfigCore)
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
-- **Validação e prévia**: Qt Test, `dbus-run-session` e a localidade `en_US.UTF-8` para os testes; Plasma SDK (`plasmoidviewer`) para a prévia visual. O shell Nix fornece esses recursos.
+- **Interface e dependências transitivas**: Qt Quick/Gui, os módulos QML do Plasma e Kirigami continuam necessários. `libplasma` fornece também as macros CMake de instalação do pacote; as dependências transitivas são resolvidas pelos pacotes Qt/KDE.
+- **Validação e prévia**: Qt Test, Qt Quick, KI18n, `dbus-run-session` e a localidade `en_US.UTF-8` para os testes; Plasma SDK (`plasmoidviewer`) para a prévia visual. O shell Nix fornece esses recursos.
 
 ---
 
@@ -160,7 +161,11 @@ Clicando com o botão direito no widget e selecionando **Configurar Título e Bo
 6. **Posição dos Botões**: Escolha entre **Esquerda / Topo** ou **Direita / Base**, respeitando a posição do título e as extremidades livres. Conflitos ocultam os botões sem sobrescrever a preferência de lado.
 7. **Estilo dos Botões**: Tema do Sistema, macOS (Círculos coloridos) ou Minimalista.
 8. **Tamanho dos Botões**: Pequeno, Médio (Padrão) ou Grande.
-9. **Ocultar a barra de título original da janela quando maximizada (KWin)**: Alterna a opção global `BorderlessMaximizedWindows` do KWin. A mudança é imediata, vale para todos os monitores e instâncias do widget e não é desfeita por Cancelar. Abrir as configurações ou adicionar outra instância apenas lê o estado existente. Alterações externas são acompanhadas automaticamente; falhas ao salvar ou recarregar são exibidas na interface.
+9. **Ocultar a barra de título original da janela quando maximizada (KWin)**: Preferência por instância, desativada por padrão e salva com **Aplicar/OK**. Enquanto pelo menos uma instância tiver esta opção e **Exibir Botões de Controle** ativadas, o widget solicita `BorderlessMaximizedWindows` para todos os monitores. Desativar os botões, desmarcar a opção, remover a última instância participante ou desinstalar seu pacote restaura o estado anterior. Desfazer a remoção reativa a solicitação. Fechar a janela de configuração não interfere nas instâncias ativas.
+
+Uma preferência do KWin que já ocultava as barras antes da ativação é preservada. Na atualização de versões antigas, desmarque a opção e use **Restaurar barras de título agora** para remover explicitamente a configuração global herdada; esse botão é imediato e não é desfeito por Cancelar. Depois, ative a nova opção e aplique para usar a restauração automática.
+
+O widget registra sua alteração em `kwinrc`, preserva outras opções e abandona a restauração quando observa uma mudança externa da preferência. A saída normal do Plasma restaura o estado; após uma queda abrupta, o registro permite recuperá-lo no próximo carregamento do widget. Não há um serviço separado que restaure a configuração enquanto o Plasma estiver encerrado à força. Processos separados, como uma prévia e o Shell, não podem controlar a preferência simultaneamente. Erros de gravação/recarga aparecem na configuração; falhas durante a remoção também são registradas no log.
 
 ---
 

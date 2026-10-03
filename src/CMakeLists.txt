@@ -28,15 +28,9 @@ set_target_properties(${PLUGIN_TARGET} PROPERTIES
 target_link_libraries(${PLUGIN_TARGET}
     PRIVATE
         Qt6::Core
-        Qt6::Gui
         Qt6::Qml
-        Qt6::Quick
         Qt6::DBus
-        KF6::CoreAddons
         KF6::ConfigCore
-        KF6::ConfigGui
-        KF6::WindowSystem
-        Plasma::Plasma
         PW::LibTaskManager
 )
 
