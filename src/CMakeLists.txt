@@ -28,6 +28,7 @@ set_target_properties(${PLUGIN_TARGET} PROPERTIES
 target_link_libraries(${PLUGIN_TARGET}
     PRIVATE
         Qt6::Core
+        Qt6::Gui
         Qt6::Qml
         Qt6::DBus
         KF6::ConfigCore

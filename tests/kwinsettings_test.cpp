@@ -24,6 +24,8 @@
 #include <QWheelEvent>
 #include <QAccessible>
 #include <QLockFile>
+#include <QIcon>
+#include <QPixmap>
 
 class FakeKWin : public QObject, protected QDBusContext
 {
@@ -65,6 +67,85 @@ class KWinSettingsTest : public QObject
     }
 
 private Q_SLOTS:
+    void emptyTitleIconsDoNotReserveSpace_data()
+    {
+        QTest::addColumn<QVariant>("emptyIcon");
+        QTest::addColumn<bool>("vertical");
+        const QList<QPair<QByteArray, QVariant>> cases = {
+            {"undefined", QVariant()},
+            {"null", QVariant::fromValue(nullptr)},
+            {"empty-string", QStringLiteral("")},
+        };
+        for (bool vertical : {false, true}) {
+            for (const auto &entry : cases) {
+                const QByteArray name = entry.first + (vertical ? "-vertical" : "-horizontal");
+                QTest::newRow(name.constData()) << entry.second << vertical;
+            }
+        }
+    }
+
+    void emptyTitleIconsDoNotReserveSpace()
+    {
+        QFETCH(QVariant, emptyIcon);
+        QFETCH(bool, vertical);
+        QQmlEngine engine;
+        QQuickWindow window;
+        window.resize(400, 32);
+        QQmlComponent component(&engine);
+        component.setData(R"(
+            import QtQuick
+            WindowTitle {
+                width: 400; height: 32
+                property alias testIcon: mockController.windowIcon
+                property alias active: mockController.hasActiveWindow
+                controller: QtObject {
+                    id: mockController
+                    property bool hasActiveWindow: true
+                    property string windowTitle: "Window without an icon"
+                    property var windowIcon
+                }
+            }
+        )", QUrl::fromLocalFile(QStringLiteral(CONFIG_QML_PATH)));
+        QScopedPointer<QObject> title(component.create());
+        QVERIFY2(title, qPrintable(component.errorString()));
+        auto *item = qobject_cast<QQuickItem *>(title.data());
+        QVERIFY(item);
+        item->setParentItem(window.contentItem());
+        title->setProperty("vertical", vertical);
+        auto *icon = title->findChild<QQuickItem *>(QStringLiteral("windowTitleIcon"));
+        auto *label = title->findChild<QQuickItem *>(QStringLiteral("windowTitleText"));
+        QVERIFY(icon && label);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+
+        // Um ícone criado em memória independe dos temas instalados na máquina.
+        QPixmap pixmap(16, 16);
+        pixmap.fill(Qt::red);
+        const QVariant validIcon = QVariant::fromValue(QIcon(pixmap));
+        for (int repetition = 0; repetition < 2; ++repetition) {
+            QVERIFY(title->setProperty("testIcon", validIcon));
+            QTRY_VERIFY(icon->isVisible());
+            QTRY_VERIFY(label->x() > 0);
+            QVERIFY(title->setProperty("testIcon", emptyIcon));
+            QTRY_VERIFY(!icon->isVisible());
+            QTRY_COMPARE(label->x(), 0.0);
+            const qreal emptyWidth = item->implicitWidth();
+            QVERIFY(title->setProperty("showIcon", false));
+            QTRY_COMPARE(item->implicitWidth(), emptyWidth);
+            QVERIFY(title->setProperty("showIcon", true));
+        }
+        QVERIFY(title->setProperty("testIcon", validIcon));
+        QTRY_VERIFY(icon->isVisible());
+        QVERIFY(title->setProperty("active", false));
+        QTRY_VERIFY(!icon->isVisible());
+        QTRY_COMPARE(label->x(), 0.0);
+        QVERIFY(title->setProperty("active", true));
+        QTRY_VERIFY(icon->isVisible());
+        QVERIFY(title->setProperty("showIcon", false));
+        QTRY_VERIFY(!icon->isVisible());
+        QTRY_COMPARE(label->x(), 0.0);
+    }
+
     void verticalPanelGeometry_data()
     {
         QTest::addColumn<QString>("style");

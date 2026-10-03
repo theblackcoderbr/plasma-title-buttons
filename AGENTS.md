@@ -23,7 +23,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
 
 - **Linguagem**: C++20 (backend) e QML / QtQuick (frontend).
 - **Frameworks**:
-  - Backend: Qt 6 (Core, Qml, DBus) e KDE Frameworks 6 (KConfig/ConfigCore).
+  - Backend: Qt 6 (Core, Gui para QIcon, Qml, DBus) e KDE Frameworks 6 (KConfig/ConfigCore).
   - Interface: Qt Quick/Gui, módulos QML do Plasma e Kirigami; dependências transitivas resolvidas pelos pacotes Qt/KDE.
   - Testes: Qt Test, Qt Quick e KI18n, exigidos explicitamente quando `BUILD_TESTING=ON`.
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
@@ -70,7 +70,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
   1. **Expansão Dinâmica**: O widget ocupa dinamicamente todo o espaço disponível no painel (`Layout.fillWidth: true`, `Layout.fillHeight: true`).
   2. O **Título** pode ser exibido ou oculto conforme a configuração, independentemente do ícone e dos botões. Quando habilitado, exibe o nome da janela ativa ou `"Plasma Workspace"`. Pode ser alinhado à **Esquerda**, **Centro** ou **Direita**.
   3. Os **Botões de controle** só devem ser visíveis quando a janela ativa estiver maximizada (`isMaximized === true`) e se a opção estiver ativada nas configurações.
-  4. O **Ícone da janela** pode ser exibido ou oculto conforme a configuração.
+  4. O **Ícone da janela** pode ser exibido ou oculto conforme a configuração. Só reserva espaço quando há janela ativa e a fonte passa pela propriedade `valid` do Kirigami. O backend normaliza QIcon vazio para QVariant inválido; fontes ausentes, nulas ou strings vazias também não deixam recuo no título.
   5. **Sincronização de Posição**:
      - O título e os botões não podem ocupar a mesma ponta (se título à esquerda, botões à direita; se título à direita, botões à esquerda).
      - A posição é resolvida pela mesma regra no applet e na configuração (`ButtonPlacement.qml`). Se o título ocupar a única extremidade livre, os botões ficam ocultos e a configuração explica como resolver o conflito. Não se move o título nem se sobrescreve a preferência de lado dos botões automaticamente; quando houver uma combinação válida, a exibição pode retornar conforme a configuração.
@@ -89,7 +89,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
   7. **Estilos e Tamanhos dos Botões**:
      - Todos os estilos mantêm a mesma ordem: Minimizar, Maximizar/Restaurar, Fechar. No estilo macOS, as cores acompanham as ações: amarelo, verde, vermelho.
      - Todos os estilos usam controles nativos com foco por Tab, ativação por Espaço, indicação visual de foco e nomes acessíveis traduzidos via `i18n()`. Maximizar muda para Restaurar quando a janela está maximizada.
-     - Cada botão exige janela ativa e a capacidade correspondente (`canClose`, `canMinimize`, `canMaximize`); botões indisponíveis ficam desabilitados. A ação de acessibilidade e os métodos do backend também respeitam essa disponibilidade.
+     - Cada botão exige janela ativa e a capacidade correspondente (`canClose`, `canMinimize`, `canMaximize`); botões indisponíveis ficam desabilitados. A ação de acessibilidade e os métodos do backend também respeitam essa disponibilidade. A seleção do índice ativo para ações exige `IsWindow` e `IsActive`, de modo consistente com a atualização do estado; itens não-janela não recebem ações mesmo que anunciem capacidades.
      - Estilos: `system` (Tema do sistema ativo, padrão), `macos` (Círculos coloridos: vermelho, amarelo, verde) e `minimal` (Design geométrico limpo).
      - Tamanhos dos Botões:
        - Largura / área de clique: `small` (24px), `medium` (32px, padrão) e `large` (44px).

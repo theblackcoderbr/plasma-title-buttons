@@ -69,7 +69,7 @@ An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**,
   - Extra CMake Modules (ECM)
   - Ninja (recommended) or Make
   - GNU Gettext (translation catalogs)
-  - Qt 6 (Core, Qml, and DBus used directly by the backend)
+  - Qt 6 (Core, Gui for QIcon validation, Qml, and DBus used directly by the backend)
   - KDE Frameworks 6 (KConfig, ConfigCore component)
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
 - **Interface and transitive dependencies**: Qt Quick/Gui, the Plasma QML modules, and Kirigami remain necessary. `libplasma` also provides the package installation CMake macros; transitive dependencies are resolved by the Qt/KDE packages.
@@ -185,7 +185,7 @@ The KDE build may also register `appstreamtest` to validate metadata, depending 
 
 Right-clicking the widget and selecting **Configure Window Title and Buttons...** provides the following options:
 
-1. **Show Window Icon**: Toggle application icon visibility.
+1. **Show Window Icon**: Toggle application icon visibility. When no valid icon is available, the title does not reserve space for it.
 2. **Show Window Title**: Toggle title text visibility.
 3. **Show Control Buttons**: Toggle minimize, maximize/restore, and close buttons.
 4. **Title Position**: Choose between **Left / Top**, **Center**, or **Right / Bottom**, according to panel orientation.

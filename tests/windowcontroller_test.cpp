@@ -8,6 +8,8 @@
 #include <taskmanager/taskfilterproxymodel.h>
 #include <taskmanager/tasksmodel.h>
 #include <QGuiApplication>
+#include <QIcon>
+#include <QPixmap>
 #include <QTemporaryDir>
 #include <QTest>
 #include <QSignalSpy>
@@ -78,6 +80,29 @@ class WindowControllerTest : public QObject
 {
     Q_OBJECT
 private Q_SLOTS:
+    void emptyIconsAreNormalized()
+    {
+        FakeWindows source;
+        source.windows = {{QStringLiteral("focused"), {}, {}, QRect(), false, true, true}};
+        WindowController controller;
+        auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);
+        QVERIFY(filter);
+        filter->setSourceModel(&source);
+        QPixmap pixmap(16, 16);
+        pixmap.fill(Qt::red);
+        const QIcon validIcon(pixmap);
+        QSignalSpy changed(&controller, &WindowController::activeWindowChanged);
+        for (int repetition = 0; repetition < 2; ++repetition) {
+            source.windows[0].icon = validIcon;
+            Q_EMIT source.dataChanged(source.index(0), source.index(0), {Qt::DecorationRole});
+            QCOMPARE(controller.windowIcon().value<QIcon>().cacheKey(), validIcon.cacheKey());
+            source.windows[0].icon = QIcon();
+            Q_EMIT source.dataChanged(source.index(0), source.index(0), {Qt::DecorationRole});
+            QVERIFY(!controller.windowIcon().isValid());
+        }
+        QCOMPARE(changed.count(), 4);
+    }
+
     void selectiveStateUpdates()
     {
         FakeWindows source;
@@ -176,6 +201,40 @@ private Q_SLOTS:
             QCOMPARE(source.minimized, mask & 2 ? 0 : -1);
             QCOMPARE(source.maximized, mask & 4 ? 0 : -1);
         }
+    }
+
+    void actionsIgnoreActiveNonWindows()
+    {
+        FakeWindows source;
+        source.windows = {
+            {QStringLiteral("active non-window"), {}, {}, QRect(), false, true, true},
+            {QStringLiteral("real window"), {}, {}, QRect(), false, false, true},
+        };
+        // Mantém todas as capacidades verdadeiras para testar especificamente IsWindow.
+        source.windows[0].isWindow = false;
+        WindowController controller;
+        auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);
+        QVERIFY(filter);
+        filter->setSourceModel(&source);
+        QCOMPARE(filter->rowCount(), 2);
+        QVERIFY(!controller.hasActiveWindow());
+        controller.close();
+        controller.minimize();
+        controller.toggleMaximize();
+        QCOMPARE(source.closed, -1);
+        QCOMPARE(source.minimized, -1);
+        QCOMPARE(source.maximized, -1);
+
+        // Um item não-janela ativo antes da janela real não pode capturar as ações.
+        source.windows[1].active = true;
+        Q_EMIT source.dataChanged(source.index(1), source.index(1), {TaskManager::AbstractTasksModel::IsActive});
+        QCOMPARE(controller.windowTitle(), QStringLiteral("real window"));
+        controller.close();
+        controller.minimize();
+        controller.toggleMaximize();
+        QCOMPARE(source.closed, 1);
+        QCOMPARE(source.minimized, 1);
+        QCOMPARE(source.maximized, 1);
     }
 
     void cycleSingleWindow_data()

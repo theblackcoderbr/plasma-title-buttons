@@ -3,6 +3,7 @@
 
 #include "windowcontroller.h"
 #include "kwinsettings.h"
+#include <QIcon>
 
 #include <taskmanager/tasksmodel.h>
 #include <taskmanager/abstracttasksmodel.h>
@@ -156,7 +157,8 @@ QModelIndex WindowController::activeIndex() const
     const int rowCount = m_tasksModel->rowCount();
     for (int r = 0; r < rowCount; ++r) {
         const QModelIndex idx = m_tasksModel->index(r, 0);
-        if (idx.data(TaskManager::AbstractTasksModel::IsActive).toBool()) {
+        if (idx.data(TaskManager::AbstractTasksModel::IsWindow).toBool()
+            && idx.data(TaskManager::AbstractTasksModel::IsActive).toBool()) {
             return idx;
         }
     }
@@ -219,6 +221,10 @@ void WindowController::updateWindowState()
             title = QStringLiteral("Plasma Workspace");
         }
         icon = active.data(Qt::DecorationRole);
+        // QVariant com QIcon vazio não é nulo para o QML/Kirigami.
+        if (icon.metaType().id() == QMetaType::QIcon && icon.value<QIcon>().isNull()) {
+            icon.clear();
+        }
         maximized = active.data(TaskManager::AbstractTasksModel::IsMaximized).toBool();
         canMax = active.data(TaskManager::AbstractTasksModel::IsMaximizable).toBool();
         canMin = active.data(TaskManager::AbstractTasksModel::IsMinimizable).toBool();

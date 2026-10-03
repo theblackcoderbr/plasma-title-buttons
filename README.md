@@ -69,7 +69,7 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - Extra CMake Modules (ECM)
   - Ninja (recomendado) ou Make
   - GNU Gettext (catálogos de tradução)
-  - Qt 6 (Core, Qml e DBus usados diretamente pelo backend)
+  - Qt 6 (Core, Gui para validar QIcon, Qml e DBus usados diretamente pelo backend)
   - KDE Frameworks 6 (KConfig, componente ConfigCore)
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
 - **Interface e dependências transitivas**: Qt Quick/Gui, os módulos QML do Plasma e Kirigami continuam necessários. `libplasma` fornece também as macros CMake de instalação do pacote; as dependências transitivas são resolvidas pelos pacotes Qt/KDE.
@@ -185,7 +185,7 @@ O build KDE também pode registrar `appstreamtest` para validar os metadados, co
 
 Clicando com o botão direito no widget e selecionando **Configurar Título e Botões de Janela...**, é possível ajustar:
 
-1. **Exibir Ícone da Janela**: Alterna a visibilidade do ícone do aplicativo.
+1. **Exibir Ícone da Janela**: Alterna a visibilidade do ícone do aplicativo. Quando não há um ícone válido, o título não reserva espaço para ele.
 2. **Exibir Título da Janela**: Alterna a visibilidade do nome da janela em foco.
 3. **Exibir Botões de Controle**: Alterna a exibição dos botões de minimizar, maximizar/restaurar e fechar.
 4. **Posição do Título**: Escolha entre **Esquerda / Topo**, **Centro** ou **Direita / Base**, conforme a orientação do painel.
