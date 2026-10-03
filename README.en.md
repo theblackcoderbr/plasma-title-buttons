@@ -103,7 +103,18 @@ cmake --install build
 
 For **Nix** or **NixOS** users, the repository includes a ready-to-use [`shell.nix`](shell.nix) file providing all required dependencies, build tools, and environment variables:
 
-The file uses the local environment's `<nixpkgs>` without pinning a revision. Dependency versions may vary between machines or after channel updates.
+The environment uses the nixpkgs commit and hash recorded in [`nix/nixpkgs.json`](nix/nixpkgs.json). [`nix/pkgs.nix`](nix/pkgs.nix) verifies the source with `builtins.fetchTarball` and disables personal configuration and overlays. Channel updates and changes to `NIX_PATH` do not change the selected packages. First use may require network access to obtain sources and dependencies; flakes are not required. This follows the [nixpkgs pinning documentation](https://wiki.nixos.org/wiki/FAQ/Pinning_Nixpkgs).
+
+Use `nix-shell --pure` to reduce the influence of session variables. The shell prioritizes Plasma QML modules from the pinned revision. The host architecture and graphical session still influence execution; the optional `pkgs` argument allows deliberately replacing the pinned package set for experiments.
+
+`nix-shell` itself selects its initial Bash before loading the project, using channels or `PATH`, even with `--pure`. To pin that executable as well and avoid channels entirely, run from the repository root:
+
+```bash
+NIX_BUILD_SHELL="$(nix-build --no-out-link --max-jobs 2 --cores 2 -E '(import ./nix/pkgs.nix).bashInteractive')/bin/bash" \
+  nix-shell --pure
+```
+
+This distinction is described in the [nix-shell manual](https://nix.dev/manual/nix/2.32/command-ref/nix-shell.html).
 
 ```bash
 # 1. Enter the Nix shell
@@ -115,6 +126,14 @@ build-applet
 # 3. (Optional) Run the applet in an isolated test window
 run-test
 ```
+
+To update dependencies, choose a full commit from the NixOS/nixpkgs repository and obtain the unpacked source hash:
+
+```bash
+nix-prefetch-url --unpack --name source "https://github.com/NixOS/nixpkgs/archive/<COMMIT>.tar.gz"
+```
+
+Update both `rev` and `sha256` in `nix/nixpkgs.json`; the printed base32 hash is accepted, as is the initial SRI format. Configure a new build directory to avoid dependency paths retained by the CMake cache, build with two jobs, and run the tests before installing and restarting the Shell. Review compatibility with the running Plasma session when changing Qt/KDE. Commit the pin file together with any necessary project changes.
 
 ### Applying Changes to the Plasma Session
 
@@ -181,6 +200,9 @@ The widget records its change in `kwinrc`, preserves other settings, and relinqu
 ├── README.md                     # Documentation in Portuguese
 ├── README.en.md                  # Documentation in English
 ├── shell.nix                     # Nix/NixOS development shell
+├── nix/
+│   ├── nixpkgs.json              # nixpkgs source commit and hash
+│   └── pkgs.nix                  # Verified import without personal overlays
 ├── docs/
 │   └── demo.gif                  # Widget demonstration
 ├── package/                      # Plasmoid package sources

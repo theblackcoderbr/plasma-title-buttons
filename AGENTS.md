@@ -29,7 +29,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
 - **Sistema de Build**: CMake 3.20+ com Extra CMake Modules (ECM) e gerador Ninja.
 - **Traduções**: GNU Gettext para extrair, atualizar, validar e compilar os catálogos.
-- **Ambiente Nix**: `shell.nix` usa `<nixpkgs>` sem fixar uma revisão; fornece Gettext, Qt Test, D-Bus, Plasma SDK e `LOCALE_ARCHIVE` para os testes de tradução.
+- **Ambiente Nix**: `shell.nix` importa `nix/pkgs.nix`, com commit e hash fixados em `nix/nixpkgs.json`, sem depender de canais/NIX_PATH ou de configurações e overlays pessoais. Fornece Gettext, Qt Test, D-Bus, Plasma SDK e `LOCALE_ARCHIVE` para os testes de tradução, priorizando o módulo QML do Plasma fixado. Ao atualizar o pin, confira o hash com `nix-prefetch-url --unpack`, use um diretório de build novo e valide a compatibilidade com a sessão antes de instalar. O argumento `pkgs` continua disponível para substituições explícitas.
 
 ---
 

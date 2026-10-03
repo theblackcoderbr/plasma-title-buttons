@@ -103,7 +103,18 @@ cmake --install build
 
 Para usuários do **Nix** ou **NixOS**, o repositório inclui um arquivo [`shell.nix`](shell.nix) pronto que disponibiliza todas as dependências, ferramentas de compilação e variáveis de ambiente necessárias:
 
-O arquivo usa `<nixpkgs>` do ambiente local, sem fixar uma revisão. As versões das dependências podem variar entre máquinas ou após atualizar os canais.
+O ambiente usa o commit de nixpkgs e o hash registrados em [`nix/nixpkgs.json`](nix/nixpkgs.json). [`nix/pkgs.nix`](nix/pkgs.nix) verifica a fonte com `builtins.fetchTarball` e desativa configurações e overlays pessoais. Atualizações dos canais e mudanças em `NIX_PATH` não alteram os pacotes selecionados. O primeiro uso pode precisar de rede para obter fontes e dependências; não é necessário habilitar flakes. Esse mecanismo segue a [documentação de fixação de nixpkgs](https://wiki.nixos.org/wiki/FAQ/Pinning_Nixpkgs).
+
+Para reduzir a influência das variáveis da sessão, use `nix-shell --pure`. O shell prioriza os módulos QML do Plasma da revisão fixada. A arquitetura do host e a sessão gráfica ainda influenciam a execução; o argumento opcional `pkgs` permite substituir deliberadamente o conjunto fixado para experimentos.
+
+O próprio `nix-shell` escolhe o Bash inicial antes de carregar o projeto, usando os canais ou o `PATH`, mesmo com `--pure`. Para fixar também esse executável e dispensar totalmente os canais, execute na raiz do repositório:
+
+```bash
+NIX_BUILD_SHELL="$(nix-build --no-out-link --max-jobs 2 --cores 2 -E '(import ./nix/pkgs.nix).bashInteractive')/bin/bash" \
+  nix-shell --pure
+```
+
+Essa distinção está descrita no [manual do nix-shell](https://nix.dev/manual/nix/2.32/command-ref/nix-shell.html).
 
 ```bash
 # 1. Entrar no shell do Nix
@@ -115,6 +126,14 @@ build-applet
 # 3. (Opcional) Executar o applet em janela de teste isolada
 run-test
 ```
+
+Para atualizar as dependências, escolha um commit completo do repositório NixOS/nixpkgs e obtenha o hash da fonte descompactada:
+
+```bash
+nix-prefetch-url --unpack --name source "https://github.com/NixOS/nixpkgs/archive/<COMMIT>.tar.gz"
+```
+
+Atualize juntos `rev` e `sha256` em `nix/nixpkgs.json`; o hash impresso em base32 é aceito, assim como o formato SRI usado inicialmente. Configure um diretório de build novo para evitar caminhos de dependências retidos pelo cache do CMake, compile com dois processos e execute os testes antes de instalar e reiniciar o Shell. Revise a compatibilidade com o Plasma da sessão ao mudar Qt/KDE. Versione o arquivo de fixação junto com os ajustes necessários no projeto.
 
 ### Aplicando as Alterações na Sessão do Plasma
 
@@ -181,6 +200,9 @@ O widget registra sua alteração em `kwinrc`, preserva outras opções e abando
 ├── README.md                     # Documentação em português
 ├── README.en.md                  # Documentação em inglês
 ├── shell.nix                     # Shell de desenvolvimento Nix/NixOS
+├── nix/
+│   ├── nixpkgs.json              # Commit e hash da fonte nixpkgs
+│   └── pkgs.nix                  # Importação verificada, sem overlays pessoais
 ├── docs/
 │   └── demo.gif                  # Demonstração do widget
 ├── package/                      # Fontes do pacote Plasmoid

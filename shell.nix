@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-FileCopyrightText: 2026 Arthur Celestino
 
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import ./nix/pkgs.nix }:
 
 pkgs.mkShell {
   name = "plasma-title-buttons-dev-shell";
@@ -22,6 +22,8 @@ pkgs.mkShell {
 
     # KDE Frameworks 6 & Plasma 6
     kdePackages.libplasma
+    kdePackages.kirigami
+    kdePackages.qqc2-desktop-style
     kdePackages.ki18n
     kdePackages.kconfig
     kdePackages.plasma-workspace
@@ -40,9 +42,17 @@ pkgs.mkShell {
   shellHook = ''
     echo "=========================================================="
 
-    export QML2_IMPORT_PATH="$HOME/.local/lib/qml:$HOME/.local/lib/qt-6/qml:$HOME/.local/lib64/qml:$PWD/build/src:$QML2_IMPORT_PATH"
-    export QT_PLUGIN_PATH="$HOME/.local/lib/plugins:$QT_PLUGIN_PATH"
-    export LD_LIBRARY_PATH="$HOME/.local/lib:$PWD/build/bin:$LD_LIBRARY_PATH"
+    # Expõe os módulos de execução dos inputs e suas dependências propagadas:
+    # os executáveis de teste não recebem os wrappers Qt dos pacotes Nix.
+    qtShellQmlPath=
+    qtShellPluginPath=
+    for qtDependency in "''${pkgsHostTarget[@]}"; do
+      addToSearchPath qtShellQmlPath "$qtDependency/lib/qt-6/qml"
+      addToSearchPath qtShellPluginPath "$qtDependency/lib/qt-6/plugins"
+    done
+    export QML_IMPORT_PATH="$qtShellQmlPath:$QML_IMPORT_PATH"
+    export QML2_IMPORT_PATH="$QML_IMPORT_PATH:$QML2_IMPORT_PATH"
+    export QT_PLUGIN_PATH="$qtShellPluginPath:$QT_PLUGIN_PATH"
     export XDG_DATA_DIRS="$HOME/.local/share:$XDG_DATA_DIRS"
 
     build-applet() {
