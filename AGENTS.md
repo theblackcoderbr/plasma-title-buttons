@@ -23,17 +23,19 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
 
 - **Linguagem**: C++20 (backend) e QML / QtQuick (frontend).
 - **Frameworks**:
-  - Qt 6 (Core, Gui, Qml, Quick, Svg)
-  - KDE Frameworks 6 (ECM, KCoreAddons, KI18n, KConfig, KWindowSystem)
+  - Qt 6 (Core, Gui, Qml, Quick, Svg, DBus)
+  - KDE Frameworks 6 (ECM, KCoreAddons, KI18n, KConfig, KConfigWidgets, KWindowSystem)
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
 - **Sistema de Build**: CMake 3.20+ com Extra CMake Modules (ECM) e gerador Ninja.
+- **Traduções**: GNU Gettext para extrair, atualizar, validar e compilar os catálogos.
+- **Ambiente Nix**: `shell.nix` usa `<nixpkgs>` sem fixar uma revisão; fornece Gettext, Qt Test, D-Bus, Plasma SDK e `LOCALE_ARCHIVE` para os testes de tradução.
 
 ---
 
 ## 3. Arquitetura e Padrões de Projeto
 
 - Deve ser compilado como um plugin QML registrado sob um namespace seguro (`org.kde.plasma.private.windowtitleandbuttons`), instalado e empacotado tanto no QMLDIR quanto diretamente no diretório do Plasmoid (`contents/plugin/`).
-- O QML do Plasmoid carrega o módulo via import relativo (`import "../plugin" as WTButtons`), tornando o widget 100% autossuficiente e imune à perda de variáveis de ambiente de sessão (como `QML2_IMPORT_PATH`) após reinicializações.
+- O QML do Plasmoid carrega o módulo via import relativo (`import "../plugin" as WTButtons`), sem depender de variáveis de ambiente de sessão (como `QML2_IMPORT_PATH`) para localizar o plugin após reinicializações. As bibliotecas Qt/KDE continuam sendo dependências do sistema.
 - Utiliza a biblioteca oficial de gerenciamento de tarefas do KDE Workspace (`PW::LibTaskManager` / `TaskManager::TasksModel`).
 - Um `TaskFilterProxyModel` público filtra o `TasksModel` sem agrupamento. Todos os estados e comandos do controlador usam os índices desse proxy, que encaminha as ações à janela de origem.
 - **Comportamento do Controlador**:
@@ -50,7 +52,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
     - `minimize()`
     - `close()`
     - `cycleWindow(int direction)`: Alterna o foco entre as janelas elegíveis na mesma tela/desktop/atividade (ciclo circular). Uma única janela sem foco deve ser ativada; se já estiver ativa, não executa ação. Sem janelas ou com direção zero, não executa ação.
-    - `setBorderlessMaximizedWindows(bool enabled)`: Ajusta a opção no arquivo `kwinrc` (`[Windows] BorderlessMaximizedWindows`) e solicita ao KWin a recarga via DBus (`qdbus6 org.kde.KWin /KWin reconfigure`).
+    - `setBorderlessMaximizedWindows(bool enabled)`: Encaminha a alteração a `KWinSettings`, que grava `kwinrc` (`[Windows] BorderlessMaximizedWindows`) e solicita a recarga assíncrona via QtDBus (`org.kde.KWin`, `/KWin`, método `reconfigure`).
   - **Preferência global do KWin**: `KWinSettings` é a fonte reativa de `BorderlessMaximizedWindows`. A inicialização apenas lê o estado; nunca aplica valores salvos por instância. A interface altera essa preferência explicitamente, com efeito imediato em todos os monitores, e acompanha alterações externas em `kwinrc`. Falhas de gravação e de recarga via D-Bus devem ser exibidas, sem reverter alterações concorrentes de outras instâncias.
 
 ### 3.2. Frontend QML (`package/contents/`)
@@ -60,6 +62,9 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
   - `PanelAxis.qml` mantém um eixo local ao longo do painel: em vertical, troca largura/altura e gira o conteúdo 90°. Título segue de cima para baixo; ícone da aplicação e símbolos dos botões recebem contrarrotação para permanecerem de pé. As posições `left`/`right` correspondem a topo/base, sem alterar preferências salvas.
   - Centralização, limites do título, espaçadores e contrapesos usam as dimensões locais desse eixo. A posição e o comprimento globais usam x/largura no painel horizontal e y/altura no vertical.
   - Animações fluidas em transições de hover e visibilidade (usando `NumberAnimation` ou `Behavior on opacity`).
+- **Carregamento sob demanda**:
+  - `main.qml` usa `Loader` para instanciar apenas o título na posição escolhida, incluindo a alternativa de centralização absoluta. `WindowButtons.qml` instancia somente o estilo selecionado.
+  - `FadingLoader.qml` carrega os botões conforme lado e visibilidade. Ao ocultar, desabilita a interação imediatamente e mantém o conteúdo e sua geometria durante a animação de 150 ms; só então descarrega os controles. Se a exibição retornar durante a saída, reutiliza o conteúdo e reverte a animação.
 - **Regras de Visibilidade e Interação da Interface**:
   1. **Expansão Dinâmica**: O widget ocupa dinamicamente todo o espaço disponível no painel (`Layout.fillWidth: true`, `Layout.fillHeight: true`).
   2. O **Título** pode ser exibido ou oculto conforme a configuração, independentemente do ícone e dos botões. Quando habilitado, exibe o nome da janela ativa ou `"Plasma Workspace"`. Pode ser alinhado à **Esquerda**, **Centro** ou **Direita**.
@@ -92,6 +97,16 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
 
 ---
 
+### 3.3. Traduções (`po/`)
+
+- O domínio é `plasma_applet_org.kde.plasma.windowtitleandbuttons`, derivado do identificador do widget em `package/metadata.json`.
+- Os textos de origem em `i18n()` são em inglês; `po/pt_BR/` contém a tradução completa para português brasileiro. Títulos externos e o texto `Plasma Workspace` são preservados.
+- `Messages.sh` extrai as mensagens para o `.pot`; `sh po/update.sh` também atualiza os `.po` existentes. Revise mensagens novas ou modificadas após alterar a interface.
+- `po/CMakeLists.txt` executa `msgfmt --check`, gera `.mo` em `build/po/` e instala os catálogos em `share/locale` e em `contents/locale/` do pacote. A geração participa do limite de jobs do build.
+- Nomes e descrições do seletor de widgets são traduzidos separadamente em `Name[<idioma>]` e `Description[<idioma>]` de `package/metadata.json`.
+
+---
+
 ## 4. Comandos de Validação e Teste
 
 Para compilar e testar alterações:
@@ -107,13 +122,15 @@ build-applet
 run-test
 ```
 
-Testes automatizados isolam `kwinrc` em um diretório temporário e usam um serviço KWin simulado em D-Bus privado (requerem Qt Test e `dbus-run-session`, disponíveis no shell Nix):
+Testes automatizados isolam `kwinrc` em um diretório temporário e usam D-Bus privado, com serviço KWin simulado nos testes de integração. Requerem Qt Test, `dbus-run-session` e Gettext; o teste de tradução usa a localidade `en_US.UTF-8`. Esses recursos estão disponíveis no shell Nix:
 
 ```bash
-cmake -B build -S . -DBUILD_TESTING=ON
-cmake --build build --parallel 2
+cmake -B build -S . -DBUILD_TESTING=ON &&
+cmake --build build --parallel 2 &&
 ctest --test-dir build --output-on-failure
 ```
+
+O CTest registra `windowcontroller`, `kwinsettings`, `translations` e `translation_catalogs`; o build KDE também pode adicionar `appstreamtest` conforme as ferramentas disponíveis. A cobertura inclui filtros e ações por janela, estado global do KWin, geometria QML nos dois eixos, acessibilidade, navegação, carregamento sob demanda, animações e traduções. `translation_catalogs` verifica o modelo contra uma extração nova e exige tradução completa de `pt_BR`. A validação visual na sessão real permanece manual.
 
 ---
 

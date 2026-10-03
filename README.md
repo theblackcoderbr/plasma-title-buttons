@@ -16,23 +16,24 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
 ## 🚀 Principais Recursos
 
 - **Título Inteligente da Janela Ativa**:
-  - Exibe o título da janela atualmente em foco com suporte a ícone customizável da aplicação.
+  - Exibe o título da janela atualmente em foco, com opção de mostrar o ícone do aplicativo. Títulos são renderizados como texto simples.
   - Quando nenhuma janela estiver em foco, exibe suavemente `Plasma Workspace`.
   - **Ações Rápidas no Título**:
     - **Clique esquerdo**: Minimiza a janela em foco quando maximizada; caso contrário, maximiza, se a janela permitir a ação.
     - **Roda do mouse (Scroll) ou clique do botão do meio**: Percorre e alterna ciclicamente entre as janelas abertas, incluindo minimizadas, na mesma tela, área de trabalho virtual e atividade atuais. O scroll acumula pequenos movimentos do touchpad e limita as trocas a uma a cada 300 ms; o clique do meio é imediato. Pedidos de atenção não permitem que janelas de outros contextos entrem no ciclo.
 - **Botões de Controle Condicionais**:
-  - Os botões de Fechar, Minimizar e Maximizar/Restaurar aparecem **apenas quando a janela ativa estiver maximizada**, liberando espaço nos outros momentos.
+  - Os botões aparecem na ordem **Minimizar, Maximizar/Restaurar e Fechar**, quando habilitados, com uma posição permitida no painel e a janela ativa maximizada.
   - Ações que a janela não permite ficam desabilitadas. Os três estilos oferecem navegação por Tab, ativação por Espaço, indicação de foco e nomes acessíveis traduzíveis.
+  - Ao desaparecer, os botões ficam imediatamente sem interação e completam uma transição de opacidade de 150 ms antes de liberar o espaço ocupado.
 - **Estilos de Botões Selecionáveis**:
-  - **Tema do Sistema (Padrão)**: Utiliza os ícones do tema de decorações ativo do Plasma/KWin (Breeze, etc.).
-  - **macOS / Círculos Coloridos**: Botões circulares clássicos (vermelho, amarelo e verde) com ícones que se revelam no hover.
+  - **Tema do Sistema (Padrão)**: Utiliza controles nativos do Plasma e ícones do tema ativo (Breeze, etc.).
+  - **macOS / Círculos Coloridos**: Minimizar em amarelo, Maximizar/Restaurar em verde e Fechar em vermelho, com símbolos que aparecem ao passar o ponteiro ou receber foco pelo teclado.
   - **Minimalista**: Visual geométrico limpo e discreto.
 - **Disposição Dinâmica e Alinhamento Sincronizado**:
   - **Painéis verticais**: Título de cima para baixo e botões empilhados, com ícones na posição normal. Esquerda/direita correspondem a topo/base; a centralização acompanha o comprimento do painel.
   - **Expansão Automática**: Ocupa dinamicamente todo o espaço disponível no painel sem comprimentos fixos arbitrários.
   - **Posicionamento do Título**: Escolha entre **Esquerda**, **Centro** ou **Direita**.
-  - **Centralização Absoluta no Painel**: Opção que mantém o título matematicamente centralizado na largura total do painel, compensando assimetrias causadas por outros elementos (como bandeja do sistema, relógio ou lançadores de aplicativos).
+  - **Centralização Absoluta no Painel**: Opção que mantém o título matematicamente centralizado no comprimento total do painel, compensando assimetrias causadas por outros elementos (como bandeja do sistema, relógio ou lançadores de aplicativos).
     - O cálculo usa a largura exibida, mesmo com reticências. Se o centro do painel não couber no espaço livre do widget, o título fica limitado à área disponível para não sobrepor os botões.
   - **Detecção Inteligente de Bordas do Painel**:
     - Detecta os applets vizinhos no painel, distinguindo margens de widgets pequenos. Durante carga ou edição do painel, aguarda um layout válido sem apagar preferências.
@@ -40,13 +41,19 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
     - Se ambas as pontas estiverem ocupadas (widget posicionado no meio de outros elementos), a opção dos botões é desabilitada e desmarcada após estabilização, com ajuda contextual (`?`). Após mover o widget para uma extremidade, é possível reativá-la manualmente.
   - **Sincronização com os Botões**: A interface impede automaticamente que o título e os botões ocupem a mesma ponta.
     - Se o título ocupar a única extremidade livre, os botões ficam ocultos. A ajuda nas configurações orienta a centralizar ou reposicionar o título, ou mover o widget. As preferências são preservadas para quando houver uma posição válida.
-  - **Controle de Tamanho dos Botões**: Opções de tamanho **Pequeno (Compacto)**, **Normal / Padrão** e **Grande (Espaçoso)**:
-    - **Largura / área de clique**: 24 px (pequeno), 32 px (médio) e 44 px (grande);
+  - **Controle de Tamanho dos Botões**: Opções de tamanho **Pequeno (Compacto)**, **Médio / Padrão** e **Grande (Espaçoso)**:
+    - **Largura-base nos estilos Sistema e Minimalista**: 24 px (pequeno), 32 px (médio) e 44 px (grande), reduzida proporcionalmente em painéis compactos;
+    - **Diâmetro-base no estilo macOS**: 12, 16 e 22 px, limitado pela espessura do painel;
     - **Tamanho-base dos ícones**: 14 px (pequeno), 18 px (médio) e 22 px (grande);
     - **Altura**: adaptativa conforme a espessura do painel (com suporte otimizado a painéis compactos de 24–26 px).
   - Ativação/desativação independente de cada elemento: Título, Ícone e Botões.
 - **Ocultação de Barra de Título Nativa**:
   - Integração nativa com o KWin para alternar `BorderlessMaximizedWindows`, ocultando a barra de título original da janela quando ela estiver maximizada.
+- **Carregamento sob Demanda**:
+  - Instancia apenas o título na posição escolhida e o estilo de botões em uso. Os controles são descarregados ao terminar a animação de saída.
+  - O backend ignora notificações de propriedades que não afetam o widget e atualiza a contagem e a janela ativa em uma única passagem pelo modelo.
+- **Interface Traduzida**:
+  - Tradução completa para português brasileiro (`pt_BR`), incluindo ajuda, erros e nomes acessíveis, com inglês como idioma de origem e alternativa.
 
 ---
 
@@ -62,9 +69,10 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - Extra CMake Modules (ECM)
   - Ninja (recomendado) ou Make
   - GNU Gettext (catálogos de tradução)
-  - Qt 6 (Core, Gui, Qml, Quick, Svg)
-  - KDE Frameworks 6 (KCoreAddons, KI18n, KConfig, KWindowSystem)
+  - Qt 6 (Core, Gui, Qml, Quick, Svg, DBus)
+  - KDE Frameworks 6 (KCoreAddons, KI18n, KConfig, KConfigWidgets, KWindowSystem)
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
+- **Validação e prévia**: Qt Test, `dbus-run-session` e a localidade `en_US.UTF-8` para os testes; Plasma SDK (`plasmoidviewer`) para a prévia visual. O shell Nix fornece esses recursos.
 
 ---
 
@@ -90,9 +98,11 @@ cmake --install build
 > [!TIP]
 > **Paralelismo**: O projeto adota dois processos de compilação em qualquer máquina como padrão conservador de uso de memória. O CMake também limita as tarefas de compilação e link do Ninja a dois processos simultâneos. A instalação com `cmake --install` não inicia outra compilação.
 
-### Opção 2: Ambiente Reproduzível com Nix / NixOS (`shell.nix`)
+### Opção 2: Ambiente de Desenvolvimento com Nix / NixOS (`shell.nix`)
 
 Para usuários do **Nix** ou **NixOS**, o repositório inclui um arquivo [`shell.nix`](shell.nix) pronto que disponibiliza todas as dependências, ferramentas de compilação e variáveis de ambiente necessárias:
+
+O arquivo usa `<nixpkgs>` do ambiente local, sem fixar uma revisão. As versões das dependências podem variar entre máquinas ou após atualizar os canais.
 
 ```bash
 # 1. Entrar no shell do Nix
@@ -107,13 +117,34 @@ run-test
 
 ### Aplicando as Alterações na Sessão do Plasma
 
-Os testes automatizados são opcionais (`-DBUILD_TESTING=ON`) e requerem Qt Test e `dbus-run-session`, disponíveis no shell Nix. Após compilar com essa opção, execute `ctest --test-dir build --output-on-failure`. Os testes usam configuração temporária e D-Bus privado, sem modificar o KWin da sessão.
+O CMake instala o módulo nativo também em `contents/plugin/` e os catálogos em `contents/locale/` do pacote. O QML importa o plugin por caminho relativo, sem depender de `QML2_IMPORT_PATH` para encontrar esse módulo na sessão. As bibliotecas Qt/KDE continuam sendo dependências do sistema.
 
-Após a instalação, reinicie a barra de tarefas do Plasma para carregar a nova versão:
+Após a instalação, reinicie o Plasma Shell para carregar a nova versão:
 
 ```bash
 systemctl --user restart plasma-plasmashell.service
 ```
+
+---
+
+## 🧪 Validação Automatizada
+
+Os testes são opcionais e ficam desativados por padrão. No shell Nix, ou com as dependências de teste instaladas, execute:
+
+```bash
+cmake -B build -S . -DBUILD_TESTING=ON &&
+cmake --build build --parallel 2 &&
+ctest --test-dir build --output-on-failure
+```
+
+| Teste | Cobertura |
+|---|---|
+| `windowcontroller` | Janelas sem agrupamento, filtros de tela/desktop/atividade, capacidades, navegação circular e atualizações do modelo. |
+| `kwinsettings` | Sincronização e falhas do KWin, configurações QML, posicionamento, painéis verticais, acessibilidade, scroll, carregamento sob demanda e animações. |
+| `translations` | Domínio do catálogo, tradução no QML e nomes acessíveis em `pt_BR`, inglês e alternativa para idioma sem catálogo. |
+| `translation_catalogs` | Modelo `.pot` atualizado e cobertura completa das mensagens em `pt_BR`. |
+
+O build KDE também pode registrar `appstreamtest` para validar os metadados, conforme as ferramentas disponíveis. Os testes C++ usam configuração temporária e D-Bus privado; a integração com KWin é simulada. Os testes QML executam fora da tela. A conferência visual em painéis reais, múltiplos monitores, mouse/touchpad e leitor de tela continua sendo uma etapa manual.
 
 ---
 
@@ -123,13 +154,13 @@ Clicando com o botão direito no widget e selecionando **Configurar Título e Bo
 
 1. **Exibir Ícone da Janela**: Alterna a visibilidade do ícone do aplicativo.
 2. **Exibir Título da Janela**: Alterna a visibilidade do nome da janela em foco.
-3. **Exibir Botões de Controle**: Alterna a exibição dos botões de fechar, minimizar e maximizar.
-4. **Posição do Título**: Escolha entre **Esquerda**, **Centro** ou **Direita**.
+3. **Exibir Botões de Controle**: Alterna a exibição dos botões de minimizar, maximizar/restaurar e fechar.
+4. **Posição do Título**: Escolha entre **Esquerda / Topo**, **Centro** ou **Direita / Base**, conforme a orientação do painel.
 5. **Centralizar em relação ao painel inteiro**: Caixa de seleção disponível quando o título está ao centro para mantê-lo matematicamente centralizado no comprimento total do painel.
-6. **Posição dos Botões**: Escolha entre **Esquerda** ou **Direita** (sincronizado automaticamente e restrito às pontas livres do painel).
+6. **Posição dos Botões**: Escolha entre **Esquerda / Topo** ou **Direita / Base**, respeitando a posição do título e as extremidades livres. Conflitos ocultam os botões sem sobrescrever a preferência de lado.
 7. **Estilo dos Botões**: Tema do Sistema, macOS (Círculos coloridos) ou Minimalista.
 8. **Tamanho dos Botões**: Pequeno, Médio (Padrão) ou Grande.
-9. **Remover borda da janela maximizada**: Alterna a opção global `BorderlessMaximizedWindows` do KWin. A mudança é imediata, vale para todos os monitores e instâncias do widget e não é desfeita por Cancelar. Abrir as configurações ou adicionar outra instância apenas lê o estado existente. Alterações externas são acompanhadas automaticamente; falhas ao salvar ou recarregar são exibidas na interface.
+9. **Ocultar a barra de título original da janela quando maximizada (KWin)**: Alterna a opção global `BorderlessMaximizedWindows` do KWin. A mudança é imediata, vale para todos os monitores e instâncias do widget e não é desfeita por Cancelar. Abrir as configurações ou adicionar outra instância apenas lê o estado existente. Alterações externas são acompanhadas automaticamente; falhas ao salvar ou recarregar são exibidas na interface.
 
 ---
 
@@ -137,29 +168,54 @@ Clicando com o botão direito no widget e selecionando **Configurar Título e Bo
 
 ```text
 .
-├── shell.nix                     # Ambiente de desenvolvimento reprozudível Nix/NixOS
-├── CMakeLists.txt                # Configuração principal do sistema de build CMake
-├── README.md                     # Documentação em Português
-├── README.en.md                  # Documentação em Inglês
-├── AGENTS.md                     # Diretrizes técnicas para agentes e automações
-├── src/                          # Backend C++ (integração KWin e LibTaskManager)
-│   ├── CMakeLists.txt            # Módulo QML nativo (qt_add_qml_module)
-│   ├── windowcontroller.h        # Declaração do controlador de janelas
-│   ├── windowcontroller.cpp      # Lógica de foco e ciclo de janelas
-│   ├── kwinsettings.h            # Estado global das preferências do KWin
-│   └── kwinsettings.cpp          # Sincronização de kwinrc e recarga via D-Bus
-└── package/                      # Pacote Plasmoid para Plasma 6
-    ├── metadata.json             # Metadados e manifesto do widget
-    └── contents/
-        ├── config/
-        │   ├── main.xml          # Esquema de opções persistidas via KConfigXT
-        │   └── config.qml        # Registro das páginas de configuração
-        └── ui/
-            ├── main.qml          # Componente raiz do plasmoid e gerenciamento de layout
-            ├── WindowTitle.qml   # Componente de renderização e eventos do título
-            ├── WindowButtons.qml # Componente de renderização dos botões de controle
-            └── configGeneral.qml # Interface gráfica de configurações do usuário
+├── .gitignore                    # Artefatos gerados e arquivos locais ignorados
+├── AGENTS.md                     # Diretrizes técnicas para desenvolvimento
+├── CMakeLists.txt                # Build, dependências, traduções e testes opcionais
+├── LICENSE                       # Licença GPL-3.0
+├── Messages.sh                   # Extração das mensagens para o modelo .pot
+├── README.md                     # Documentação em português
+├── README.en.md                  # Documentação em inglês
+├── shell.nix                     # Shell de desenvolvimento Nix/NixOS
+├── docs/
+│   └── demo.gif                  # Demonstração do widget
+├── package/                      # Fontes do pacote Plasmoid
+│   ├── metadata.json             # Identificação e nomes traduzidos do widget
+│   └── contents/
+│       ├── config/
+│       │   ├── config.qml        # Registro da página de configuração
+│       │   └── main.xml          # Esquema das preferências por instância
+│       └── ui/
+│           ├── main.qml          # Integração do controlador e layout do applet
+│           ├── ButtonPlacement.qml    # Regra compartilhada de posição dos botões
+│           ├── FadingLoader.qml       # Animação de saída e descarregamento
+│           ├── PanelAxis.qml          # Eixo local para painéis horizontais/verticais
+│           ├── PanelCenteredTitle.qml # Centralização no comprimento total do painel
+│           ├── PanelEdges.qml         # Detecção de vizinhos e extremidades livres
+│           ├── WindowButtons.qml      # Controles acessíveis e estilo sob demanda
+│           ├── WindowTitle.qml        # Título, ícone e interação por mouse
+│           └── configGeneral.qml      # Interface de configuração
+├── po/
+│   ├── CMakeLists.txt            # Validação, compilação e instalação dos catálogos
+│   ├── update.sh                 # Atualização do modelo e dos arquivos .po
+│   ├── plasma_applet_org.kde.plasma.windowtitleandbuttons.pot
+│   └── pt_BR/
+│       └── plasma_applet_org.kde.plasma.windowtitleandbuttons.po
+├── src/
+│   ├── CMakeLists.txt            # Módulo QML nativo e instalação do plugin
+│   ├── kwinsettings.cpp          # Sincronização de kwinrc e recarga via D-Bus
+│   ├── kwinsettings.h            # Preferência global reativa e estados de erro
+│   ├── windowcontroller.cpp      # Filtros, foco, capacidades e ações das janelas
+│   └── windowcontroller.h        # API do controlador exposta ao QML
+└── tests/
+    ├── CMakeLists.txt            # Executáveis e registro dos testes no CTest
+    ├── check-translations.sh     # Verificação do modelo e cobertura de pt_BR
+    ├── dbus-session.conf         # Configuração do D-Bus privado dos testes
+    ├── kwinsettings_test.cpp     # Integração KWin e componentes QML
+    ├── translations_test.cpp     # Tradução efetiva no QML e acessibilidade
+    └── windowcontroller_test.cpp # Modelos simulados e ações por janela
 ```
+
+`build/` contém os artefatos gerados, incluindo os catálogos `.mo` em `build/po/`. Os diretórios `contents/plugin/` e `contents/locale/` são preenchidos no pacote instalado pelo CMake. Os relatórios locais `RELATORIO_REVISAO.md` e `RELATORIO_DESENVOLVIMENTO.md` são ignorados pelo Git e não fazem parte da árvore versionada acima.
 
 ---
 
@@ -167,13 +223,15 @@ Clicando com o botão direito no widget e selecionando **Configurar Título e Bo
 
 A interface acompanha o idioma do Plasma, com tradução completa para **português brasileiro (`pt_BR`)** e inglês como idioma de origem e alternativa quando não há tradução. Os títulos recebidos dos aplicativos e o texto de ausência de janela `Plasma Workspace` são preservados.
 
-O build compila os catálogos automaticamente; `cmake --install build` instala os arquivos `.mo` em `share/locale` e em `contents/locale` dentro do pacote do widget. O domínio é `plasma_applet_org.kde.plasma.windowtitleandbuttons`.
+O build valida os catálogos com `msgfmt --check` e os compila automaticamente; `cmake --install build` instala os arquivos `.mo` em `share/locale` e em `contents/locale` dentro do pacote do widget. O domínio é `plasma_applet_org.kde.plasma.windowtitleandbuttons`.
 
 Para atualizar o modelo `.pot` e incorporar mudanças nos catálogos `.po`, execute com GNU Gettext disponível (incluído no shell Nix):
 
 ```bash
 sh po/update.sh
 ```
+
+`Messages.sh` faz apenas a extração; `po/update.sh` também incorpora as mensagens nos catálogos existentes. Após alterar textos da interface, atualize os catálogos e revise as mensagens novas ou modificadas. O teste `translation_catalogs` exige cobertura completa de `pt_BR`; novos idiomas podem começar com traduções parciais.
 
 Edite `po/pt_BR/plasma_applet_org.kde.plasma.windowtitleandbuttons.po` para revisar a tradução. Para adicionar outro idioma, crie `po/<idioma>/` e use `msginit` com o modelo em `po/`. Traduza também `Name[<idioma>]` e `Description[<idioma>]` em `package/metadata.json`, usados no seletor de widgets. Reconfigure e compile após adicionar um idioma.
 
