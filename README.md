@@ -149,6 +149,17 @@ systemctl --user restart plasma-plasmashell.service
 
 ## 🧪 Validação Automatizada
 
+O workflow [CI](.github/workflows/ci.yml) executa em pushes, pull requests e acionamento manual no GitHub Actions, em Ubuntu 24.04 com o ambiente Nix fixado. Valida o workflow com actionlint e o script com ShellCheck, compila com dois processos e executa os testes sequencialmente. Falhas interrompem o fluxo; logs e relatório JUnit ficam no artefato `validation-reports` por 14 dias, inclusive quando um teste falha. As actions são fixadas por commit, com permissões de leitura e sem credenciais persistidas no checkout.
+
+Para reproduzir o mesmo fluxo localmente:
+
+```bash
+wtb_bash=$(nix-build --no-out-link --max-jobs 2 --cores 2 -E '(import ./nix/pkgs.nix).bashInteractive') &&
+NIX_PATH= NIX_BUILD_SHELL="$wtb_bash/bin/bash" nix-shell --pure --run 'bash tests/ci.sh'
+```
+
+O script usa `build-ci/`, grava logs em `build-ci/logs/` e o relatório em `build-ci/junit.xml`. A instalação de teste fica em `build-ci/test-install/`, isolada por `DESTDIR`; a CI não instala na sessão nem reinicia o Plasma. Ao trocar a revisão do nixpkgs, use um `build-ci/` novo. Para bloquear merges com falhas, configure no GitHub o check **Build and test (Nix)** como obrigatório na proteção da branch; o workflow sozinho não impõe essa regra.
+
 Os testes são opcionais e ficam desativados por padrão. No shell Nix, ou com as dependências de teste instaladas, execute:
 
 ```bash
@@ -163,6 +174,8 @@ ctest --test-dir build --output-on-failure
 | `kwinsettings` | Sincronização e falhas do KWin, configurações QML, posicionamento, painéis verticais, acessibilidade, scroll, carregamento sob demanda e animações. |
 | `translations` | Domínio do catálogo, tradução no QML e nomes acessíveis em `pt_BR`, inglês e alternativa para idioma sem catálogo. |
 | `translation_catalogs` | Modelo `.pot` atualizado e cobertura completa das mensagens em `pt_BR`. |
+| `install_package` | Instalação isolada, arquivos essenciais e igualdade dos catálogos nos dois destinos. |
+| `installed_plugin` | Importação QML dos tipos nativos pelo pacote instalado, sem ligar o teste ao backend. Depende da instalação via fixture CTest. |
 
 O build KDE também pode registrar `appstreamtest` para validar os metadados, conforme as ferramentas disponíveis. Os testes C++ usam configuração temporária e D-Bus privado; a integração com KWin é simulada. Os testes QML executam fora da tela. A conferência visual em painéis reais, múltiplos monitores, mouse/touchpad e leitor de tela continua sendo uma etapa manual.
 
@@ -192,6 +205,7 @@ O widget registra sua alteração em `kwinrc`, preserva outras opções e abando
 
 ```text
 .
+├── .github/workflows/ci.yml      # CI: lint, build, testes e relatórios
 ├── .gitignore                    # Artefatos gerados e arquivos locais ignorados
 ├── AGENTS.md                     # Diretrizes técnicas para desenvolvimento
 ├── CMakeLists.txt                # Build, dependências, traduções e testes opcionais
@@ -236,6 +250,9 @@ O widget registra sua alteração em `kwinrc`, preserva outras opções e abando
 └── tests/
     ├── CMakeLists.txt            # Executáveis e registro dos testes no CTest
     ├── check-translations.sh     # Verificação do modelo e cobertura de pt_BR
+    ├── ci.sh                     # Fluxo compartilhado entre CI e execução local
+    ├── install-package.cmake     # Instalação isolada e validação do pacote
+    ├── installedplugin_test.cpp  # Carregamento do plugin instalado
     ├── dbus-session.conf         # Configuração do D-Bus privado dos testes
     ├── kwinsettings_test.cpp     # Integração KWin e componentes QML
     ├── translations_test.cpp     # Tradução efetiva no QML e acessibilidade

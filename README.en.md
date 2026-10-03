@@ -149,6 +149,17 @@ systemctl --user restart plasma-plasmashell.service
 
 ## 🧪 Automated Validation
 
+The [CI workflow](.github/workflows/ci.yml) runs on pushes, pull requests, and manual dispatch in GitHub Actions, using Ubuntu 24.04 and the pinned Nix environment. It validates the workflow with actionlint and the script with ShellCheck, builds with two jobs, and runs tests sequentially. Failures stop the pipeline; logs and the JUnit report are retained in the `validation-reports` artifact for 14 days, including when a test fails. Actions are pinned to commits, with read permissions and no credentials persisted in the checkout.
+
+To reproduce the same pipeline locally:
+
+```bash
+wtb_bash=$(nix-build --no-out-link --max-jobs 2 --cores 2 -E '(import ./nix/pkgs.nix).bashInteractive') &&
+NIX_PATH= NIX_BUILD_SHELL="$wtb_bash/bin/bash" nix-shell --pure --run 'bash tests/ci.sh'
+```
+
+The script uses `build-ci/`, writes logs to `build-ci/logs/`, and produces `build-ci/junit.xml`. The test installation lives in `build-ci/test-install/`, isolated with `DESTDIR`; CI does not install into a desktop session or restart Plasma. Use a fresh `build-ci/` after changing the nixpkgs revision. To prevent merges with failing checks, require **Build and test (Nix)** in GitHub branch protection; the workflow alone does not enforce that policy.
+
 Tests are optional and disabled by default. In the Nix shell, or with the test dependencies installed, run:
 
 ```bash
@@ -163,6 +174,8 @@ ctest --test-dir build --output-on-failure
 | `kwinsettings` | KWin synchronization and failures, QML settings, positioning, vertical panels, accessibility, scrolling, on-demand loading, and animations. |
 | `translations` | Catalog domain, QML translation, and accessible names in `pt_BR`, English, and fallback for a language without a catalog. |
 | `translation_catalogs` | Current `.pot` template and complete message coverage in `pt_BR`. |
+| `install_package` | Isolated installation, required package files, and matching catalogs at both destinations. |
+| `installed_plugin` | QML import of native types from the installed package, without linking the test to the backend. Requires the CTest installation fixture. |
 
 The KDE build may also register `appstreamtest` to validate metadata, depending on available tools. C++ tests use temporary configuration and a private D-Bus session; KWin integration is simulated. QML tests run offscreen. Visual checks on real panels, multiple monitors, mouse/touchpad devices, and a screen reader remain manual steps.
 
@@ -192,6 +205,7 @@ The widget records its change in `kwinrc`, preserves other settings, and relinqu
 
 ```text
 .
+├── .github/workflows/ci.yml      # CI: lint, build, tests, and reports
 ├── .gitignore                    # Ignored generated artifacts and local files
 ├── AGENTS.md                     # Technical development guidelines
 ├── CMakeLists.txt                # Build, dependencies, translations, and optional tests
@@ -236,6 +250,9 @@ The widget records its change in `kwinrc`, preserves other settings, and relinqu
 └── tests/
     ├── CMakeLists.txt            # Test executables and CTest registration
     ├── check-translations.sh     # Template freshness and pt_BR coverage
+    ├── ci.sh                     # Shared CI and local validation pipeline
+    ├── install-package.cmake     # Isolated installation and package validation
+    ├── installedplugin_test.cpp  # Loading the installed plugin
     ├── dbus-session.conf         # Private D-Bus configuration for tests
     ├── kwinsettings_test.cpp     # KWin integration and QML components
     ├── translations_test.cpp     # Actual QML translation and accessibility

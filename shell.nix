@@ -10,6 +10,8 @@ pkgs.mkShell {
     cmake
     ninja
     pkg-config
+    actionlint # valida o workflow do GitHub Actions
+    shellcheck # valida o script compartilhado de CI
     gettext # extração, atualização e compilação dos catálogos de tradução
     dbus # dbus-run-session para testes isolados da sessão real
     kdePackages.extra-cmake-modules

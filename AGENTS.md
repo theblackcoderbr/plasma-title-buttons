@@ -133,7 +133,9 @@ cmake --build build --parallel 2 &&
 ctest --test-dir build --output-on-failure
 ```
 
-O CTest registra `windowcontroller`, `kwinsettings`, `translations` e `translation_catalogs`; o build KDE também pode adicionar `appstreamtest` conforme as ferramentas disponíveis. A cobertura inclui filtros e ações por janela, estado global do KWin, geometria QML nos dois eixos, acessibilidade, navegação, carregamento sob demanda, animações e traduções. `translation_catalogs` verifica o modelo contra uma extração nova e exige tradução completa de `pt_BR`. A validação visual na sessão real permanece manual.
+O CTest registra `windowcontroller`, `kwinsettings`, `translations`, `translation_catalogs`, `install_package` e `installed_plugin`; o build KDE também pode adicionar `appstreamtest`. A instalação de teste usa DESTDIR em uma área do build e prepara a fixture para carregar o plugin instalado, sem tocar na instalação real. Os testes têm limites de tempo. A cobertura inclui filtros e ações por janela, estado global do KWin, geometria QML nos dois eixos, acessibilidade, navegação, carregamento sob demanda, animações e traduções. `translation_catalogs` exige modelo atualizado e tradução completa de `pt_BR`. A validação visual na sessão real permanece manual.
+
+A CI em `.github/workflows/ci.yml` executa `bash tests/ci.sh` no shell Nix puro, com Bash fixado. O mesmo script pode ser executado localmente: valida actionlint/ShellCheck, configura `build-ci`, compila com dois processos e executa CTest sequencialmente, gerando logs e JUnit. A CI instala somente na área de teste; sincronização em `~/.local` e reinício do Shell são etapas locais posteriores ao sucesso. Actions são fixadas por commit; o workflow não configura proteção de branches.
 
 ---
 

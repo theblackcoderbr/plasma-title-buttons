@@ -48,3 +48,19 @@ find_program(GETTEXT_MSGCMP_EXECUTABLE msgcmp REQUIRED)
 add_test(NAME translation_catalogs COMMAND ${CMAKE_COMMAND} -E env
     "XGETTEXT=${GETTEXT_XGETTEXT_EXECUTABLE}" "MSGCMP=${GETTEXT_MSGCMP_EXECUTABLE}"
     sh "${CMAKE_CURRENT_SOURCE_DIR}/check-translations.sh")
+
+add_executable(installedplugin_test installedplugin_test.cpp)
+target_link_libraries(installedplugin_test PRIVATE Qt6::Gui Qt6::Qml)
+add_dependencies(installedplugin_test windowtitleandbuttonspluginplugin translations)
+set(TEST_STAGING_DIR "${PROJECT_BINARY_DIR}/test-install")
+add_test(NAME install_package COMMAND ${CMAKE_COMMAND}
+    "-DBUILD_DIR=${PROJECT_BINARY_DIR}" "-DSTAGING_DIR=${TEST_STAGING_DIR}"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/install-package.cmake")
+set_tests_properties(install_package PROPERTIES FIXTURES_SETUP installed_package TIMEOUT 60)
+add_test(NAME installed_plugin COMMAND ${DBUS_RUN_SESSION_EXECUTABLE}
+    --config-file=${CMAKE_CURRENT_SOURCE_DIR}/dbus-session.conf -- $<TARGET_FILE:installedplugin_test>
+    "${TEST_STAGING_DIR}/usr/share/plasma/plasmoids/org.kde.plasma.windowtitleandbuttons/contents/plugin")
+set_tests_properties(installed_plugin PROPERTIES
+    FIXTURES_REQUIRED installed_package TIMEOUT 30
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
+set_tests_properties(windowcontroller kwinsettings translations translation_catalogs PROPERTIES TIMEOUT 120)
