@@ -237,6 +237,42 @@ private Q_SLOTS:
         QCOMPARE(source.maximized, 1);
     }
 
+    void cycleWithoutActiveWindow_data()
+    {
+        QTest::addColumn<int>("direction");
+        QTest::addColumn<int>("expectedRow");
+        QTest::newRow("forward") << 1 << 1;
+        QTest::newRow("reverse") << -1 << 3;
+        QTest::newRow("zero") << 0 << -1;
+    }
+
+    void cycleWithoutActiveWindow()
+    {
+        QFETCH(int, direction);
+        QFETCH(int, expectedRow);
+        FakeWindows source;
+        const QRect screen(0, 0, 1920, 1080);
+        source.windows = {
+            {QStringLiteral("focused elsewhere"), {QStringLiteral("A")}, {1}, QRect(1920, 0, 1920, 1080), false, true},
+            {QStringLiteral("first local"), {QStringLiteral("A")}, {1}, screen},
+            {QStringLiteral("other desktop"), {QStringLiteral("A")}, {2}, screen},
+            {QStringLiteral("last local minimized"), {QStringLiteral("A")}, {1}, screen, false, false, false, true, true},
+            {QStringLiteral("other activity"), {QStringLiteral("B")}, {1}, screen},
+        };
+        WindowController controller;
+        auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);
+        QVERIFY(filter);
+        filter->setFilterByCurrentVirtualDesktop(false);
+        filter->setVirtualDesktop(1);
+        filter->setActivity(QStringLiteral("A"));
+        controller.setScreenGeometry(screen);
+        filter->setSourceModel(&source);
+        QCOMPARE(controller.windowCount(), 2);
+        QVERIFY(!controller.hasActiveWindow());
+        controller.cycleWindow(direction);
+        QCOMPARE(source.activated, expectedRow);
+    }
+
     void cycleSingleWindow_data()
     {
         QTest::addColumn<int>("direction");

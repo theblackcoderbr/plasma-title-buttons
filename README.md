@@ -20,7 +20,7 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - Quando nenhuma janela estiver em foco, exibe suavemente `Plasma Workspace`.
   - **Ações Rápidas no Título**:
     - **Clique esquerdo**: Minimiza a janela em foco quando maximizada; caso contrário, maximiza, se a janela permitir a ação.
-    - **Roda do mouse (Scroll) ou clique do botão do meio**: Percorre e alterna ciclicamente entre as janelas abertas, incluindo minimizadas, na mesma tela, área de trabalho virtual e atividade atuais. O scroll acumula pequenos movimentos do touchpad e limita as trocas a uma a cada 300 ms; o clique do meio é imediato. Pedidos de atenção não permitem que janelas de outros contextos entrem no ciclo.
+    - **Roda do mouse (Scroll) ou clique do botão do meio**: Percorre e alterna ciclicamente entre as janelas abertas, incluindo minimizadas, na mesma tela, área de trabalho virtual e atividade atuais. O scroll acumula pequenos movimentos do touchpad e limita as trocas a uma a cada 300 ms; o clique do meio é imediato. Sem janela elegível em foco, avançar seleciona a primeira janela e retroceder seleciona a última. Pedidos de atenção não permitem que janelas de outros contextos entrem no ciclo.
 - **Botões de Controle Condicionais**:
   - Os botões aparecem na ordem **Minimizar, Maximizar/Restaurar e Fechar**, quando habilitados, com uma posição permitida no painel e a janela ativa maximizada.
   - Ações que a janela não permite ficam desabilitadas. Os três estilos oferecem navegação por Tab, ativação por Espaço, indicação de foco e nomes acessíveis traduzíveis.

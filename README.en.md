@@ -20,7 +20,7 @@ An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**,
   - When no window is focused, gently falls back to `Plasma Workspace`.
   - **Quick Title Bar Actions**:
     - **Left click**: Minimizes the focused window when maximized; otherwise, maximizes it, if the window supports the action.
-    - **Mouse wheel scroll or Middle click**: Cycles through open windows, including minimized ones, on the same screen, current virtual desktop, and current activity. Scrolling accumulates small touchpad movements and limits switching to once every 300 ms; middle click remains immediate. Attention requests do not let windows from other contexts enter the cycle.
+    - **Mouse wheel scroll or Middle click**: Cycles through open windows, including minimized ones, on the same screen, current virtual desktop, and current activity. Scrolling accumulates small touchpad movements and limits switching to once every 300 ms; middle click remains immediate. When no eligible window is focused, moving forward selects the first window and moving backward selects the last. Attention requests do not let windows from other contexts enter the cycle.
 - **Conditional Window Control Buttons**:
   - Buttons appear in the order **Minimize, Maximize/Restore, Close**, when enabled, with an allowed panel position and a maximized active window.
   - Actions unsupported by the window are disabled. All three styles support Tab navigation, Space activation, focus indicators, and translatable accessible names.

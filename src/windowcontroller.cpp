@@ -300,7 +300,8 @@ void WindowController::cycleWindow(int direction)
         return;
     }
 
-    int nextPos = 0;
+    // Sem foco local, entra no ciclo pela extremidade correspondente à direção.
+    int nextPos = direction > 0 ? 0 : rows.size() - 1;
     if (currentPos != -1) {
         if (direction > 0) {
             nextPos = (currentPos + 1) % rows.size();
