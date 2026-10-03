@@ -61,6 +61,7 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - Compilador compatível com C++20 (GCC ou Clang)
   - Extra CMake Modules (ECM)
   - Ninja (recomendado) ou Make
+  - GNU Gettext (catálogos de tradução)
   - Qt 6 (Core, Gui, Qml, Quick, Svg)
   - KDE Frameworks 6 (KCoreAddons, KI18n, KConfig, KWindowSystem)
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
@@ -158,6 +159,28 @@ Clicando com o botão direito no widget e selecionando **Configurar Título e Bo
             ├── WindowTitle.qml   # Componente de renderização e eventos do título
             ├── WindowButtons.qml # Componente de renderização dos botões de controle
             └── configGeneral.qml # Interface gráfica de configurações do usuário
+```
+
+---
+
+## 🌐 Traduções
+
+A interface acompanha o idioma do Plasma, com tradução completa para **português brasileiro (`pt_BR`)** e inglês como idioma de origem e alternativa quando não há tradução. Os títulos recebidos dos aplicativos e o texto de ausência de janela `Plasma Workspace` são preservados.
+
+O build compila os catálogos automaticamente; `cmake --install build` instala os arquivos `.mo` em `share/locale` e em `contents/locale` dentro do pacote do widget. O domínio é `plasma_applet_org.kde.plasma.windowtitleandbuttons`.
+
+Para atualizar o modelo `.pot` e incorporar mudanças nos catálogos `.po`, execute com GNU Gettext disponível (incluído no shell Nix):
+
+```bash
+sh po/update.sh
+```
+
+Edite `po/pt_BR/plasma_applet_org.kde.plasma.windowtitleandbuttons.po` para revisar a tradução. Para adicionar outro idioma, crie `po/<idioma>/` e use `msginit` com o modelo em `po/`. Traduza também `Name[<idioma>]` e `Description[<idioma>]` em `package/metadata.json`, usados no seletor de widgets. Reconfigure e compile após adicionar um idioma.
+
+Os testes verificam se o modelo está atualizado, se todas as mensagens de `pt_BR` estão traduzidas e se o QML carrega o catálogo nos controles, nomes acessíveis e configurações. Também verificam a alternativa em inglês. O teste de tradução requer a localidade `en_US.UTF-8`, fornecida pelo shell Nix; em outras distribuições, habilite essa localidade para executar os testes. Após instalar, a conferência visual pode ser feita com:
+
+```bash
+LC_ALL=pt_BR.UTF-8 LANGUAGE=pt_BR plasmoidviewer -a org.kde.plasma.windowtitleandbuttons
 ```
 
 ---

@@ -61,6 +61,7 @@ An elegant and highly configurable panel applet (plasmoid) for **KDE Plasma 6**,
   - C++20 compliant compiler (GCC or Clang)
   - Extra CMake Modules (ECM)
   - Ninja (recommended) or Make
+  - GNU Gettext (translation catalogs)
   - Qt 6 (Core, Gui, Qml, Quick, Svg)
   - KDE Frameworks 6 (KCoreAddons, KI18n, KConfig, KWindowSystem)
   - Plasma 6 Workspace (`libplasma`, `PW::LibTaskManager`)
@@ -158,6 +159,28 @@ Right-clicking the widget and selecting **Configure Window Title and Buttons...*
             ├── WindowTitle.qml   # Title rendering and interaction component
             ├── WindowButtons.qml # Window buttons rendering component
             └── configGeneral.qml # General settings page UI
+```
+
+---
+
+## 🌐 Translations
+
+The interface follows Plasma's language, with a complete **Brazilian Portuguese (`pt_BR`)** translation and English as the source language and fallback. Application window titles and the no-window text `Plasma Workspace` are preserved.
+
+The build compiles catalogs automatically; `cmake --install build` installs `.mo` files both in `share/locale` and in the widget package's `contents/locale`. The translation domain is `plasma_applet_org.kde.plasma.windowtitleandbuttons`.
+
+To update the `.pot` template and merge source changes into `.po` catalogs, run with GNU Gettext available (included in the Nix shell):
+
+```bash
+sh po/update.sh
+```
+
+Edit `po/pt_BR/plasma_applet_org.kde.plasma.windowtitleandbuttons.po` to revise the translation. To add another language, create `po/<language>/` and use `msginit` with the template in `po/`. Also translate `Name[<language>]` and `Description[<language>]` in `package/metadata.json`, which the widget picker uses. Reconfigure and build after adding a language.
+
+Tests check that the template is current, all `pt_BR` messages are translated, and QML loads the catalog for controls, accessible names, and settings. They also check the English fallback. The translation test requires the `en_US.UTF-8` locale, provided by the Nix shell; enable that locale on other distributions before running the tests. After installation, preview the translation with:
+
+```bash
+LC_ALL=pt_BR.UTF-8 LANGUAGE=pt_BR plasmoidviewer -a org.kde.plasma.windowtitleandbuttons
 ```
 
 ---

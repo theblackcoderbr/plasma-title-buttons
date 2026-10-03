@@ -28,3 +28,22 @@ target_include_directories(windowcontroller_test PRIVATE ../src)
 target_link_libraries(windowcontroller_test PRIVATE Qt6::Test Qt6::Quick Qt6::DBus KF6::ConfigCore PW::LibTaskManager)
 add_test(NAME windowcontroller COMMAND ${DBUS_RUN_SESSION_EXECUTABLE} --config-file=${CMAKE_CURRENT_SOURCE_DIR}/dbus-session.conf -- $<TARGET_FILE:windowcontroller_test>)
 set_tests_properties(windowcontroller PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
+
+add_executable(translations_test translations_test.cpp ../src/kwinsettings.cpp ../src/kwinsettings.h)
+target_include_directories(translations_test PRIVATE ../src)
+target_link_libraries(translations_test PRIVATE Qt6::Test Qt6::Quick Qt6::DBus KF6::ConfigCore KF6::I18n)
+target_compile_definitions(translations_test PRIVATE
+    APPLET_TRANSLATION_DOMAIN="${TRANSLATION_DOMAIN}"
+    TRANSLATIONS_PATH="${PROJECT_BINARY_DIR}/po"
+    PACKAGE_PATH="${PROJECT_SOURCE_DIR}/package"
+)
+add_dependencies(translations_test translations)
+add_test(NAME translations COMMAND ${DBUS_RUN_SESSION_EXECUTABLE} --config-file=${CMAKE_CURRENT_SOURCE_DIR}/dbus-session.conf -- $<TARGET_FILE:translations_test>)
+# Gettext desabilita traduções na localidade C, mesmo com LANGUAGE definido.
+set_tests_properties(translations PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;LC_ALL=en_US.UTF-8")
+
+find_program(GETTEXT_XGETTEXT_EXECUTABLE xgettext REQUIRED)
+find_program(GETTEXT_MSGCMP_EXECUTABLE msgcmp REQUIRED)
+add_test(NAME translation_catalogs COMMAND ${CMAKE_COMMAND} -E env
+    "XGETTEXT=${GETTEXT_XGETTEXT_EXECUTABLE}" "MSGCMP=${GETTEXT_MSGCMP_EXECUTABLE}"
+    sh "${CMAKE_CURRENT_SOURCE_DIR}/check-translations.sh")

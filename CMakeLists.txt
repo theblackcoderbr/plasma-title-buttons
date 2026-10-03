@@ -53,6 +53,8 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
 find_package(Plasma REQUIRED)
 find_package(LibTaskManager REQUIRED)
 
+set(TRANSLATION_DOMAIN "plasma_applet_org.kde.plasma.windowtitleandbuttons")
+add_subdirectory(po)
 add_subdirectory(src)
 
 include(CTest)

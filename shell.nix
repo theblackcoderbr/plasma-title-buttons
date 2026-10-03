@@ -10,6 +10,7 @@ pkgs.mkShell {
     cmake
     ninja
     pkg-config
+    gettext # extração, atualização e compilação dos catálogos de tradução
     dbus # dbus-run-session para testes isolados da sessão real
     kdePackages.extra-cmake-modules
   ];
@@ -36,6 +37,9 @@ pkgs.mkShell {
   # Padrão conservador do projeto: dois processos, independentemente do hardware.
   NIX_BUILD_CORES = 2;
   CMAKE_BUILD_PARALLEL_LEVEL = 2;
+
+  # Os testes de tradução precisam de en_US.UTF-8, mesmo sob hosts com locale C.
+  LOCALE_ARCHIVE = "${pkgs.glibcLocales}/lib/locale/locale-archive";
 
   shellHook = ''
     echo "=========================================================="

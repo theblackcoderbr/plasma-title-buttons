@@ -1,0 +1,185 @@
+# Brazilian Portuguese translations for Plasma Title & Buttons.
+# SPDX-FileCopyrightText: 2026 Plasma Title & Buttons contributors
+# SPDX-License-Identifier: GPL-3.0-only
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: plasma-title-buttons 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-02 22:52-0300\n"
+"PO-Revision-Date: 2026-10-02 22:48-0300\n"
+"Last-Translator: Plasma Title & Buttons contributors\n"
+"Language-Team: Brazilian Portuguese\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: package/contents/config/config.qml
+msgid "General"
+msgstr "Geral"
+
+#: package/contents/ui/WindowButtons.qml
+msgid "Minimize window"
+msgstr "Minimizar janela"
+
+#: package/contents/ui/WindowButtons.qml
+msgid "Restore window"
+msgstr "Restaurar janela"
+
+#: package/contents/ui/WindowButtons.qml
+msgid "Maximize window"
+msgstr "Maximizar janela"
+
+#: package/contents/ui/WindowButtons.qml
+msgid "Close window"
+msgstr "Fechar janela"
+
+#: package/contents/ui/configGeneral.qml
+msgid "The panel layout is not ready or is being edited. Window buttons are temporarily unavailable; your preference is preserved."
+msgstr "O layout do painel ainda não está pronto ou está sendo editado. Os botões da janela estão temporariamente indisponíveis; sua preferência será mantida."
+
+#: package/contents/ui/configGeneral.qml
+msgid "Both panel edges are occupied by other elements. Move this widget to a panel edge to show window buttons."
+msgstr "As duas extremidades do painel estão ocupadas por outros elementos. Mova este widget para uma extremidade do painel para exibir os botões da janela."
+
+#: package/contents/ui/configGeneral.qml
+msgid "The title occupies the only available panel edge. Center the title, move it to the opposite side, or move this widget to another panel edge to show window buttons."
+msgstr "O título ocupa a única extremidade disponível do painel. Centralize o título, mova-o para o lado oposto ou mova este widget para outra extremidade do painel para exibir os botões da janela."
+
+#: package/contents/ui/configGeneral.qml
+msgid "The left or top edge of the panel is occupied by other elements. Window buttons can only be placed on the right or bottom edge."
+msgstr "A extremidade esquerda ou superior do painel está ocupada por outros elementos. Os botões da janela só podem ficar na extremidade direita ou inferior."
+
+#: package/contents/ui/configGeneral.qml
+msgid "The right or bottom edge of the panel is occupied by other elements. Window buttons can only be placed on the left or top edge."
+msgstr "A extremidade direita ou inferior do painel está ocupada por outros elementos. Os botões da janela só podem ficar na extremidade esquerda ou superior."
+
+#: package/contents/ui/configGeneral.qml
+msgid "Element Visibility"
+msgstr "Visibilidade dos elementos"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Window Icon:"
+msgstr "Ícone da janela:"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Show application icon"
+msgstr "Exibir o ícone do aplicativo"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Window Title:"
+msgstr "Título da janela:"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Show active window title"
+msgstr "Exibir o título da janela ativa"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Window Buttons:"
+msgstr "Botões da janela:"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Show control buttons (Minimize, Maximize, Close)"
+msgstr "Exibir os botões de controle (Minimizar, Maximizar, Fechar)"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Alignment & Positioning"
+msgstr "Alinhamento e posicionamento"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Title Position:"
+msgstr "Posição do título:"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Left / Top"
+msgstr "Esquerda / Topo"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Center"
+msgstr "Centro"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Right / Bottom"
+msgstr "Direita / Base"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Center relative to the entire panel (absolute)"
+msgstr "Centralizar em relação ao painel inteiro (centralização absoluta)"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Maintains the window title mathematically centered on the full panel length, even when asymmetric elements (such as the system tray or application launcher) exist on the panel."
+msgstr "Mantém o título da janela matematicamente centralizado no comprimento total do painel, mesmo quando há elementos assimétricos, como a área de notificação ou o lançador de aplicativos."
+
+#: package/contents/ui/configGeneral.qml
+msgid "Buttons Position:"
+msgstr "Posição dos botões:"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Buttons Style & Size"
+msgstr "Estilo e tamanho dos botões"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Button Style:"
+msgstr "Estilo dos botões:"
+
+#: package/contents/ui/configGeneral.qml
+msgid "System Theme (Breeze / Active Theme)"
+msgstr "Tema do sistema (Breeze / tema ativo)"
+
+#: package/contents/ui/configGeneral.qml
+msgid "macOS Traffic Lights (Colored Circles)"
+msgstr "Estilo macOS (círculos coloridos)"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Minimalist (Geometric Outline)"
+msgstr "Minimalista (contorno geométrico)"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Button Size:"
+msgstr "Tamanho dos botões:"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Small (Compact - 24px)"
+msgstr "Pequeno (compacto - 24 px)"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Medium (Default - 32px)"
+msgstr "Médio (padrão - 32 px)"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Large (Spacious - 44px)"
+msgstr "Grande (espaçoso - 44 px)"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Window Management"
+msgstr "Gerenciamento de janelas"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Maximized Windows:"
+msgstr "Janelas maximizadas:"
+
+#: package/contents/ui/configGeneral.qml
+msgid "Hide original window title bar when maximized (KWin)"
+msgstr "Ocultar a barra de título original da janela quando maximizada (KWin)"
+
+#: package/contents/ui/configGeneral.qml
+msgid "This KWin setting applies to all monitors and widget instances. Changes take effect immediately and are not undone by Cancel."
+msgstr "Esta configuração do KWin se aplica a todos os monitores e instâncias do widget. As alterações têm efeito imediato e não são desfeitas ao clicar em Cancelar."
+
+#: package/contents/ui/configGeneral.qml
+msgid "Global setting for all monitors. Changes apply immediately."
+msgstr "Configuração global para todos os monitores. As alterações são aplicadas imediatamente."
+
+#: package/contents/ui/configGeneral.qml
+msgid "Could not save the KWin setting. Check write permissions for kwinrc and whether the setting is locked."
+msgstr "Não foi possível salvar a configuração do KWin. Verifique as permissões de escrita do arquivo kwinrc e se a configuração está bloqueada."
+
+#: package/contents/ui/configGeneral.qml
+msgid "The setting was saved, but KWin could not reload it. Retry to apply the saved setting."
+msgstr "A configuração foi salva, mas o KWin não conseguiu recarregá-la. Tente novamente para aplicar a configuração salva."
+
+#: package/contents/ui/configGeneral.qml
+msgid "Retry"
+msgstr "Tentar novamente"
