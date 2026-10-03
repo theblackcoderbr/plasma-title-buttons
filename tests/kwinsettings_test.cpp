@@ -16,6 +16,7 @@
 #include <QQmlEngine>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QPointer>
 #include <QSaveFile>
 #include <QSignalSpy>
 #include <QTemporaryDir>
@@ -210,6 +211,10 @@ private Q_SLOTS:
         QVERIFY(QTest::qWaitForWindowExposed(&window));
         auto *controller = buttons->findChild<QObject *>(QStringLiteral("controller"));
         QVERIFY(controller);
+        // As definições dos estilos existem, mas só três controles são instanciados.
+        for (const QString &other : {QStringLiteral("system"), QStringLiteral("macos"), QStringLiteral("minimal")}) {
+            QCOMPARE(buttons->findChild<QQuickItem *>(other + QStringLiteral("-close")) != nullptr, other == style);
+        }
         const QStringList actions{QStringLiteral("close"), QStringLiteral("minimize"), QStringLiteral("maximize")};
         const QStringList capabilities{QStringLiteral("canClose"), QStringLiteral("canMinimize"), QStringLiteral("canMaximize")};
         const QStringList names{QStringLiteral("Close window"), QStringLiteral("Minimize window"), QStringLiteral("Maximize window")};
@@ -255,6 +260,181 @@ private Q_SLOTS:
         for (const QString &action : actions) {
             QVERIFY(!buttons->findChild<QQuickItem *>(style + QLatin1Char('-') + action)->isEnabled());
         }
+        QPointer<QQuickItem> oldButton = maximize;
+        buttons->setProperty("buttonStyle", style == QStringLiteral("system") ? QStringLiteral("macos") : QStringLiteral("system"));
+        QTRY_VERIFY(oldButton.isNull());
+        QVERIFY(!buttons->findChild<QQuickItem *>(style + QStringLiteral("-maximize")));
+    }
+
+    void appletLoadsOnlySelectedContent_data()
+    {
+        QTest::addColumn<bool>("vertical");
+        QTest::newRow("horizontal") << false;
+        QTest::newRow("vertical") << true;
+    }
+
+    void appletLoadsOnlySelectedContent()
+    {
+        QFETCH(bool, vertical);
+        QQmlEngine engine;
+        engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
+        QQuickWindow window;
+        window.resize(vertical ? 26 : 800, vertical ? 800 : 26);
+        QFile source(QFileInfo(QStringLiteral(CONFIG_QML_PATH)).dir().filePath(QStringLiteral("main.qml")));
+        QVERIFY(source.open(QIODevice::ReadOnly));
+        const QByteArray main = source.readAll();
+        const auto offset = main.indexOf("fullRepresentation: Item {");
+        QVERIFY(offset >= 0);
+        // Executa a representação real; simula apenas o contexto do Plasma e as janelas.
+        QByteArray representation = main.mid(offset);
+        representation.replace("fullRepresentation: Item {", "Item {");
+        representation.replace("Plasmoid.configuration", "configuration");
+        representation.replace("id: panelAxis", "id: panelAxis; objectName: \"axis\"");
+        QQmlComponent component(&engine);
+        component.setData(QByteArray(R"(
+            import QtQuick
+            import QtQuick.Layouts
+            Item {
+                id: root
+                width: 800; height: 26
+                property bool isVertical: false
+                readonly property real panelThickness: isVertical ? width : height
+                property string titlePosition: "left"
+                property string buttonPosition: "right"
+                property bool centerInPanel: false
+                property bool buttonsVisible: true
+                readonly property bool titleOnLeft: titlePosition === "left"
+                readonly property bool titleOnCenter: titlePosition === "center"
+                readonly property bool titleOnRight: titlePosition === "right"
+                readonly property bool buttonsOnLeft: buttonPosition === "left"
+                readonly property bool buttonsOnRight: buttonPosition === "right"
+                QtObject {
+                    id: configuration
+                    property bool showIcon: false
+                    property bool showTitle: true
+                    property string buttonsStyle: "system"
+                    property string buttonsSize: "medium"
+                }
+                QtObject {
+                    id: windowController
+                    property string windowTitle: "Long title ".repeat(100)
+                    property bool hasActiveWindow: true
+                    property bool isMaximized: true
+                    property bool canClose: true
+                    property bool canMinimize: true
+                    property bool canMaximize: true
+                }
+        )") + representation, QUrl::fromLocalFile(QStringLiteral(CONFIG_QML_PATH)));
+        QScopedPointer<QObject> fixture(component.create());
+        QVERIFY2(fixture, qPrintable(component.errorString()));
+        auto *item = qobject_cast<QQuickItem *>(fixture.data());
+        item->setWidth(window.width());
+        item->setHeight(window.height());
+        item->setProperty("isVertical", vertical);
+        item->setParentItem(window.contentItem());
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        auto titles = [&]() {
+            QList<QQuickItem *> result;
+            for (auto *child : fixture->findChildren<QQuickItem *>()) {
+                if (child->property("showTitle").isValid()) {
+                    result.append(child);
+                }
+            }
+            return result;
+        };
+        auto buttonSets = [&]() {
+            int count = 0;
+            for (auto *child : fixture->findChildren<QQuickItem *>()) {
+                count += child->property("buttonsSize").isValid();
+            }
+            return count;
+        };
+        for (const QString &position : {QStringLiteral("left"), QStringLiteral("right"), QStringLiteral("center")}) {
+            item->setProperty("titlePosition", position);
+            item->setProperty("buttonPosition", position == QStringLiteral("right") ? QStringLiteral("left") : QStringLiteral("right"));
+            QTRY_COMPARE(titles().size(), 1);
+            QTRY_COMPARE(buttonSets(), 1);
+            QTRY_COMPARE(titles().first()->property("alignment").toString(), position);
+            QTRY_VERIFY(titles().first()->width() > 0);
+            auto *axis = fixture->findChild<QQuickItem *>(QStringLiteral("axis"));
+            QVERIFY(axis);
+            QTRY_VERIFY(titles().first()->width() <= axis->width() * (position == QStringLiteral("center") ? 0.65 : 0.8) + 0.01);
+        }
+        item->setProperty("centerInPanel", true);
+        QTRY_COMPARE(titles().size(), 1);
+        QTRY_VERIFY(titles().first()->property("panelLength").isValid());
+        QTRY_COMPARE(titles().first()->width(), 520.0);
+        const QPointF center = titles().first()->mapToScene(QPointF(260, 13));
+        QVERIFY(qAbs((vertical ? center.y() : center.x()) - 400) < 0.01);
+        item->setProperty("buttonsVisible", false);
+        QTRY_COMPARE(buttonSets(), 0);
+        QTRY_COMPARE(titles().size(), 1);
+        item->setProperty("buttonsVisible", true);
+        QTRY_COMPARE(buttonSets(), 1);
+    }
+
+    void buttonsFadeBeforeUnloading()
+    {
+        QQmlEngine engine;
+        engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
+        QQuickWindow window;
+        window.resize(200, 32);
+        QQmlComponent component(&engine);
+        component.setData(R"(
+            import QtQuick
+            import QtQuick.Layouts
+            RowLayout {
+                width: 200; height: 32
+                FadingLoader {
+                    objectName: "loader"
+                    Layout.fillHeight: true
+                    sourceComponent: WindowButtons {
+                        controller: QtObject {
+                            property bool hasActiveWindow: true
+                            property bool isMaximized: true
+                            property bool canClose: true
+                            property bool canMinimize: true
+                            property bool canMaximize: true
+                        }
+                    }
+                }
+                Item { Layout.fillWidth: true }
+            }
+        )", QUrl::fromLocalFile(QStringLiteral(CONFIG_QML_PATH)));
+        QScopedPointer<QObject> fixture(component.create());
+        QVERIFY2(fixture, qPrintable(component.errorString()));
+        qobject_cast<QQuickItem *>(fixture.data())->setParentItem(window.contentItem());
+        auto *loader = fixture->findChild<QQuickItem *>(QStringLiteral("loader"));
+        QVERIFY(loader);
+        QVERIFY(!loader->isVisible());
+        QVERIFY(!fixture->findChild<QQuickItem *>(QStringLiteral("system-close")));
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        loader->setProperty("shown", true);
+        QTRY_COMPARE(loader->opacity(), 1.0);
+        QPointer<QQuickItem> button = fixture->findChild<QQuickItem *>(QStringLiteral("system-close"));
+        QVERIFY(button);
+        const qreal width = loader->width();
+        QVERIFY(width > 0);
+        loader->setProperty("shown", false);
+        QVERIFY(loader->isVisible());
+        QVERIFY(!button->isEnabled());
+        QTRY_VERIFY(loader->opacity() < 1 && loader->opacity() > 0);
+        QCOMPARE(loader->width(), width);
+        // Inverter durante a saída reutiliza o conteúdo e restaura a interação.
+        loader->setProperty("shown", true);
+        QTRY_COMPARE(loader->opacity(), 1.0);
+        QCOMPARE(fixture->findChild<QQuickItem *>(QStringLiteral("system-close")), button.data());
+        QVERIFY(button->isEnabled());
+        loader->setProperty("shown", false);
+        QTRY_VERIFY(!loader->isVisible());
+        QTRY_VERIFY(button.isNull());
+        QVERIFY(!loader->property("active").toBool());
+        loader->setProperty("shown", true);
+        QTRY_COMPARE(loader->opacity(), 1.0);
+        QVERIFY(fixture->findChild<QQuickItem *>(QStringLiteral("system-close")));
+        QTRY_COMPARE(loader->width(), width);
     }
 
     void titleScrollIsPaced()

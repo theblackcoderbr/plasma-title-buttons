@@ -128,34 +128,41 @@ PlasmoidItem {
                 // =============================================================
 
                 // Botões de controle à esquerda
-                WindowButtons {
+                FadingLoader {
                     id: buttonsLeft
-                    vertical: root.isVertical
-                    controller: windowController
-                    panelThickness: root.panelThickness
-                    buttonStyle: Plasmoid.configuration.buttonsStyle
-                    buttonsSize: Plasmoid.configuration.buttonsSize
-                    visible: root.buttonsOnLeft && root.buttonsVisible
-                    opacity: (root.buttonsOnLeft && root.buttonsVisible) ? 1.0 : 0.0
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    shown: root.buttonsOnLeft && root.buttonsVisible
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
                     Layout.fillHeight: true
+                    sourceComponent: Component {
+                        WindowButtons {
+                            vertical: root.isVertical
+                            controller: windowController
+                            panelThickness: root.panelThickness
+                            buttonStyle: Plasmoid.configuration.buttonsStyle
+                            buttonsSize: Plasmoid.configuration.buttonsSize
+                        }
+                    }
                 }
 
                 // Título à esquerda
-                WindowTitle {
+                Loader {
                     id: titleLeft
-                    vertical: root.isVertical
-                    controller: windowController
-                    panelThickness: root.panelThickness
-                    showIcon: Plasmoid.configuration.showIcon
-                    showTitle: Plasmoid.configuration.showTitle
-                    alignment: "left"
-                    visible: root.titleOnLeft
+                    active: root.titleOnLeft
+                    visible: active
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
                     Layout.fillWidth: root.titleOnLeft
                     Layout.fillHeight: true
                     Layout.maximumWidth: parent.width * 0.8
+                    sourceComponent: Component {
+                        WindowTitle {
+                            vertical: root.isVertical
+                            controller: windowController
+                            panelThickness: root.panelThickness
+                            showIcon: Plasmoid.configuration.showIcon
+                            showTitle: Plasmoid.configuration.showTitle
+                            alignment: "left"
+                        }
+                    }
                 }
 
                 // Contrapeso de simetria (para centralizar o título quando botões estão à direita, no modo relativo)
@@ -179,18 +186,23 @@ PlasmoidItem {
                 // =============================================================
                 // 3. SEÇÃO CENTRAL (Título centralizado)
                 // =============================================================
-                WindowTitle {
+                Loader {
                     id: titleCenter
-                    vertical: root.isVertical
-                    controller: windowController
-                    panelThickness: root.panelThickness
-                    showIcon: Plasmoid.configuration.showIcon
-                    showTitle: Plasmoid.configuration.showTitle
-                    alignment: "center"
-                    visible: root.titleOnCenter && !root.centerInPanel
+                    active: root.titleOnCenter && !root.centerInPanel
+                    visible: active
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                     Layout.fillHeight: true
                     Layout.maximumWidth: parent.width * 0.65
+                    sourceComponent: Component {
+                        WindowTitle {
+                            vertical: root.isVertical
+                            controller: windowController
+                            panelThickness: root.panelThickness
+                            showIcon: Plasmoid.configuration.showIcon
+                            showTitle: Plasmoid.configuration.showTitle
+                            alignment: "center"
+                        }
+                    }
                 }
 
                 // =============================================================
@@ -215,48 +227,63 @@ PlasmoidItem {
                 }
 
                 // Título à direita
-                WindowTitle {
+                Loader {
                     id: titleRight
-                    vertical: root.isVertical
-                    controller: windowController
-                    panelThickness: root.panelThickness
-                    showIcon: Plasmoid.configuration.showIcon
-                    showTitle: Plasmoid.configuration.showTitle
-                    alignment: "right"
-                    visible: root.titleOnRight
+                    active: root.titleOnRight
+                    visible: active
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                     Layout.fillWidth: root.titleOnRight
                     Layout.fillHeight: true
                     Layout.maximumWidth: parent.width * 0.8
+                    sourceComponent: Component {
+                        WindowTitle {
+                            vertical: root.isVertical
+                            controller: windowController
+                            panelThickness: root.panelThickness
+                            showIcon: Plasmoid.configuration.showIcon
+                            showTitle: Plasmoid.configuration.showTitle
+                            alignment: "right"
+                        }
+                    }
                 }
 
                 // Botões de controle à direita
-                WindowButtons {
+                FadingLoader {
                     id: buttonsRight
-                    vertical: root.isVertical
-                    controller: windowController
-                    panelThickness: root.panelThickness
-                    buttonStyle: Plasmoid.configuration.buttonsStyle
-                    buttonsSize: Plasmoid.configuration.buttonsSize
-                    visible: root.buttonsOnRight && root.buttonsVisible
-                    opacity: (root.buttonsOnRight && root.buttonsVisible) ? 1.0 : 0.0
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    shown: root.buttonsOnRight && root.buttonsVisible
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                     Layout.fillHeight: true
+                    sourceComponent: Component {
+                        WindowButtons {
+                            vertical: root.isVertical
+                            controller: windowController
+                            panelThickness: root.panelThickness
+                            buttonStyle: Plasmoid.configuration.buttonsStyle
+                            buttonsSize: Plasmoid.configuration.buttonsSize
+                        }
+                    }
                 }
             }
 
-            PanelCenteredTitle {
-                vertical: root.isVertical
-                controller: windowController
-                panelThickness: root.panelThickness
-                showIcon: Plasmoid.configuration.showIcon
-                showTitle: Plasmoid.configuration.showTitle
-                visible: root.titleOnCenter && root.centerInPanel
-                panelLength: container.totalPanelLength
-                panelOffset: container.globalPos
-                leftInset: buttonsLeft.visible ? buttonsLeft.x + buttonsLeft.width + contentLayout.spacing : 0
-                rightInset: buttonsRight.visible ? panelAxis.width - buttonsRight.x + contentLayout.spacing : 0
+            Loader {
+                anchors.fill: parent
+                active: root.titleOnCenter && root.centerInPanel
+                visible: active
+                sourceComponent: Component {
+                    Item {
+                        PanelCenteredTitle {
+                            vertical: root.isVertical
+                            controller: windowController
+                            panelThickness: root.panelThickness
+                            showIcon: Plasmoid.configuration.showIcon
+                            showTitle: Plasmoid.configuration.showTitle
+                            panelLength: container.totalPanelLength
+                            panelOffset: container.globalPos
+                            leftInset: buttonsLeft.visible ? buttonsLeft.x + buttonsLeft.width + contentLayout.spacing : 0
+                            rightInset: buttonsRight.visible ? panelAxis.width - buttonsRight.x + contentLayout.spacing : 0
+                        }
+                    }
+                }
             }
         }
     }

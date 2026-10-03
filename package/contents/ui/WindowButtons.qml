@@ -190,107 +190,119 @@ RowLayout {
         }
     }
 
+    // Somente o estilo selecionado mantém controles e bindings ativos.
+    Loader {
+        sourceComponent: root.buttonStyle === "macos" ? macosStyle
+            : (root.buttonStyle === "minimal" ? minimalStyle : systemStyle)
+    }
+
     // LAYOUT SEGUNDO O ESTILO SELECIONADO:
 
     // ------------------------------------------
     // Renderizador: Estilo macOS (Minimizar, Maximizar/Restaurar, Fechar)
     // ------------------------------------------
-    Row {
-        spacing: root.spacing
-        visible: root.buttonStyle === "macos"
+    Component {
+        id: macosStyle
+        Row {
+            spacing: root.spacing
 
-        MacButton {
-            objectName: "macos-minimize"
-            text: i18n("Minimize window")
-            enabled: root.controller.hasActiveWindow && root.controller.canMinimize
-            normalColor: "#FFBD2E"
-            hoverBorderColor: "#DEA123"
-            symbolText: "−"
-            onClickedAction: root.controller.minimize()
-        }
+            MacButton {
+                objectName: "macos-minimize"
+                text: i18n("Minimize window")
+                enabled: root.controller.hasActiveWindow && root.controller.canMinimize
+                normalColor: "#FFBD2E"
+                hoverBorderColor: "#DEA123"
+                symbolText: "−"
+                onClickedAction: root.controller.minimize()
+            }
 
-        MacButton {
-            objectName: "macos-maximize"
-            text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
-            enabled: root.controller.hasActiveWindow && root.controller.canMaximize
-            normalColor: "#27C93F"
-            hoverBorderColor: "#1AAB29"
-            symbolText: "+"
-            onClickedAction: root.controller.toggleMaximize()
-        }
+            MacButton {
+                objectName: "macos-maximize"
+                text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
+                enabled: root.controller.hasActiveWindow && root.controller.canMaximize
+                normalColor: "#27C93F"
+                hoverBorderColor: "#1AAB29"
+                symbolText: "+"
+                onClickedAction: root.controller.toggleMaximize()
+            }
 
-        MacButton {
-            objectName: "macos-close"
-            text: i18n("Close window")
-            enabled: root.controller.hasActiveWindow && root.controller.canClose
-            normalColor: "#FF5F56"
-            hoverBorderColor: "#E0443E"
-            symbolText: "×"
-            onClickedAction: root.controller.close()
+            MacButton {
+                objectName: "macos-close"
+                text: i18n("Close window")
+                enabled: root.controller.hasActiveWindow && root.controller.canClose
+                normalColor: "#FF5F56"
+                hoverBorderColor: "#E0443E"
+                symbolText: "×"
+                onClickedAction: root.controller.close()
+            }
         }
     }
 
     // ------------------------------------------
     // Renderizador: Estilo Sistema / Breeze
     // ------------------------------------------
-    Row {
-        spacing: 2
-        visible: root.buttonStyle === "system"
+    Component {
+        id: systemStyle
+        Row {
+            spacing: 2
 
-        SystemButton {
-            objectName: "system-minimize"
-            text: i18n("Minimize window")
-            enabled: root.controller.hasActiveWindow && root.controller.canMinimize
-            iconName: "window-minimize"
-            onClickedAction: root.controller.minimize()
-        }
+            SystemButton {
+                objectName: "system-minimize"
+                text: i18n("Minimize window")
+                enabled: root.controller.hasActiveWindow && root.controller.canMinimize
+                iconName: "window-minimize"
+                onClickedAction: root.controller.minimize()
+            }
 
-        SystemButton {
-            objectName: "system-maximize"
-            text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
-            enabled: root.controller.hasActiveWindow && root.controller.canMaximize
-            iconName: root.controller.isMaximized ? "window-restore" : "window-maximize"
-            onClickedAction: root.controller.toggleMaximize()
-        }
+            SystemButton {
+                objectName: "system-maximize"
+                text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
+                enabled: root.controller.hasActiveWindow && root.controller.canMaximize
+                iconName: root.controller.isMaximized ? "window-restore" : "window-maximize"
+                onClickedAction: root.controller.toggleMaximize()
+            }
 
-        SystemButton {
-            objectName: "system-close"
-            text: i18n("Close window")
-            enabled: root.controller.hasActiveWindow && root.controller.canClose
-            iconName: "window-close"
-            onClickedAction: root.controller.close()
+            SystemButton {
+                objectName: "system-close"
+                text: i18n("Close window")
+                enabled: root.controller.hasActiveWindow && root.controller.canClose
+                iconName: "window-close"
+                onClickedAction: root.controller.close()
+            }
         }
     }
 
     // ------------------------------------------
     // Renderizador: Estilo Minimalista
     // ------------------------------------------
-    Row {
-        spacing: 2
-        visible: root.buttonStyle === "minimal"
+    Component {
+        id: minimalStyle
+        Row {
+            spacing: 2
 
-        MinimalButton {
-            objectName: "minimal-minimize"
-            text: i18n("Minimize window")
-            enabled: root.controller.hasActiveWindow && root.controller.canMinimize
-            iconName: "window-minimize"
-            onClickedAction: root.controller.minimize()
-        }
+            MinimalButton {
+                objectName: "minimal-minimize"
+                text: i18n("Minimize window")
+                enabled: root.controller.hasActiveWindow && root.controller.canMinimize
+                iconName: "window-minimize"
+                onClickedAction: root.controller.minimize()
+            }
 
-        MinimalButton {
-            objectName: "minimal-maximize"
-            text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
-            enabled: root.controller.hasActiveWindow && root.controller.canMaximize
-            iconName: root.controller.isMaximized ? "window-restore" : "window-maximize"
-            onClickedAction: root.controller.toggleMaximize()
-        }
+            MinimalButton {
+                objectName: "minimal-maximize"
+                text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
+                enabled: root.controller.hasActiveWindow && root.controller.canMaximize
+                iconName: root.controller.isMaximized ? "window-restore" : "window-maximize"
+                onClickedAction: root.controller.toggleMaximize()
+            }
 
-        MinimalButton {
-            objectName: "minimal-close"
-            text: i18n("Close window")
-            enabled: root.controller.hasActiveWindow && root.controller.canClose
-            iconName: "window-close"
-            onClickedAction: root.controller.close()
+            MinimalButton {
+                objectName: "minimal-close"
+                text: i18n("Close window")
+                enabled: root.controller.hasActiveWindow && root.controller.canClose
+                iconName: "window-close"
+                onClickedAction: root.controller.close()
+            }
         }
     }
 }
