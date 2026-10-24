@@ -87,7 +87,7 @@ Clone o repositório e compile o projeto utilizando CMake e Ninja:
 # 1. Configurar o build para instalação local do usuário (~/.local)
 cmake -B build -S . -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX="$HOME/.local" &&
+  -DCMAKE_INSTALL_PREFIX="$XDG_DATA_HOME" &&
 
 # 2. Compilar com o limite padrão de dois processos
 cmake --build build --parallel 2 &&
