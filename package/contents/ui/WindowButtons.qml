@@ -119,7 +119,7 @@ RowLayout {
     }
 
     // ==========================================
-    // 2. ESTILO SISTEMA (Breeze / Tema Ativo)
+    // 2. CONTROLE BASE (teclado, acessibilidade e ações)
     // ==========================================
     component SystemButton: PlasmaComponents3.ToolButton {
         id: sysBtn
@@ -162,11 +162,41 @@ RowLayout {
         }
     }
 
+    component BreezeButton: SystemButton {
+        id: breezeBtn
+        property string symbolAction: ""
+        opacity: enabled ? 1 : 0.4
+        background: Rectangle {
+            anchors.centerIn: parent
+            width: Math.min(parent.width, parent.height)
+            height: width
+            radius: width / 2
+            color: breezeBtn.hovered || breezeBtn.down
+                ? (breezeBtn.symbolAction === "close" ? Kirigami.Theme.negativeTextColor : Kirigami.Theme.textColor)
+                : "transparent"
+            opacity: breezeBtn.down ? 0.4 : 0.2
+            border.width: breezeBtn.visualFocus ? 2 : 0
+            border.color: Kirigami.Theme.highlightColor
+            Behavior on color { ColorAnimation { duration: 120 } }
+        }
+        contentItem: Item {
+            BreezeSymbol {
+                objectName: "breeze-symbol"
+                anchors.centerIn: parent
+                width: root.iconSize
+                height: width
+                action: breezeBtn.symbolAction
+                color: Kirigami.Theme.textColor
+            }
+        }
+    }
+
     // ==========================================
     // 3. ESTILO MINIMALISTA (Geométrico Clean)
     // ==========================================
     component MinimalButton: SystemButton {
         id: minBtn
+        property string symbolAction: ""
         opacity: enabled ? 1 : 0.4
         background: Rectangle {
             radius: 4
@@ -178,11 +208,13 @@ RowLayout {
         }
 
         contentItem: Item {
-            Kirigami.Icon {
+            MinimalSymbol {
+                objectName: "minimal-symbol"
                 anchors.centerIn: parent
                 width: root.iconSize
                 height: root.iconSize
-                source: minBtn.iconName
+                action: minBtn.symbolAction
+                color: Kirigami.Theme.textColor
                 opacity: minBtn.hovered || minBtn.visualFocus ? 1.0 : 0.75
                 Accessible.ignored: true
                 Behavior on opacity { NumberAnimation { duration: 120 } }
@@ -239,34 +271,34 @@ RowLayout {
     }
 
     // ------------------------------------------
-    // Renderizador: Estilo Sistema / Breeze
+    // Renderizador: Breeze local ("system" preserva a preferência já salva)
     // ------------------------------------------
     Component {
         id: systemStyle
         Row {
             spacing: 2
 
-            SystemButton {
+            BreezeButton {
                 objectName: "system-minimize"
                 text: i18n("Minimize window")
                 enabled: root.controller.hasActiveWindow && root.controller.canMinimize
-                iconName: "window-minimize"
+                symbolAction: "minimize"
                 onClickedAction: root.controller.minimize()
             }
 
-            SystemButton {
+            BreezeButton {
                 objectName: "system-maximize"
                 text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
                 enabled: root.controller.hasActiveWindow && root.controller.canMaximize
-                iconName: root.controller.isMaximized ? "window-restore" : "window-maximize"
+                symbolAction: root.controller.isMaximized ? "restore" : "maximize"
                 onClickedAction: root.controller.toggleMaximize()
             }
 
-            SystemButton {
+            BreezeButton {
                 objectName: "system-close"
                 text: i18n("Close window")
                 enabled: root.controller.hasActiveWindow && root.controller.canClose
-                iconName: "window-close"
+                symbolAction: "close"
                 onClickedAction: root.controller.close()
             }
         }
@@ -284,7 +316,7 @@ RowLayout {
                 objectName: "minimal-minimize"
                 text: i18n("Minimize window")
                 enabled: root.controller.hasActiveWindow && root.controller.canMinimize
-                iconName: "window-minimize"
+                symbolAction: "minimize"
                 onClickedAction: root.controller.minimize()
             }
 
@@ -292,7 +324,7 @@ RowLayout {
                 objectName: "minimal-maximize"
                 text: root.controller.isMaximized ? i18n("Restore window") : i18n("Maximize window")
                 enabled: root.controller.hasActiveWindow && root.controller.canMaximize
-                iconName: root.controller.isMaximized ? "window-restore" : "window-maximize"
+                symbolAction: root.controller.isMaximized ? "restore" : "maximize"
                 onClickedAction: root.controller.toggleMaximize()
             }
 
@@ -300,7 +332,7 @@ RowLayout {
                 objectName: "minimal-close"
                 text: i18n("Close window")
                 enabled: root.controller.hasActiveWindow && root.controller.canClose
-                iconName: "window-close"
+                symbolAction: "close"
                 onClickedAction: root.controller.close()
             }
         }

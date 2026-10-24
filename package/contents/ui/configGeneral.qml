@@ -210,7 +210,7 @@ Kirigami.ScrollablePage {
             id: styleCombo
             Kirigami.FormData.label: i18n("Button Style:")
             property var options: [
-                { text: i18n("System Theme (Breeze / Active Theme)"), value: "system" },
+                { text: i18n("Breeze"), value: "system" },
                 { text: i18n("macOS Traffic Lights (Colored Circles)"), value: "macos" },
                 { text: i18n("Minimalist (Geometric Outline)"), value: "minimal" }
             ]

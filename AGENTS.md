@@ -90,7 +90,7 @@ Este documento estabelece o contexto de arquitetura, restrições de hardware e 
      - Todos os estilos mantêm a mesma ordem: Minimizar, Maximizar/Restaurar, Fechar. No estilo macOS, as cores acompanham as ações: amarelo, verde, vermelho.
      - Todos os estilos usam controles nativos com foco por Tab, ativação por Espaço, indicação visual de foco e nomes acessíveis traduzidos via `i18n()`. Maximizar muda para Restaurar quando a janela está maximizada.
      - Cada botão exige janela ativa e a capacidade correspondente (`canClose`, `canMinimize`, `canMaximize`); botões indisponíveis ficam desabilitados. A ação de acessibilidade e os métodos do backend também respeitam essa disponibilidade. A seleção do índice ativo para ações exige `IsWindow` e `IsActive`, de modo consistente com a atualização do estado; itens não-janela não recebem ações mesmo que anunciem capacidades.
-     - Estilos: `system` (Tema do sistema ativo, padrão), `macos` (Círculos coloridos: vermelho, amarelo, verde) e `minimal` (Design geométrico limpo).
+     - Estilos: `system` (Breeze desenhado em QML local, independente do tema de ícones; identificador preservado por compatibilidade, padrão), `macos` (Círculos coloridos: vermelho, amarelo, verde) e `minimal` (X, traço e quadrado para maximizar/restaurar, desenhados em MinimalSymbol.qml sem tema de ícones).
      - Tamanhos dos Botões:
        - Largura / área de clique: `small` (24px), `medium` (32px, padrão) e `large` (44px).
        - Tamanho-base dos ícones: `small` (14px), `medium` (18px) e `large` (22px).

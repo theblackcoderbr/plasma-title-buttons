@@ -304,6 +304,12 @@ private Q_SLOTS:
             auto *button = buttons->findChild<QQuickItem *>(style + QLatin1Char('-') + actions[i]);
             QVERIFY(button);
             QVERIFY(button->isVisible());
+            if (style == QStringLiteral("system") || style == QStringLiteral("minimal")) {
+                auto *symbol = button->findChild<QQuickItem *>(style == QStringLiteral("system") ? QStringLiteral("breeze-symbol") : QStringLiteral("minimal-symbol"));
+                QVERIFY(symbol);
+                QCOMPARE(symbol->property("action").toString(), actions[i]);
+                QVERIFY(button->property("iconName").toString().isEmpty());
+            }
             auto *accessible = QAccessible::queryAccessibleInterface(button);
             QVERIFY(accessible);
             QCOMPARE(accessible->role(), QAccessible::Button);
@@ -338,6 +344,11 @@ private Q_SLOTS:
         controller->setProperty("isMaximized", true);
         auto *maximize = buttons->findChild<QQuickItem *>(style + QStringLiteral("-maximize"));
         QCOMPARE(QAccessible::queryAccessibleInterface(maximize)->text(QAccessible::Name), QStringLiteral("Restore window"));
+        if (style == QStringLiteral("system") || style == QStringLiteral("minimal")) {
+            auto *symbol = maximize->findChild<QQuickItem *>(style == QStringLiteral("system") ? QStringLiteral("breeze-symbol") : QStringLiteral("minimal-symbol"));
+            QVERIFY(symbol);
+            QCOMPARE(symbol->property("action").toString(), QStringLiteral("restore"));
+        }
         controller->setProperty("hasActiveWindow", false);
         for (const QString &action : actions) {
             QVERIFY(!buttons->findChild<QQuickItem *>(style + QLatin1Char('-') + action)->isEnabled());

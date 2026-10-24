@@ -26,9 +26,9 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - Ações que a janela não permite ficam desabilitadas. Os três estilos oferecem navegação por Tab, ativação por Espaço, indicação de foco e nomes acessíveis traduzíveis.
   - Ao desaparecer, os botões ficam imediatamente sem interação e completam uma transição de opacidade de 150 ms antes de liberar o espaço ocupado.
 - **Estilos de Botões Selecionáveis**:
-  - **Tema do Sistema (Padrão)**: Utiliza controles nativos do Plasma e ícones do tema ativo (Breeze, etc.).
+  - **Breeze (Padrão)**: Desenha os símbolos em QML local, sem depender do tema de ícones ou da instalação do Breeze. As cores acompanham a paleta do Plasma.
   - **macOS / Círculos Coloridos**: Minimizar em amarelo, Maximizar/Restaurar em verde e Fechar em vermelho, com símbolos que aparecem ao passar o ponteiro ou receber foco pelo teclado.
-  - **Minimalista**: Visual geométrico limpo e discreto.
+  - **Minimalista**: Símbolos locais: fechar (X), minimizar (−) e maximizar/restaurar (quadrado), independentes do tema de ícones.
 - **Disposição Dinâmica e Alinhamento Sincronizado**:
   - **Painéis verticais**: Título de cima para baixo e botões empilhados, com ícones na posição normal. Esquerda/direita correspondem a topo/base; a centralização acompanha o comprimento do painel.
   - **Expansão Automática**: Ocupa dinamicamente todo o espaço disponível no painel sem comprimentos fixos arbitrários.
@@ -42,7 +42,7 @@ Um applet (plasmoid) elegante e altamente configurável para o painel do **KDE P
   - **Sincronização com os Botões**: A interface impede automaticamente que o título e os botões ocupem a mesma ponta.
     - Se o título ocupar a única extremidade livre, os botões ficam ocultos. A ajuda nas configurações orienta a centralizar ou reposicionar o título, ou mover o widget. As preferências são preservadas para quando houver uma posição válida.
   - **Controle de Tamanho dos Botões**: Opções de tamanho **Pequeno (Compacto)**, **Médio / Padrão** e **Grande (Espaçoso)**:
-    - **Largura-base nos estilos Sistema e Minimalista**: 24 px (pequeno), 32 px (médio) e 44 px (grande), reduzida proporcionalmente em painéis compactos;
+    - **Largura-base nos estilos Breeze e Minimalista**: 24 px (pequeno), 32 px (médio) e 44 px (grande), reduzida proporcionalmente em painéis compactos;
     - **Diâmetro-base no estilo macOS**: 12, 16 e 22 px, limitado pela espessura do painel;
     - **Tamanho-base dos ícones**: 14 px (pequeno), 18 px (médio) e 22 px (grande);
     - **Altura**: adaptativa conforme a espessura do painel (com suporte otimizado a painéis compactos de 24–26 px).
@@ -191,7 +191,7 @@ Clicando com o botão direito no widget e selecionando **Configurar Título e Bo
 4. **Posição do Título**: Escolha entre **Esquerda / Topo**, **Centro** ou **Direita / Base**, conforme a orientação do painel.
 5. **Centralizar em relação ao painel inteiro**: Caixa de seleção disponível quando o título está ao centro para mantê-lo matematicamente centralizado no comprimento total do painel.
 6. **Posição dos Botões**: Escolha entre **Esquerda / Topo** ou **Direita / Base**, respeitando a posição do título e as extremidades livres. Conflitos ocultam os botões sem sobrescrever a preferência de lado.
-7. **Estilo dos Botões**: Tema do Sistema, macOS (Círculos coloridos) ou Minimalista.
+7. **Estilo dos Botões**: Breeze, macOS (Círculos coloridos) ou Minimalista.
 8. **Tamanho dos Botões**: Pequeno, Médio (Padrão) ou Grande.
 9. **Ocultar a barra de título original da janela quando maximizada (KWin)**: Preferência por instância, desativada por padrão e salva com **Aplicar/OK**. Enquanto pelo menos uma instância tiver esta opção e **Exibir Botões de Controle** ativadas, o widget solicita `BorderlessMaximizedWindows` para todos os monitores. Desativar os botões, desmarcar a opção, remover a última instância participante ou desinstalar seu pacote restaura o estado anterior. Desfazer a remoção reativa a solicitação. Fechar a janela de configuração não interfere nas instâncias ativas.
 
@@ -233,6 +233,8 @@ O widget registra sua alteração em `kwinrc`, preserva outras opções e abando
 │           ├── PanelCenteredTitle.qml # Centralização no comprimento total do painel
 │           ├── PanelEdges.qml         # Detecção de vizinhos e extremidades livres
 │           ├── WindowButtons.qml      # Controles acessíveis e estilo sob demanda
+│           ├── BreezeSymbol.qml       # Símbolos Breeze locais, independentes do tema de ícones
+│           ├── MinimalSymbol.qml      # X, traço e quadrado desenhados localmente
 │           ├── WindowTitle.qml        # Título, ícone e interação por mouse
 │           └── configGeneral.qml      # Interface de configuração
 ├── po/
