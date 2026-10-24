@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma-title-buttons\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-02 23:50-0300\n"
+"POT-Creation-Date: 2026-10-24 00:17-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -126,7 +126,7 @@ msgid "Button Style:"
 msgstr ""
 
 #: package/contents/ui/configGeneral.qml
-msgid "System Theme (Breeze / Active Theme)"
+msgid "Breeze"
 msgstr ""
 
 #: package/contents/ui/configGeneral.qml

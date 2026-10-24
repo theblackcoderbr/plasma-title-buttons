@@ -8,6 +8,8 @@
 #include <taskmanager/taskfilterproxymodel.h>
 #include <taskmanager/tasksmodel.h>
 #include <QGuiApplication>
+#include <QIcon>
+#include <QPixmap>
 #include <QTemporaryDir>
 #include <QTest>
 #include <QSignalSpy>
@@ -78,6 +80,29 @@ class WindowControllerTest : public QObject
 {
     Q_OBJECT
 private Q_SLOTS:
+    void emptyIconsAreNormalized()
+    {
+        FakeWindows source;
+        source.windows = {{QStringLiteral("focused"), {}, {}, QRect(), false, true, true}};
+        WindowController controller;
+        auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);
+        QVERIFY(filter);
+        filter->setSourceModel(&source);
+        QPixmap pixmap(16, 16);
+        pixmap.fill(Qt::red);
+        const QIcon validIcon(pixmap);
+        QSignalSpy changed(&controller, &WindowController::activeWindowChanged);
+        for (int repetition = 0; repetition < 2; ++repetition) {
+            source.windows[0].icon = validIcon;
+            Q_EMIT source.dataChanged(source.index(0), source.index(0), {Qt::DecorationRole});
+            QCOMPARE(controller.windowIcon().value<QIcon>().cacheKey(), validIcon.cacheKey());
+            source.windows[0].icon = QIcon();
+            Q_EMIT source.dataChanged(source.index(0), source.index(0), {Qt::DecorationRole});
+            QVERIFY(!controller.windowIcon().isValid());
+        }
+        QCOMPARE(changed.count(), 4);
+    }
+
     void selectiveStateUpdates()
     {
         FakeWindows source;
@@ -176,6 +201,76 @@ private Q_SLOTS:
             QCOMPARE(source.minimized, mask & 2 ? 0 : -1);
             QCOMPARE(source.maximized, mask & 4 ? 0 : -1);
         }
+    }
+
+    void actionsIgnoreActiveNonWindows()
+    {
+        FakeWindows source;
+        source.windows = {
+            {QStringLiteral("active non-window"), {}, {}, QRect(), false, true, true},
+            {QStringLiteral("real window"), {}, {}, QRect(), false, false, true},
+        };
+        // Mantém todas as capacidades verdadeiras para testar especificamente IsWindow.
+        source.windows[0].isWindow = false;
+        WindowController controller;
+        auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);
+        QVERIFY(filter);
+        filter->setSourceModel(&source);
+        QCOMPARE(filter->rowCount(), 2);
+        QVERIFY(!controller.hasActiveWindow());
+        controller.close();
+        controller.minimize();
+        controller.toggleMaximize();
+        QCOMPARE(source.closed, -1);
+        QCOMPARE(source.minimized, -1);
+        QCOMPARE(source.maximized, -1);
+
+        // Um item não-janela ativo antes da janela real não pode capturar as ações.
+        source.windows[1].active = true;
+        Q_EMIT source.dataChanged(source.index(1), source.index(1), {TaskManager::AbstractTasksModel::IsActive});
+        QCOMPARE(controller.windowTitle(), QStringLiteral("real window"));
+        controller.close();
+        controller.minimize();
+        controller.toggleMaximize();
+        QCOMPARE(source.closed, 1);
+        QCOMPARE(source.minimized, 1);
+        QCOMPARE(source.maximized, 1);
+    }
+
+    void cycleWithoutActiveWindow_data()
+    {
+        QTest::addColumn<int>("direction");
+        QTest::addColumn<int>("expectedRow");
+        QTest::newRow("forward") << 1 << 1;
+        QTest::newRow("reverse") << -1 << 3;
+        QTest::newRow("zero") << 0 << -1;
+    }
+
+    void cycleWithoutActiveWindow()
+    {
+        QFETCH(int, direction);
+        QFETCH(int, expectedRow);
+        FakeWindows source;
+        const QRect screen(0, 0, 1920, 1080);
+        source.windows = {
+            {QStringLiteral("focused elsewhere"), {QStringLiteral("A")}, {1}, QRect(1920, 0, 1920, 1080), false, true},
+            {QStringLiteral("first local"), {QStringLiteral("A")}, {1}, screen},
+            {QStringLiteral("other desktop"), {QStringLiteral("A")}, {2}, screen},
+            {QStringLiteral("last local minimized"), {QStringLiteral("A")}, {1}, screen, false, false, false, true, true},
+            {QStringLiteral("other activity"), {QStringLiteral("B")}, {1}, screen},
+        };
+        WindowController controller;
+        auto *filter = controller.findChild<TaskManager::TaskFilterProxyModel *>(QString(), Qt::FindDirectChildrenOnly);
+        QVERIFY(filter);
+        filter->setFilterByCurrentVirtualDesktop(false);
+        filter->setVirtualDesktop(1);
+        filter->setActivity(QStringLiteral("A"));
+        controller.setScreenGeometry(screen);
+        filter->setSourceModel(&source);
+        QCOMPARE(controller.windowCount(), 2);
+        QVERIFY(!controller.hasActiveWindow());
+        controller.cycleWindow(direction);
+        QCOMPARE(source.activated, expectedRow);
     }
 
     void cycleSingleWindow_data()

@@ -125,8 +125,8 @@ msgid "Button Style:"
 msgstr "Estilo dos botões:"
 
 #: package/contents/ui/configGeneral.qml
-msgid "System Theme (Breeze / Active Theme)"
-msgstr "Tema do sistema (Breeze / tema ativo)"
+msgid "Breeze"
+msgstr "Breeze"
 
 #: package/contents/ui/configGeneral.qml
 msgid "macOS Traffic Lights (Colored Circles)"

@@ -41,13 +41,15 @@ Item {
         // Ícone da Janela Ativa
         Kirigami.Icon {
             id: iconItem
+            objectName: "windowTitleIcon"
             // O texto acompanha o painel, mas o ícone da aplicação fica de pé.
             rotation: root.vertical ? -90 : 0
-            visible: root.showIcon && root.controller.hasActiveWindow && (root.controller.windowIcon !== undefined)
+            // O backend normaliza QIcon vazio; valid rejeita fontes ausentes e strings vazias.
+            visible: root.showIcon && root.controller.hasActiveWindow && valid
             Layout.alignment: Qt.AlignVCenter
             Layout.preferredWidth: Math.min(22, Math.max(14, root.panelThickness - 8))
             Layout.preferredHeight: Layout.preferredWidth
-            source: root.controller.windowIcon
+            source: root.controller.windowIcon ?? ""
 
             scale: mouseArea.containsMouse ? 1.05 : 1.0
             Behavior on scale { NumberAnimation { duration: 120 } }
@@ -56,6 +58,7 @@ Item {
         // Texto do Título
         PlasmaComponents3.Label {
             id: labelText
+            objectName: "windowTitleText"
             visible: root.showTitle
             Layout.alignment: Qt.AlignVCenter
             Layout.fillWidth: true
